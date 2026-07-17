@@ -39,7 +39,7 @@ class AskRequest(BaseModel):
 class AskResponse(BaseModel):
     answer: str
     sources: list[Source]
-    mode: Literal["ai", "local"]
+    mode: Literal["openai", "ollama"]
 
 
 class GenerateRequest(BaseModel):
@@ -64,5 +64,4 @@ class Deck(BaseModel):
     subtitle: str
     slides: list[Slide]
     duration: int
-    mode: Literal["ai", "local"]
-
+    mode: Literal["openai", "ollama"]

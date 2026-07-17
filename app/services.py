@@ -6,7 +6,6 @@ import math
 import os
 import re
 import uuid
-from collections import Counter
 from pypdf import PdfReader
 
 from .models import Chunk, Deck, Document, Slide, Source
@@ -73,76 +72,124 @@ def parse_pdf(content: bytes, filename: str) -> Document:
     )
 
 
-DEMO_TEXT = [
-    (1, "生成式人工智慧會根據大量資料學習機率分布，並依提示產生新的文字、圖片或聲音。它不是資料庫查詢，而是逐步預測最可能的內容。"),
-    (2, "大型語言模型的核心是 Transformer。注意力機制讓模型衡量不同詞彙之間的關係，因此能在長篇文字中掌握上下文。"),
-    (3, "提示工程包含明確任務、背景脈絡、輸出格式與範例。好的提示能降低歧義，但不能完全消除幻覺。"),
-    (4, "檢索增強生成（RAG）先從可信文件找出相關片段，再把片段交給模型回答。這能提升可追溯性，並讓知識容易更新。"),
-    (5, "負責任使用 AI 需要留意偏誤、隱私、著作權與資訊正確性。重要決策應保留人工覆核，並清楚揭露 AI 的使用。"),
-    (6, "評估 AI 系統時，可觀察答案正確率、來源忠實度、回應時間與成本。持續蒐集真實使用情境，才能改善系統。"),
-]
-
-
-def demo_document() -> Document:
-    chunks = [Chunk(text=t, page=p, index=i) for i, (p, t) in enumerate(DEMO_TEXT)]
-    return Document(id=uuid.uuid4().hex[:12], name="生成式 AI 入門教材.pdf", pages=6, chunks=chunks, size_bytes=1_840_000)
-
-
-def _tokens(text: str) -> list[str]:
-    latin = re.findall(r"[a-zA-Z0-9]{2,}", text.lower())
-    chinese = re.findall(r"[\u4e00-\u9fff]", text)
-    bigrams = ["".join(chinese[i : i + 2]) for i in range(max(0, len(chinese) - 1))]
-    return latin + bigrams
-
-
-def _cosine_counter(a: Counter[str], b: Counter[str]) -> float:
-    shared = set(a) & set(b)
-    numerator = sum(a[k] * b[k] for k in shared)
-    da = math.sqrt(sum(v * v for v in a.values()))
-    db = math.sqrt(sum(v * v for v in b.values()))
-    return numerator / (da * db) if da and db else 0.0
-
-
 class AIService:
     def __init__(self) -> None:
+        self.provider = os.getenv("AI_PROVIDER", "ollama").strip().lower()
+        if self.provider not in {"openai", "ollama"}:
+            raise ValueError("AI_PROVIDER 必須是 openai 或 ollama")
+
+        self.openai = None
+        self.ollama = None
+        self._embedder = None
         self.api_key = os.getenv("OPENAI_API_KEY", "").strip()
-        self.model = os.getenv("OPENAI_MODEL", "gpt-5-mini")
-        self.embedding_model = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
-        self.client = None
-        if self.api_key:
+        if self.provider == "openai":
+            if not self.api_key:
+                raise ValueError("AI_PROVIDER=openai 時必須設定 OPENAI_API_KEY")
             from openai import OpenAI
 
-            self.client = OpenAI(api_key=self.api_key)
+            self.model = os.getenv("OPENAI_MODEL", "gpt-5-mini")
+            self.embedding_model = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
+            self.openai = OpenAI(api_key=self.api_key)
+        else:
+            from ollama import Client
+
+            self.model = os.getenv("OLLAMA_MODEL", "qwen3:4b")
+            self.embedding_model = os.getenv(
+                "HUGGINGFACE_EMBEDDING_MODEL",
+                "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+            )
+            self.ollama = Client(host=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"))
 
     @property
-    def enabled(self) -> bool:
-        return self.client is not None
+    def info(self) -> dict[str, str]:
+        label = "Ollama + Hugging Face" if self.provider == "ollama" else "OpenAI"
+        return {
+            "provider": self.provider,
+            "provider_label": label,
+            "generation_model": self.model,
+            "embedding_model": self.embedding_model,
+        }
+
+    def _embed(self, texts: list[str], *, query: bool = False) -> list[list[float]]:
+        if self.provider == "openai":
+            response = self.openai.embeddings.create(model=self.embedding_model, input=texts)
+            return [item.embedding for item in response.data]
+
+        try:
+            if self._embedder is None:
+                from sentence_transformers import SentenceTransformer
+
+                self._embedder = SentenceTransformer(self.embedding_model)
+            method_name = "encode_query" if query and hasattr(self._embedder, "encode_query") else "encode_document"
+            method = getattr(self._embedder, method_name, self._embedder.encode)
+            vectors = method(texts, normalize_embeddings=True, show_progress_bar=False)
+            return vectors.tolist() if hasattr(vectors, "tolist") else [list(vector) for vector in vectors]
+        except Exception as exc:
+            raise RuntimeError(f"Hugging Face embedding 模型載入或推論失敗：{exc}") from exc
 
     def index(self, document: Document) -> None:
-        if not self.client:
-            return
-        response = self.client.embeddings.create(
-            model=self.embedding_model,
-            input=[chunk.text for chunk in document.chunks],
-        )
-        document.vectors = [item.embedding for item in response.data]
+        document.vectors = self._embed([chunk.text for chunk in document.chunks])
 
     def retrieve(self, document: Document, query: str, limit: int = 4) -> list[tuple[Chunk, float]]:
-        if self.client and document.vectors:
-            query_vector = self.client.embeddings.create(model=self.embedding_model, input=[query]).data[0].embedding
-            ranked = []
-            for chunk, vector in zip(document.chunks, document.vectors):
-                dot = sum(a * b for a, b in zip(query_vector, vector))
-                denom = math.sqrt(sum(a * a for a in query_vector)) * math.sqrt(sum(b * b for b in vector))
-                ranked.append((chunk, dot / denom if denom else 0.0))
-        else:
-            query_terms = Counter(_tokens(query))
-            ranked = [(chunk, _cosine_counter(query_terms, Counter(_tokens(chunk.text)))) for chunk in document.chunks]
+        if not document.vectors:
+            raise RuntimeError("文件尚未建立 embedding 索引，請重新上傳")
+        query_vector = self._embed([query], query=True)[0]
+        ranked = []
+        for chunk, vector in zip(document.chunks, document.vectors):
+            dot = sum(a * b for a, b in zip(query_vector, vector))
+            denom = math.sqrt(sum(a * a for a in query_vector)) * math.sqrt(sum(b * b for b in vector))
+            ranked.append((chunk, dot / denom if denom else 0.0))
         ranked.sort(key=lambda pair: pair[1], reverse=True)
-        selected = ranked[:limit]
-        if selected and selected[0][1] == 0:
-            selected = [(chunk, 0.12) for chunk, _ in selected]
-        return selected
+        return ranked[:limit]
+
+    def _text_response(self, system: str, prompt: str) -> str:
+        if self.provider == "openai":
+            response = self.openai.responses.create(
+                model=self.model, instructions=system, input=prompt, store=False
+            )
+            return response.output_text.strip()
+        try:
+            response = self.ollama.chat(
+                model=self.model,
+                messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt}],
+                stream=False,
+                options={"temperature": 0.1},
+            )
+            message = response.message if hasattr(response, "message") else response["message"]
+            return (message.content if hasattr(message, "content") else message["content"]).strip()
+        except Exception as exc:
+            raise RuntimeError(
+                f"Ollama 回應失敗；請確認服務已啟動且已執行 `ollama pull {self.model}`：{exc}"
+            ) from exc
+
+    def _structured_response(self, system: str, prompt: str, schema: dict) -> dict:
+        if self.provider == "openai":
+            response = self.openai.responses.create(
+                model=self.model,
+                instructions=system,
+                input=prompt,
+                text={"format": {"type": "json_schema", "name": "lesson_deck", "strict": True, "schema": schema}},
+                store=False,
+            )
+            return json.loads(response.output_text)
+        try:
+            response = self.ollama.chat(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": prompt + "\n\n請嚴格依照指定 JSON schema 輸出。"},
+                ],
+                format=schema,
+                stream=False,
+                options={"temperature": 0},
+            )
+            message = response.message if hasattr(response, "message") else response["message"]
+            content = message.content if hasattr(message, "content") else message["content"]
+            return json.loads(content)
+        except Exception as exc:
+            raise RuntimeError(
+                f"Ollama 結構化輸出失敗；請確認模型 `{self.model}` 可用：{exc}"
+            ) from exc
 
     def ask(self, document: Document, question: str) -> tuple[str, list[Source], str]:
         matches = self.retrieve(document, question)
@@ -151,33 +198,17 @@ class AIService:
             for c, s in matches
         ]
         context = "\n\n".join(f"[第 {c.page} 頁]\n{c.text}" for c, _ in matches)
-        if self.client:
-            response = self.client.responses.create(
-                model=self.model,
-                instructions=(
-                    "你是嚴謹的繁體中文教學助理。只能根據提供的教材片段回答。"
-                    "若教材沒有答案，直接說教材未提及。回答清楚、精簡，並以（第 X 頁）標示依據。"
-                ),
-                input=f"教材片段：\n{context}\n\n學生問題：{question}",
-                store=False,
-            )
-            return response.output_text.strip(), sources, "ai"
-
-        if not matches:
-            return "目前的教材中找不到足夠資訊回答這個問題。", sources, "local"
-        best, _ = matches[0]
-        answer = (
-            f"依教材第 {best.page} 頁，{best.text[:260]}"
-            + ("…" if len(best.text) > 260 else "")
-            + "\n\n目前為本機檢索模式；設定 API Key 後可獲得整合多段內容的生成式回答。"
+        answer = self._text_response(
+            "你是嚴謹的繁體中文教學助理。只能根據提供的教材片段回答。"
+            "若教材沒有答案，直接說教材未提及。回答清楚、精簡，並以（第 X 頁）標示依據。",
+            f"教材片段：\n{context}\n\n學生問題：{question}",
         )
-        return answer, sources, "local"
+        return answer, sources, self.provider
 
     def generate_deck(self, document: Document, audience: str, tone: str, slide_count: int, duration: int) -> Deck:
-        if self.client:
-            sampled = document.chunks[: min(30, len(document.chunks))]
-            context = "\n\n".join(f"[第 {c.page} 頁] {c.text}" for c in sampled)
-            schema = {
+        sampled = document.chunks[: min(30, len(document.chunks))]
+        context = "\n\n".join(f"[第 {c.page} 頁] {c.text}" for c in sampled)
+        schema = {
                 "type": "object",
                 "properties": {
                     "title": {"type": "string"},
@@ -202,42 +233,19 @@ class AIService:
                 "required": ["title", "subtitle", "slides"],
                 "additionalProperties": False,
             }
-            response = self.client.responses.create(
-                model=self.model,
-                instructions="你是資深教學設計師。只使用教材內容，以繁體中文設計投影片與自然、可直接朗讀的逐頁講稿。",
-                input=f"對象：{audience}\n語氣：{tone}\n總時長：{duration} 分鐘\n投影片：{slide_count} 頁\n\n教材：\n{context}",
-                text={"format": {"type": "json_schema", "name": "lesson_deck", "strict": True, "schema": schema}},
-                store=False,
-            )
-            payload = json.loads(response.output_text)
-            slides = [Slide(**item) for item in payload["slides"]]
-            mode = "ai"
-            title, subtitle = payload["title"], payload["subtitle"]
-        else:
-            slides = self._local_slides(document, slide_count, duration)
-            title = re.sub(r"\.pdf$", "", document.name, flags=re.I)
-            subtitle = f"{audience}｜{duration} 分鐘教學設計"
-            mode = "local"
+        payload = self._structured_response(
+            "你是資深教學設計師。只使用教材內容，以繁體中文設計投影片與自然、可直接朗讀的逐頁講稿。",
+            f"對象：{audience}\n語氣：{tone}\n總時長：{duration} 分鐘\n投影片：{slide_count} 頁\n\n教材：\n{context}",
+            schema,
+        )
+        slides = [Slide(**item) for item in payload["slides"]]
+        title, subtitle = payload["title"], payload["subtitle"]
 
         deck = Deck(
             id=uuid.uuid4().hex[:12], document_id=document.id, title=title, subtitle=subtitle,
-            slides=slides, duration=duration, mode=mode,
+            slides=slides, duration=duration, mode=self.provider,
         )
         return deck
-
-    def _local_slides(self, document: Document, count: int, duration: int) -> list[Slide]:
-        chunks = document.chunks
-        slides: list[Slide] = []
-        title = re.sub(r"\.pdf$", "", document.name, flags=re.I)
-        slides.append(Slide(title=title, bullets=["課程重點與學習路徑", f"預計時間：{duration} 分鐘"], speaker_notes=f"歡迎來到「{title}」。這堂課會從核心概念開始，逐步連結到實際應用。", source_pages=[1]))
-        for i in range(1, count - 1):
-            chunk = chunks[min(len(chunks) - 1, round((i - 1) * (len(chunks) - 1) / max(1, count - 3)))]
-            sentences = [s.strip() for s in re.split(r"(?<=[。！？])", chunk.text) if len(s.strip()) > 8]
-            bullets = [(s[:52] + ("…" if len(s) > 52 else "")) for s in sentences[:4]] or [chunk.text[:70]]
-            heading = re.sub(r"[，。；：].*", "", bullets[0])[:22] or f"核心概念 {i}"
-            slides.append(Slide(title=heading, bullets=bullets, speaker_notes=f"這一頁聚焦在「{heading}」。{chunk.text[:300]}", source_pages=[chunk.page]))
-        slides.append(Slide(title="重點回顧", bullets=["用自己的話說明核心概念", "連結教材內容與真實情境", "提出一個仍想深入探索的問題"], speaker_notes="最後，請回想今天最重要的三個觀念。試著用自己的話重述，並思考它能如何應用在真實情境中。", source_pages=sorted({c.page for c in chunks[-2:]})))
-        return slides
 
 
 def make_pptx(deck: Deck) -> bytes:

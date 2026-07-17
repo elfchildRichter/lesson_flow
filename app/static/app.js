@@ -24,7 +24,7 @@ function setDocument(doc) {
   $('#fileMeta').textContent = `${doc.pages} 頁 · ${(doc.size_bytes / 1024 / 1024).toFixed(1)} MB · ${doc.chunks} 個知識片段`;
   $('#questionInput').disabled = false; $('#sendBtn').disabled = false;
   $('#chatDoc').innerHTML = `<span>PDF</span><div><b>${escapeHtml(doc.name)}</b><small>${doc.pages} 頁 · 已建立索引</small></div>`;
-  $('#modeText').textContent = doc.ai_enabled ? 'AI 模式' : '本機示範模式';
+  $('#modeText').textContent = doc.provider_label;
   const steps = $$('.step'); steps[0].classList.add('done'); steps[1].classList.add('active');
   toast('教材已完成解析，可以開始設計課程');
 }
@@ -42,7 +42,6 @@ const dz = $('#dropzone');
 ['dragenter','dragover'].forEach(name => dz.addEventListener(name, e => { e.preventDefault(); dz.classList.add('dragging'); }));
 ['dragleave','drop'].forEach(name => dz.addEventListener(name, e => { e.preventDefault(); dz.classList.remove('dragging'); }));
 dz.addEventListener('drop', e => uploadFile(e.dataTransfer.files[0]));
-$('#demoBtn').addEventListener('click', async () => { loading(true, '正在準備範例教材', '建立生成式 AI 課程索引…'); try { setDocument(await api('/api/demo', {method:'POST'})); } catch(e){toast(e.message,true)} finally {loading(false)} });
 $('#removeFile').addEventListener('click', () => { state.document = null; $('#settingsPanel').classList.add('locked'); $('#fileCard').classList.add('hidden'); $('#generateBtn').disabled = true; $('#questionInput').disabled = true; $('#sendBtn').disabled = true; $('#settingStatus').textContent='等待教材'; $$('.step').forEach((s,i)=>{if(i)s.classList.remove('active','done')}); toast('已從工作台移除教材'); });
 
 function switchView(name) {
@@ -65,7 +64,7 @@ $('#generateBtn').addEventListener('click', async () => {
 });
 
 function renderDeck() {
-  const d = state.deck; $('#deckTitle').textContent=d.title; $('#deckSubtitle').textContent=`${d.subtitle} · ${d.slides.length} 張投影片 · ${d.mode === 'ai' ? 'AI 生成' : '本機編排'}`;
+  const d = state.deck; $('#deckTitle').textContent=d.title; $('#deckSubtitle').textContent=`${d.subtitle} · ${d.slides.length} 張投影片 · ${d.mode === 'ollama' ? 'Ollama 本機生成' : 'OpenAI 生成'}`;
   $('#pptDownload').href=`/api/decks/${d.id}/pptx`; $('#scriptDownload').href=`/api/decks/${d.id}/script`; $('#pptDownload').classList.remove('disabled'); $('#scriptDownload').classList.remove('disabled');
   $('#slideList').innerHTML=d.slides.map((s,i)=>`<div class="slide-thumb ${i===0?'active':''}" data-index="${i}"><small>${String(i+1).padStart(2,'0')}</small><div class="mini-slide"><b>${escapeHtml(s.title)}</b>${s.bullets.slice(0,3).map(()=>'<i></i>').join('')}</div></div>`).join('');
   $$('.slide-thumb').forEach(t=>t.addEventListener('click',()=>showSlide(+t.dataset.index))); showSlide(0);
@@ -80,7 +79,7 @@ function showSlide(index) {
 function addUserMessage(text) { const el=document.createElement('div'); el.className='message user'; el.innerHTML=`<div>${escapeHtml(text)}</div>`; $('#messages').append(el); scrollMessages(); }
 function addAssistantMessage(data) {
   const el=document.createElement('div'); el.className='message assistant'; const sources=data.sources.slice(0,3).map(s=>`<div class="source"><b>第 ${s.page} 頁</b><p>${escapeHtml(s.excerpt)}</p></div>`).join('');
-  el.innerHTML=`<span class="bot-avatar">✦</span><div><p>${escapeHtml(data.answer)}</p><div class="source-list"><span>回答依據 · ${data.mode==='ai'?'AI 整合回答':'本機檢索'}</span>${sources}</div></div>`; $('#messages').append(el); scrollMessages();
+  el.innerHTML=`<span class="bot-avatar">✦</span><div><p>${escapeHtml(data.answer)}</p><div class="source-list"><span>回答依據 · ${data.mode==='ollama'?'Ollama + Hugging Face':'OpenAI'} RAG</span>${sources}</div></div>`; $('#messages').append(el); scrollMessages();
 }
 function scrollMessages(){const m=$('#messages');m.scrollTop=m.scrollHeight}
 function escapeHtml(value){const d=document.createElement('div');d.textContent=value;return d.innerHTML}
@@ -95,4 +94,4 @@ $$('.suggestions button').forEach(btn=>btn.addEventListener('click',()=>{if(!sta
 $('#pptDownload').addEventListener('click',()=>toast('正在下載 PowerPoint 簡報'));
 $('#scriptDownload').addEventListener('click',()=>toast('正在下載逐頁演講稿'));
 
-fetch('/api/health').then(r=>r.json()).then(x=>{$('#modeText').textContent=x.ai_enabled?'AI 服務已連線':'本機示範模式'}).catch(()=>{$('#modeText').textContent='服務未連線'});
+fetch('/api/health').then(r=>r.json()).then(x=>{$('#modeText').textContent=x.provider_label}).catch(()=>{$('#modeText').textContent='服務未連線'});

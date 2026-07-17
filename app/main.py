@@ -9,7 +9,7 @@ from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 
 from .models import AskRequest, AskResponse, GenerateRequest
-from .services import AIService, DocumentStore, demo_document, make_pptx, make_script, parse_pdf
+from .services import AIService, DocumentStore, make_pptx, make_script, parse_pdf
 
 load_dotenv()
 
@@ -21,7 +21,7 @@ STATIC_DIR = Path(__file__).parent / "static"
 
 @app.get("/api/health")
 def health() -> dict:
-    return {"status": "ok", "ai_enabled": ai.enabled}
+    return {"status": "ok", **ai.info}
 
 
 def document_payload(document) -> dict:
@@ -31,7 +31,7 @@ def document_payload(document) -> dict:
         "pages": document.pages,
         "chunks": len(document.chunks),
         "size_bytes": document.size_bytes,
-        "ai_enabled": ai.enabled,
+        **ai.info,
     }
 
 
@@ -50,17 +50,6 @@ async def upload_document(file: UploadFile = File(...)) -> dict:
         raise HTTPException(422, str(exc)) from exc
     except Exception as exc:
         raise HTTPException(500, f"處理 PDF 時發生錯誤：{exc}") from exc
-    store.add(document)
-    return document_payload(document)
-
-
-@app.post("/api/demo")
-def create_demo() -> dict:
-    document = demo_document()
-    try:
-        ai.index(document)
-    except Exception:
-        pass
     store.add(document)
     return document_payload(document)
 
