@@ -80,6 +80,7 @@ function updateAuthUI(user) {
     $('#userAvatar').textContent = '客';
     $('#userProfileInfo').innerHTML = `訪客用戶<small>點擊登入帳號</small>`;
   }
+  updateAdminUI();
 }
 
 async function fetchCurrentUser() {
@@ -145,7 +146,7 @@ document.addEventListener('click', (e) => {
   if (profileBtn) {
     e.preventDefault();
     if (state.user) {
-      logoutUser(true);
+      openProfileModal();
     } else {
       openAuthModal('login');
     }
@@ -328,3 +329,268 @@ $('#scriptDownload').addEventListener('click',()=>toast('正在下載逐頁演�
 // 頁面加載時拉取當前服務資訊與登入狀態
 fetch('/api/health').then(r=>r.json()).then(x=>{$('#modeText').textContent=x.provider_label}).catch(()=>{$('#modeText').textContent='服務未連線'});
 fetchCurrentUser();
+
+
+// === 管理員控制台 (Admin Modal) 與 個人設定 (Profile Modal) 邏輯 ===
+
+function updateAdminUI() {
+  const adminNavBtn = $('#openAdminModalBtn');
+  if (!adminNavBtn) return;
+  
+  if (state.user && state.user.role === 'admin') {
+    adminNavBtn.classList.remove('hidden');
+    fetchPendingCount();
+  } else {
+    adminNavBtn.classList.add('hidden');
+  }
+}
+
+async function fetchPendingCount() {
+  try {
+    const data = await api('/api/admin/users/pending');
+    const count = data.pending_users ? data.pending_users.length : 0;
+    if ($('#pendingBadge')) $('#pendingBadge').textContent = count;
+    if ($('#pendingTabCount')) $('#pendingTabCount').textContent = count;
+  } catch (e) {
+    // 靜默處理
+  }
+}
+
+function openAdminModal(tab = 'pending') {
+  if (!state.user || state.user.role !== 'admin') {
+    toast('僅限管理員存取', true);
+    return;
+  }
+  switchAdminTab(tab);
+  const modal = $('#adminModal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeAdminModal() {
+  const modal = $('#adminModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function switchAdminTab(tab) {
+  const isPending = tab === 'pending';
+  if ($('#tabPendingUsersBtn')) $('#tabPendingUsersBtn').classList.toggle('active', isPending);
+  if ($('#tabAllUsersBtn')) $('#tabAllUsersBtn').classList.toggle('active', !isPending);
+  if ($('#pendingUsersTab')) $('#pendingUsersTab').classList.toggle('hidden', !isPending);
+  if ($('#allUsersTab')) $('#allUsersTab').classList.toggle('hidden', isPending);
+
+  if (isPending) {
+    fetchPendingUsers();
+  } else {
+    fetchAllUsers();
+  }
+}
+
+async function fetchPendingUsers() {
+  const tbody = $('#pendingUsersTbody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="4" class="text-center muted">載入中…</td></tr>';
+
+  try {
+    const data = await api('/api/admin/users/pending');
+    const users = data.pending_users || [];
+    fetchPendingCount();
+
+    if (users.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" class="text-center muted">尚無待審核之帳號</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = users.map(u => `
+      <tr>
+        <td><b>${escapeHtml(u.username)}</b></td>
+        <td><span class="role-chip ${u.role}">${u.role === 'admin' ? '管理員' : '一般用戶'}</span></td>
+        <td>${escapeHtml(u.created_at || '最近')}</td>
+        <td>
+          <button class="btn-sm btn-approve" data-review="approve" data-user="${escapeHtml(u.username)}">✓ 核准</button>
+          <button class="btn-sm btn-reject" data-review="reject" data-user="${escapeHtml(u.username)}">✗ 拒絕</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">載入失敗: ${escapeHtml(err.message)}</td></tr>`;
+  }
+}
+
+async function fetchAllUsers() {
+  const tbody = $('#allUsersTbody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="6" class="text-center muted">載入中…</td></tr>';
+
+  try {
+    const data = await api('/api/users/all');
+    const users = data.users || [];
+
+    if (users.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center muted">系統尚無用戶紀錄</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = users.map(u => `
+      <tr>
+        <td>${u.id}</td>
+        <td><b>${escapeHtml(u.username)}</b></td>
+        <td>
+          <span class="role-chip ${u.role}">${u.role === 'admin' ? '👑 管理員' : '用戶'}</span>
+        </td>
+        <td>
+          <span class="status-chip ${u.status}">${u.status === 'approved' ? '已開通' : (u.status === 'pending' ? '待審核' : '停用')}</span>
+        </td>
+        <td>${escapeHtml(u.created_at || '-')}</td>
+        <td>
+          ${u.role === 'user' ? `<button class="btn-sm btn-action" data-role="admin" data-user="${escapeHtml(u.username)}">升為管理員</button>` : `<button class="btn-sm btn-warning" data-role="user" data-user="${escapeHtml(u.username)}">降為用戶</button>`}
+          <button class="btn-sm btn-action" data-resetpass="${escapeHtml(u.username)}">重置密碼</button>
+          <button class="btn-sm btn-reject" data-deleteuser="${escapeHtml(u.username)}">刪除</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">載入失敗: ${escapeHtml(err.message)}</td></tr>`;
+  }
+}
+
+// 代理管理員對話框內的按鈕動作
+$('#adminModal')?.addEventListener('click', async (e) => {
+  if (e.target === $('#adminModal')) {
+    closeAdminModal();
+    return;
+  }
+
+  const reviewBtn = e.target.closest('[data-review]');
+  if (reviewBtn) {
+    const action = reviewBtn.dataset.review;
+    const username = reviewBtn.dataset.user;
+    try {
+      const res = await api('/api/admin/users/review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, action })
+      });
+      toast(res.message);
+      fetchPendingUsers();
+    } catch (err) {
+      toast(err.message, true);
+    }
+    return;
+  }
+
+  const roleBtn = e.target.closest('[data-role]');
+  if (roleBtn) {
+    const role = roleBtn.dataset.role;
+    const username = roleBtn.dataset.user;
+    try {
+      const res = await api('/api/admin/users/role', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, role })
+      });
+      toast(res.message);
+      fetchAllUsers();
+    } catch (err) {
+      toast(err.message, true);
+    }
+    return;
+  }
+
+  const resetBtn = e.target.closest('[data-resetpass]');
+  if (resetBtn) {
+    const username = resetBtn.dataset.resetpass;
+    const newPassword = prompt(`請輸入為使用者 [${username}] 設定的新密碼：`);
+    if (!newPassword) return;
+    if (newPassword.length < 4) {
+      toast('新密碼長度至少需 4 個字元', true);
+      return;
+    }
+    try {
+      const res = await api('/api/admin/users/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, new_password: newPassword })
+      });
+      toast(res.message);
+    } catch (err) {
+      toast(err.message, true);
+    }
+    return;
+  }
+
+  const deleteBtn = e.target.closest('[data-deleteuser]');
+  if (deleteBtn) {
+    const username = deleteBtn.dataset.deleteuser;
+    if (!confirm(`確定要刪除使用者 [${username}] 嗎？此操作無法復原。`)) return;
+    try {
+      const res = await api(`/api/admin/users/${username}`, { method: 'DELETE' });
+      toast(res.message);
+      fetchAllUsers();
+    } catch (err) {
+      toast(err.message, true);
+    }
+    return;
+  }
+});
+
+$('#openAdminModalBtn')?.addEventListener('click', () => openAdminModal('pending'));
+$('#closeAdminModalBtn')?.addEventListener('click', closeAdminModal);
+$('#tabPendingUsersBtn')?.addEventListener('click', () => switchAdminTab('pending'));
+$('#tabAllUsersBtn')?.addEventListener('click', () => switchAdminTab('all'));
+
+// --- 個人設定 Modal 與修改密碼邏輯 ---
+
+function openProfileModal() {
+  if (!state.user) {
+    openAuthModal('login');
+    return;
+  }
+  const textEl = $('#profileModalUserText');
+  if (textEl) textEl.innerHTML = `目前的登入帳號：<b>${escapeHtml(state.user.username)}</b> (${state.user.role === 'admin' ? '👑 管理員' : '一般用戶'})`;
+  if ($('#changePassError')) $('#changePassError').classList.add('hidden');
+  if ($('#changePassSuccess')) $('#changePassSuccess').classList.add('hidden');
+  const modal = $('#profileModal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeProfileModal() {
+  const modal = $('#profileModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+$('#closeProfileModalBtn')?.addEventListener('click', closeProfileModal);
+$('#profileModal')?.addEventListener('click', (e) => {
+  if (e.target === $('#profileModal')) closeProfileModal();
+});
+
+$('#profileLogoutBtn')?.addEventListener('click', () => {
+  closeProfileModal();
+  logoutUser(true);
+});
+
+$('#changePasswordForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const oldPassword = $('#oldPasswordInput').value;
+  const newPassword = $('#newPasswordInput').value;
+  const errorEl = $('#changePassError');
+  const successEl = $('#changePassSuccess');
+
+  errorEl.classList.add('hidden');
+  successEl.classList.add('hidden');
+
+  try {
+    const res = await api('/api/user/change-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ old_password: oldPassword, new_password: newPassword })
+    });
+    successEl.textContent = res.message;
+    successEl.classList.remove('hidden');
+    $('#oldPasswordInput').value = '';
+    $('#newPasswordInput').value = '';
+    toast('密碼已成功修改');
+  } catch (err) {
+    errorEl.textContent = err.message;
+    errorEl.classList.remove('hidden');
+  }
+});

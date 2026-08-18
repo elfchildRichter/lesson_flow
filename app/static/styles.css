@@ -219,3 +219,179 @@
   border-radius: 3px;
   color: var(--green);
 }
+
+/* === Admin Control Dashboard & Profile Settings Styles === */
+
+.admin-only.hidden {
+  display: none !important;
+}
+
+.nav-item.admin-only {
+  color: #d97706;
+  font-weight: 600;
+}
+
+.nav-item.admin-only:hover {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.badge-pending, .badge-count {
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+  margin-left: auto;
+}
+
+.admin-modal-card {
+  max-width: 720px;
+  width: 92%;
+}
+
+.admin-modal-header h2 {
+  font-size: 16px;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.admin-modal-header p {
+  font-size: 11px;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.admin-table-wrapper {
+  max-height: 380px;
+  overflow-y: auto;
+  margin-top: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  text-align: left;
+}
+
+.admin-table th {
+  background: #f9fafb;
+  color: #374151;
+  padding: 8px 12px;
+  font-weight: 600;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.admin-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #f3f4f6;
+  color: #1f2937;
+  vertical-align: middle;
+}
+
+.admin-table tr:last-child td {
+  border-bottom: none;
+}
+
+.btn-sm {
+  padding: 3px 8px;
+  font-size: 10px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: opacity 0.15s ease;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-right: 4px;
+}
+
+.btn-sm:hover {
+  opacity: 0.85;
+}
+
+.btn-approve {
+  background: #10b981;
+  color: white;
+}
+
+.btn-reject {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-action {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-warning {
+  background: #f59e0b;
+  color: white;
+}
+
+.role-chip {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.role-chip.admin {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fcd34d;
+}
+
+.role-chip.user {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.status-chip {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.status-chip.approved {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-chip.pending {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-chip.rejected {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.modal-divider {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 14px 0;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.muted {
+  color: #9ca3af;
+}
