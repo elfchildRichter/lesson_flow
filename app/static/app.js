@@ -344,7 +344,7 @@ fetchCurrentUser();
 // === 管理員控制台 (Admin Modal) 與 個人設定 (Profile Modal) 邏輯 ===
 
 function updateAdminUI() {
-  const adminNavBtn = $('#openAdminModalBtn');
+  const adminNavBtn = $('#adminNavBtn') || $('#openAdminModalBtn') || $('.admin-only');
   if (!adminNavBtn) return;
   
   if (state.user && state.user.role === 'admin') {
