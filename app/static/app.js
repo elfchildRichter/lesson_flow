@@ -260,9 +260,19 @@ dz.addEventListener('drop', e => uploadFile(e.dataTransfer.files[0]));
 $('#removeFile').addEventListener('click', () => { state.document = null; $('#settingsPanel').classList.add('locked'); $('#fileCard').classList.add('hidden'); $('#generateBtn').disabled = true; $('#questionInput').disabled = true; $('#sendBtn').disabled = true; $('#settingStatus').textContent='等待教材'; $$('.step').forEach((s,i)=>{if(i)s.classList.remove('active','done')}); toast('已從工作台移除教材'); });
 
 function switchView(name) {
-  $$('.view').forEach(v => v.classList.remove('active')); $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === name));
-  $(`#${name}View`).classList.add('active'); $('#crumb').textContent = name === 'workspace' ? '建立新課程' : name === 'deck' ? '簡報預覽' : '文件問答';
+  if (name === 'admin' && (!state.user || state.user.role !== 'admin')) {
+    toast('僅限管理員存取控制台', true);
+    return;
+  }
+  $$('.view').forEach(v => v.classList.remove('active'));
+  $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === name));
+  if ($(`#${name}View`)) $(`#${name}View`).classList.add('active');
+  $('#crumb').textContent = name === 'workspace' ? '建立新課程' : name === 'deck' ? '簡報預覽' : name === 'chat' ? '文件問答' : '管理員控制台';
   if (innerWidth < 950) $('.sidebar').classList.remove('open');
+
+  if (name === 'admin') {
+    switchAdminTab('pending');
+  }
 }
 $$('.nav-item').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
 $('.menu-toggle').addEventListener('click', () => $('.sidebar').classList.toggle('open'));
@@ -454,11 +464,8 @@ async function fetchAllUsers() {
 }
 
 // 代理管理員對話框內的按鈕動作
-$('#adminModal')?.addEventListener('click', async (e) => {
-  if (e.target === $('#adminModal')) {
-    closeAdminModal();
-    return;
-  }
+$('#adminView')?.addEventListener('click', async (e) => {
+  
 
   const reviewBtn = e.target.closest('[data-review]');
   if (reviewBtn) {
@@ -533,7 +540,7 @@ $('#adminModal')?.addEventListener('click', async (e) => {
   }
 });
 
-$('#openAdminModalBtn')?.addEventListener('click', () => openAdminModal('pending'));
+// Admin nav button now uses data-view='admin' with switchView
 $('#closeAdminModalBtn')?.addEventListener('click', closeAdminModal);
 $('#tabPendingUsersBtn')?.addEventListener('click', () => switchAdminTab('pending'));
 $('#tabAllUsersBtn')?.addEventListener('click', () => switchAdminTab('all'));

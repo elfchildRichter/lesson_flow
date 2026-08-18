@@ -19,7 +19,7 @@
       <button class="nav-item active" data-view="workspace"><span class="icon">⌂</span>工作台</button>
       <button class="nav-item" data-view="deck"><span class="icon">▤</span>我的簡報<span class="nav-count" id="deckCount">0</span></button>
       <button class="nav-item" data-view="chat"><span class="icon">◇</span>文件問答</button>
-      <button class="nav-item admin-only hidden" id="openAdminModalBtn" type="button"><span class="icon">👑</span>管理員控制台<span class="nav-count badge-pending" id="pendingBadge">0</span></button>
+      <button class="nav-item admin-only hidden" data-view="admin"><span class="icon">👑</span>管理員控制台<span class="nav-count badge-pending" id="pendingBadge">0</span></button>
     </nav>
     <div class="sidebar-spacer"></div>
     <div class="plan-card">
@@ -143,6 +143,67 @@
         <form class="chat-input" id="chatForm"><textarea id="questionInput" rows="1" placeholder="向教材提問…" disabled></textarea><button type="submit" disabled id="sendBtn">↑</button><small><span>↵</span> Enter 傳送 · Shift + Enter 換行</small></form>
       </div>
     </section>
+
+    <section class="view" id="adminView">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow"><span></span> 系統權限與用戶審核</p>
+          <h1>👑 管理員控制台</h1>
+          <p>審核新註冊帳號、調整權限、重置密碼與維護全系統使用者。</p>
+        </div>
+      </div>
+
+      <div class="admin-panel-shell">
+        <div class="auth-tabs admin-tabs">
+          <button class="auth-tab-btn active" id="tabPendingUsersBtn" type="button" data-admintab="pending">
+            待審核帳號 <span class="badge-count" id="pendingTabCount">0</span>
+          </button>
+          <button class="auth-tab-btn" id="tabAllUsersBtn" type="button" data-admintab="all">
+            全體用戶管理
+          </button>
+        </div>
+
+        <!-- 頁籤 1: 待審核帳號 -->
+        <div class="admin-tab-content" id="pendingUsersTab">
+          <div class="admin-table-wrapper">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>帳號名稱</th>
+                  <th>角色</th>
+                  <th>註冊時間</th>
+                  <th>操作審核</th>
+                </tr>
+              </thead>
+              <tbody id="pendingUsersTbody">
+                <tr><td colspan="4" class="text-center muted">尚無待審核之帳號</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 頁籤 2: 全體用戶管理 -->
+        <div class="admin-tab-content hidden" id="allUsersTab">
+          <div class="admin-table-wrapper">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>帳號名稱</th>
+                  <th>角色</th>
+                  <th>審核狀態</th>
+                  <th>建立時間</th>
+                  <th>管理操作</th>
+                </tr>
+              </thead>
+              <tbody id="allUsersTbody">
+                <tr><td colspan="6" class="text-center muted">載入中…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <!-- 登入 / 註冊 Modal 對話視窗 -->
@@ -191,43 +252,7 @@
     </div>
   </div>
 
-  <!-- 管理員統一儀表板 Modal -->
-  <div class="auth-modal-overlay hidden" id="adminModal">
-    <div class="auth-modal-card admin-modal-card">
-      <button class="auth-modal-close" id="closeAdminModalBtn" type="button" aria-label="關閉">&times;</button>
-      
-      <div class="admin-modal-header">
-        <h2>👑 管理員控制台</h2>
-        <p>審核新註冊帳號、調整權限、重置密碼與維護全系統使用者</p>
-      </div>
-
-      <div class="auth-tabs admin-tabs">
-        <button class="auth-tab-btn active" id="tabPendingUsersBtn" type="button" data-admintab="pending">
-          待審核帳號 <span class="badge-count" id="pendingTabCount">0</span>
-        </button>
-        <button class="auth-tab-btn" id="tabAllUsersBtn" type="button" data-admintab="all">
-          全體用戶管理
-        </button>
-      </div>
-
-      <!-- 頁籤 1: 待審核帳號 -->
-      <div class="admin-tab-content" id="pendingUsersTab">
-        <div class="admin-table-wrapper">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>帳號名稱</th>
-                <th>角色</th>
-                <th>註冊時間</th>
-                <th>操作審核</th>
-              </tr>
-            </thead>
-            <tbody id="pendingUsersTbody">
-              <tr><td colspan="4" class="text-center muted">尚無待審核之帳號</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+  
 
       <!-- 頁籤 2: 全體用戶管理 -->
       <div class="admin-tab-content hidden" id="allUsersTab">
