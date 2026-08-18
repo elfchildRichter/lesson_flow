@@ -84,7 +84,7 @@ async def upload_document(
 @app.post("/api/ask", response_model=AskResponse)
 def ask(
     request: AskRequest,
-    current_user: dict = Depends(require_quota)
+    current_user: dict = Depends(require_quota("ask", 10))
 ) -> AskResponse:
     try:
         document = store.get(request.document_id)
@@ -100,7 +100,7 @@ def ask(
 @app.post("/api/decks")
 def generate_deck(
     request: GenerateRequest,
-    current_user: dict = Depends(require_quota)
+    current_user: dict = Depends(require_quota("deck", 3))
 ) -> dict:
     try:
         document = store.get(request.document_id)

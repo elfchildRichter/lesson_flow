@@ -298,7 +298,10 @@ function renderProfileView() {
   if ($('#profileQuotaText')) {
     const used = state.user.quota ? state.user.quota.used_count : 0;
     const limit = state.user.quota ? state.user.quota.daily_limit : 20;
-    $('#profileQuotaText').textContent = state.user.role === 'admin' ? '👑 無限提問額度' : `今日已使用 ${used} / ${limit} 次`;
+    const q = state.user.quota || {};
+    const deckQ = q.deck || { used_count: 0, daily_limit: 3 };
+    const askQ = q.ask || { used_count: 0, daily_limit: 10 };
+    $('#profileQuotaText').textContent = state.user.role === 'admin' ? '👑 管理員：無限額度' : `生成教材：${deckQ.used_count}/${deckQ.daily_limit} 份 · 文件提問：${askQ.used_count}/${askQ.daily_limit} 次`;
   }
 }
 $$('.nav-item').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
