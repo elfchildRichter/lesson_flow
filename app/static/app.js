@@ -271,7 +271,7 @@ function switchView(name) {
   if (innerWidth < 950) $('.sidebar').classList.remove('open');
 
   if (name === 'admin') {
-    switchAdminTab('pending');
+    fetchAllUsers();
   }
 }
 $$('.nav-item').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
@@ -447,24 +447,39 @@ async function fetchAllUsers() {
       return;
     }
 
-    tbody.innerHTML = users.map(u => `
-      <tr>
-        <td>${u.id}</td>
-        <td><b>${escapeHtml(u.username)}</b></td>
-        <td>
-          <span class="role-chip ${u.role}">${u.role === 'admin' ? '👑 管理員' : '用戶'}</span>
-        </td>
-        <td>
-          <span class="status-chip ${u.status}">${u.status === 'approved' ? '已開通' : (u.status === 'pending' ? '待審核' : '停用')}</span>
-        </td>
-        <td>${escapeHtml(u.created_at || '-')}</td>
-        <td>
+    tbody.innerHTML = users.map(u => {
+      let actionButtons = '';
+      if (u.status === 'pending') {
+        actionButtons = `
+          <button class="btn-sm btn-approve" data-review="approve" data-user="${escapeHtml(u.username)}">✓ 核准</button>
+          <button class="btn-sm btn-reject" data-review="reject" data-user="${escapeHtml(u.username)}">✗ 拒絕</button>
+          <button class="btn-sm btn-reject" data-deleteuser="${escapeHtml(u.username)}">刪除</button>
+        `;
+      } else {
+        actionButtons = `
           ${u.role === 'user' ? `<button class="btn-sm btn-action" data-role="admin" data-user="${escapeHtml(u.username)}">升為管理員</button>` : `<button class="btn-sm btn-warning" data-role="user" data-user="${escapeHtml(u.username)}">降為用戶</button>`}
           <button class="btn-sm btn-action" data-resetpass="${escapeHtml(u.username)}">重置密碼</button>
           <button class="btn-sm btn-reject" data-deleteuser="${escapeHtml(u.username)}">刪除</button>
-        </td>
-      </tr>
-    `).join('');
+        `;
+      }
+
+      return `
+        <tr>
+          <td>${u.id}</td>
+          <td><b>${escapeHtml(u.username)}</b></td>
+          <td>
+            <span class="role-chip ${u.role}">${u.role === 'admin' ? '👑 管理員' : '用戶'}</span>
+          </td>
+          <td>
+            <span class="status-chip ${u.status}">${u.status === 'approved' ? '已開通' : (u.status === 'pending' ? '⏳ 待審核' : '已拒絕')}</span>
+          </td>
+          <td>${escapeHtml(u.created_at || '-')}</td>
+          <td>
+            ${actionButtons}
+          </td>
+        </tr>
+      `;
+    }).join('');
   } catch (err) {
     tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">載入失敗: ${escapeHtml(err.message)}</td></tr>`;
   }
@@ -485,7 +500,7 @@ $('#adminView')?.addEventListener('click', async (e) => {
         body: JSON.stringify({ username, action })
       });
       toast(res.message);
-      fetchPendingUsers();
+      fetchAllUsers();
     } catch (err) {
       toast(err.message, true);
     }

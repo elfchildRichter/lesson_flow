@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>課伴 LessonFlow · AI 教學設計與簡報生成</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Intel+One+Mono:ital,wght@0,400..700;1,400..700&family=Noto+Sans+TC:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=1.0.5">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Intel+One+Mono:ital,wght@0,400..700;1,400..700&family=Noto+Sans+TC:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css?v=1.0.6">
 </head>
+
 <body>
   <aside class="sidebar">
     <a class="brand" href="#" aria-label="課伴首頁">
@@ -17,9 +21,11 @@
     </a>
     <nav>
       <button class="nav-item active" data-view="workspace"><span class="icon">⌂</span>工作台</button>
-      <button class="nav-item" data-view="deck"><span class="icon">▤</span>我的簡報<span class="nav-count" id="deckCount">0</span></button>
+      <button class="nav-item" data-view="deck"><span class="icon">▤</span>我的簡報<span class="nav-count"
+          id="deckCount">0</span></button>
       <button class="nav-item" data-view="chat"><span class="icon">◇</span>文件問答</button>
-      <button class="nav-item admin-only hidden" data-view="admin"><span class="icon">👑</span>管理員控制台<span class="nav-count badge-pending" id="pendingBadge">0</span></button>
+      <button class="nav-item admin-only hidden" data-view="admin"><span class="icon">👑</span>管理員控制台<span
+          class="nav-count badge-pending" id="pendingBadge">0</span></button>
     </nav>
     <div class="sidebar-spacer"></div>
     <div class="plan-card">
@@ -40,12 +46,12 @@
       <div class="breadcrumb"><span>工作台</span><i>/</i><strong id="crumb">建立新課程</strong></div>
       <div class="top-actions">
         <span class="status-dot"><i></i><span id="modeText">系統就緒</span></span>
-        
+
         <!-- 右上角 登入/註冊 與 使用者資訊按鈕 -->
         <div class="auth-header-container" id="authHeaderContainer">
           <button class="auth-btn" id="openAuthBtn" type="button">登入 / 註冊</button>
         </div>
-        
+
         <button class="icon-button" aria-label="通知">♢<span></span></button>
       </div>
     </header>
@@ -58,24 +64,35 @@
           <p class="hero-copy">上傳 PDF，幾分鐘內完成課程簡報、逐頁講稿，<br>還能隨時向教材提問。</p>
         </div>
         <div class="hero-art" aria-hidden="true">
-          <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
+          <div class="orbit orbit-a"></div>
+          <div class="orbit orbit-b"></div>
           <div class="book"><span></span><i></i></div>
-          <div class="spark s1">✦</div><div class="spark s2">✦</div><div class="spark s3">✦</div>
+          <div class="spark s1">✦</div>
+          <div class="spark s2">✦</div>
+          <div class="spark s3">✦</div>
         </div>
       </div>
 
       <div class="steps" id="steps">
-        <div class="step active"><span>01</span><div><b>上傳教材</b><small>PDF 文件</small></div></div>
+        <div class="step active"><span>01</span>
+          <div><b>上傳教材</b><small>PDF 文件</small></div>
+        </div>
         <i></i>
-        <div class="step"><span>02</span><div><b>設定課程</b><small>對象與節奏</small></div></div>
+        <div class="step"><span>02</span>
+          <div><b>設定課程</b><small>對象與節奏</small></div>
+        </div>
         <i></i>
-        <div class="step"><span>03</span><div><b>生成內容</b><small>簡報與講稿</small></div></div>
+        <div class="step"><span>03</span>
+          <div><b>生成內容</b><small>簡報與講稿</small></div>
+        </div>
       </div>
 
       <div class="workspace-grid">
         <section class="panel upload-panel" id="uploadPanel">
           <div class="panel-heading">
-            <div><span class="panel-index">01</span><h2>選擇你的教材</h2></div>
+            <div><span class="panel-index">01</span>
+              <h2>選擇你的教材</h2>
+            </div>
             <span class="secure">✓ 安全加密</span>
           </div>
           <label class="dropzone" id="dropzone">
@@ -89,7 +106,9 @@
 
         <section class="panel settings-panel locked" id="settingsPanel">
           <div class="panel-heading">
-            <div><span class="panel-index">02</span><h2>設計這堂課</h2></div>
+            <div><span class="panel-index">02</span>
+              <h2>設計這堂課</h2>
+            </div>
             <span class="lock" id="settingStatus">等待教材</span>
           </div>
           <div class="file-card hidden" id="fileCard">
@@ -98,10 +117,33 @@
             <button id="removeFile" aria-label="移除檔案">×</button>
           </div>
           <div class="form-grid">
-            <label><span>學習對象</span><select id="audience"><option>大學生</option><option>高中生</option><option>國中生</option><option>職場成人</option><option>一般大眾</option></select></label>
-            <label><span>教學語氣</span><select id="tone"><option>清楚易懂</option><option>活潑互動</option><option>專業嚴謹</option><option>故事引導</option></select></label>
-            <label><span>課程時間</span><select id="duration"><option value="20">20 分鐘</option><option value="30" selected>30 分鐘</option><option value="45">45 分鐘</option><option value="60">60 分鐘</option><option value="90">90 分鐘</option></select></label>
-            <label><span>簡報頁數</span><select id="slideCount"><option value="6">6 頁</option><option value="8" selected>8 頁</option><option value="10">10 頁</option><option value="12">12 頁</option><option value="15">15 頁</option></select></label>
+            <label><span>學習對象</span><select id="audience">
+                <option>大學生</option>
+                <option>高中生</option>
+                <option>國中生</option>
+                <option>職場成人</option>
+                <option>一般大眾</option>
+              </select></label>
+            <label><span>教學語氣</span><select id="tone">
+                <option>清楚易懂</option>
+                <option>活潑互動</option>
+                <option>專業嚴謹</option>
+                <option>故事引導</option>
+              </select></label>
+            <label><span>課程時間</span><select id="duration">
+                <option value="20">20 分鐘</option>
+                <option value="30" selected>30 分鐘</option>
+                <option value="45">45 分鐘</option>
+                <option value="60">60 分鐘</option>
+                <option value="90">90 分鐘</option>
+              </select></label>
+            <label><span>簡報頁數</span><select id="slideCount">
+                <option value="6">6 頁</option>
+                <option value="8" selected>8 頁</option>
+                <option value="10">10 頁</option>
+                <option value="12">12 頁</option>
+                <option value="15">15 頁</option>
+              </select></label>
           </div>
           <button class="primary-button" id="generateBtn" disabled><span>✦</span> 生成教學內容 <i>→</i></button>
           <p class="estimate">預計需要 1–2 分鐘，可留在此頁等待</p>
@@ -109,38 +151,67 @@
       </div>
 
       <div class="value-strip">
-        <div><span>01</span><p><b>忠於原文</b><small>回答附上教材頁碼</small></p></div>
-        <div><span>02</span><p><b>教學設計</b><small>不是單純內容摘要</small></p></div>
-        <div><span>03</span><p><b>即刻匯出</b><small>PPTX 與逐頁講稿</small></p></div>
+        <div><span>01</span>
+          <p><b>忠於原文</b><small>回答附上教材頁碼</small></p>
+        </div>
+        <div><span>02</span>
+          <p><b>教學設計</b><small>不是單純內容摘要</small></p>
+        </div>
+        <div><span>03</span>
+          <p><b>即刻匯出</b><small>PPTX 與逐頁講稿</small></p>
+        </div>
       </div>
     </section>
 
     <section class="view" id="deckView">
       <div class="section-head">
-        <div><p class="eyebrow"><span></span> 教學內容已就緒</p><h1 id="deckTitle">你的教學簡報</h1><p id="deckSubtitle">上傳教材後開始生成。</p></div>
-        <div class="download-actions"><a class="secondary-button disabled" id="scriptDownload">↓ 下載講稿</a><a class="primary-button disabled" id="pptDownload">↓ 匯出 PPTX</a></div>
+        <div>
+          <p class="eyebrow"><span></span> 教學內容已就緒</p>
+          <h1 id="deckTitle">你的教學簡報</h1>
+          <p id="deckSubtitle">上傳教材後開始生成。</p>
+        </div>
+        <div class="download-actions"><a class="secondary-button disabled" id="scriptDownload">↓ 下載講稿</a><a
+            class="primary-button disabled" id="pptDownload">↓ 匯出 PPTX</a></div>
       </div>
       <div class="deck-layout">
-        <aside class="slide-list" id="slideList"><div class="empty-mini">還沒有簡報</div></aside>
+        <aside class="slide-list" id="slideList">
+          <div class="empty-mini">還沒有簡報</div>
+        </aside>
         <div class="slide-stage-wrap">
           <div class="slide-stage" id="slideStage">
             <div class="stage-empty"><span>▤</span><b>尚未產生內容</b><small>回到工作台上傳教材並設定課程</small></div>
           </div>
-          <div class="speaker-notes"><div class="notes-label"><span>講</span><b>這頁怎麼說</b><small id="pageRef">講者備註</small></div><p id="speakerNotes">生成後，逐頁講稿會顯示在這裡。</p></div>
+          <div class="speaker-notes">
+            <div class="notes-label"><span>講</span><b>這頁怎麼說</b><small id="pageRef">講者備註</small></div>
+            <p id="speakerNotes">生成後，逐頁講稿會顯示在這裡。</p>
+          </div>
         </div>
       </div>
     </section>
 
     <section class="view" id="chatView">
       <div class="chat-header">
-        <div><p class="eyebrow"><span></span> 文件知識庫</p><h1>問教材，不問網路。</h1><p>每個回答都以你的文件為依據，並附上可核對的來源頁碼。</p></div>
-        <div class="document-chip" id="chatDoc"><span>PDF</span><div><b>尚未選擇教材</b><small>請先回到工作台上傳</small></div></div>
+        <div>
+          <p class="eyebrow"><span></span> 文件知識庫</p>
+          <h1>問教材，不問網路。</h1>
+          <p>每個回答都以你的文件為依據，並附上可核對的來源頁碼。</p>
+        </div>
+        <div class="document-chip" id="chatDoc"><span>PDF</span>
+          <div><b>尚未選擇教材</b><small>請先回到工作台上傳</small></div>
+        </div>
       </div>
       <div class="chat-shell">
         <div class="messages" id="messages">
-          <div class="message assistant welcome"><span class="bot-avatar">✦</span><div><b>嗨，我是你的教材助教</b><p>上傳文件後，你可以請我解釋概念、比較差異，或從教材中整理重點。我只會根據文件內容回答。</p><div class="suggestions"><button>這份教材的三個核心重點是什麼？</button><button>用簡單的例子解釋最重要的概念</button></div></div></div>
+          <div class="message assistant welcome"><span class="bot-avatar">✦</span>
+            <div><b>嗨，我是你的教材助教</b>
+              <p>上傳文件後，你可以請我解釋概念、比較差異，或從教材中整理重點。我只會根據文件內容回答。</p>
+              <div class="suggestions"><button>這份教材的三個核心重點是什麼？</button><button>用簡單的例子解釋最重要的概念</button></div>
+            </div>
+          </div>
         </div>
-        <form class="chat-input" id="chatForm"><textarea id="questionInput" rows="1" placeholder="向教材提問…" disabled></textarea><button type="submit" disabled id="sendBtn">↑</button><small><span>↵</span> Enter 傳送 · Shift + Enter 換行</small></form>
+        <form class="chat-input" id="chatForm"><textarea id="questionInput" rows="1" placeholder="向教材提問…"
+            disabled></textarea><button type="submit" disabled id="sendBtn">↑</button><small><span>↵</span> Enter 傳送 ·
+            Shift + Enter 換行</small></form>
       </div>
     </section>
 
@@ -178,53 +249,24 @@
       </div>
 
       <div class="admin-panel-shell">
-        <div class="auth-tabs admin-tabs">
-          <button class="auth-tab-btn active" id="tabPendingUsersBtn" type="button" data-admintab="pending">
-            待審核帳號 <span class="badge-count" id="pendingTabCount">0</span>
-          </button>
-          <button class="auth-tab-btn" id="tabAllUsersBtn" type="button" data-admintab="all">
-            全體用戶管理
-          </button>
-        </div>
-
-        <!-- 頁籤 1: 待審核帳號 -->
-        <div class="admin-tab-content" id="pendingUsersTab">
-          <div class="admin-table-wrapper">
-            <table class="admin-table">
-              <thead>
-                <tr>
-                  <th>帳號名稱</th>
-                  <th>角色</th>
-                  <th>註冊時間</th>
-                  <th>操作審核</th>
-                </tr>
-              </thead>
-              <tbody id="pendingUsersTbody">
-                <tr><td colspan="4" class="text-center muted">尚無待審核之帳號</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- 頁籤 2: 全體用戶管理 -->
-        <div class="admin-tab-content hidden" id="allUsersTab">
-          <div class="admin-table-wrapper">
-            <table class="admin-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>帳號名稱</th>
-                  <th>角色</th>
-                  <th>審核狀態</th>
-                  <th>建立時間</th>
-                  <th>管理操作</th>
-                </tr>
-              </thead>
-              <tbody id="allUsersTbody">
-                <tr><td colspan="6" class="text-center muted">載入中…</td></tr>
-              </tbody>
-            </table>
-          </div>
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>帳號名稱</th>
+                <th>角色</th>
+                <th>審核狀態</th>
+                <th>建立時間</th>
+                <th>管理操作</th>
+              </tr>
+            </thead>
+            <tbody id="allUsersTbody">
+              <tr>
+                <td colspan="6" class="text-center muted">載入中…</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </section>
@@ -234,7 +276,7 @@
   <div class="auth-modal-overlay hidden" id="authModal">
     <div class="auth-modal-card">
       <button class="auth-modal-close" id="closeAuthModalBtn" type="button" aria-label="關閉">&times;</button>
-      
+
       <div class="auth-tabs">
         <button class="auth-tab-btn active" id="tabLoginBtn" type="button" data-tab="login">用戶登入</button>
         <button class="auth-tab-btn" id="tabRegisterBtn" type="button" data-tab="register">註冊新帳號</button>
@@ -276,36 +318,15 @@
     </div>
   </div>
 
-  
 
-      <!-- 頁籤 2: 全體用戶管理 -->
-      <div class="admin-tab-content hidden" id="allUsersTab">
-        <div class="admin-table-wrapper">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>帳號名稱</th>
-                <th>角色</th>
-                <th>審核狀態</th>
-                <th>建立時間</th>
-                <th>管理操作</th>
-              </tr>
-            </thead>
-            <tbody id="allUsersTbody">
-              <tr><td colspan="6" class="text-center muted">載入中…</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
+
+
 
   <!-- 個人帳號與變更密碼 Modal -->
   <div class="auth-modal-overlay hidden" id="profileModal">
     <div class="auth-modal-card">
       <button class="auth-modal-close" id="closeProfileModalBtn" type="button" aria-label="關閉">&times;</button>
-      
+
       <div class="auth-form">
         <h3>個人帳號設定</h3>
         <p class="auth-sub" id="profileModalUserText">目前的登入帳號：<b>-</b></p>
@@ -320,7 +341,8 @@
           </div>
           <div class="auth-field">
             <label for="newPasswordInput">新密碼</label>
-            <input type="password" id="newPasswordInput" placeholder="輸入新密碼 (至少4字元)" required autocomplete="new-password">
+            <input type="password" id="newPasswordInput" placeholder="輸入新密碼 (至少4字元)" required
+              autocomplete="new-password">
           </div>
           <div class="auth-error-msg hidden" id="changePassError"></div>
           <div class="auth-success-msg hidden" id="changePassSuccess"></div>
@@ -329,13 +351,21 @@
 
         <hr class="modal-divider">
 
-        <button type="button" class="secondary-button" id="profileLogoutBtn" style="width:100%; margin-top:10px;">登出系統</button>
+        <button type="button" class="secondary-button" id="profileLogoutBtn"
+          style="width:100%; margin-top:10px;">登出系統</button>
       </div>
     </div>
   </div>
 
-  <div class="toast" id="toast"><span>✓</span><p></p></div>
-  <div class="loading-overlay hidden" id="loadingOverlay"><div class="loader-mark"><i></i><i></i><i></i></div><b id="loadingTitle">正在讀懂你的教材</b><p id="loadingCopy">整理章節與核心概念…</p><div class="loading-track"><span></span></div></div>
-  <script src="/app.js?v=1.0.5"></script>
+  <div class="toast" id="toast"><span>✓</span>
+    <p></p>
+  </div>
+  <div class="loading-overlay hidden" id="loadingOverlay">
+    <div class="loader-mark"><i></i><i></i><i></i></div><b id="loadingTitle">正在讀懂你的教材</b>
+    <p id="loadingCopy">整理章節與核心概念…</p>
+    <div class="loading-track"><span></span></div>
+  </div>
+  <script src="/app.js?v=1.0.6"></script>
 </body>
+
 </html>
