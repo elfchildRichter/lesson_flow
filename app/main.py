@@ -2,18 +2,42 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, UploadFile, Depends
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
+
+from fastapi_auth_core import (
+    init_db,
+    auth_router,
+    admin_router,
+    get_current_user,
+    require_quota,
+)
 
 from .models import AskRequest, AskResponse, GenerateRequest
 from .services import AIService, DocumentStore, make_pptx, make_script, parse_pdf
 
 load_dotenv()
 
-app = FastAPI(title="課伴 LessonFlow", version="1.0.0")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 初始化資料庫 (建庫/創預設 admin)
+    init_db()
+    yield
+
+app = FastAPI(
+    title="課伴 LessonFlow",
+    version="1.0.0",
+    lifespan=lifespan
+)
+
+# 掛載認證與管理員介面 (/api/auth/*, /api/admin/*)
+app.include_router(auth_router)
+app.include_router(admin_router)
+
 store = DocumentStore()
 ai = AIService()
 STATIC_DIR = Path(__file__).parent / "static"
@@ -36,7 +60,10 @@ def document_payload(document) -> dict:
 
 
 @app.post("/api/documents")
-async def upload_document(file: UploadFile = File(...)) -> dict:
+async def upload_document(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+) -> dict:
     if file.content_type != "application/pdf" and not (file.filename or "").lower().endswith(".pdf"):
         raise HTTPException(415, "只支援 PDF 檔案")
     content = await file.read()
@@ -55,7 +82,10 @@ async def upload_document(file: UploadFile = File(...)) -> dict:
 
 
 @app.post("/api/ask", response_model=AskResponse)
-def ask(request: AskRequest) -> AskResponse:
+def ask(
+    request: AskRequest,
+    current_user: dict = Depends(require_quota)
+) -> AskResponse:
     try:
         document = store.get(request.document_id)
     except KeyError as exc:
@@ -68,7 +98,10 @@ def ask(request: AskRequest) -> AskResponse:
 
 
 @app.post("/api/decks")
-def generate_deck(request: GenerateRequest) -> dict:
+def generate_deck(
+    request: GenerateRequest,
+    current_user: dict = Depends(require_quota)
+) -> dict:
     try:
         document = store.get(request.document_id)
     except KeyError as exc:
