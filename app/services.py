@@ -25,6 +25,25 @@ class DocumentStore:
         return self.documents[document_id]
 
 
+
+def _clean_model_text(text: str) -> str:
+    text = text.strip()
+    text = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL).strip()
+    return text
+
+def _extract_json_from_text(text: str) -> dict:
+    text = _clean_model_text(text)
+    match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL)
+    if match:
+        text = match.group(1)
+    else:
+        start = text.find('{')
+        end = text.rfind('}')
+        if start != -1 and end != -1 and end > start:
+            text = text[start:end+1]
+    return json.loads(text)
+
+
 def _clean(text: str) -> str:
     text = re.sub(r"[\t\r]+", " ", text)
     text = re.sub(r" +", " ", text)
@@ -159,7 +178,8 @@ class AIService:
                 options={"temperature": 0.1},
             )
             message = response.message if hasattr(response, "message") else response["message"]
-            return (message.content if hasattr(message, "content") else message["content"]).strip()
+            raw_text = message.content if hasattr(message, "content") else message["content"]
+            return _clean_model_text(raw_text)
         except Exception as exc:
             raise RuntimeError(
                 f"Ollama 回應失敗；請確認服務已啟動且已執行 `ollama pull {self.model}`：{exc}"
@@ -187,8 +207,8 @@ class AIService:
                 options={"temperature": 0},
             )
             message = response.message if hasattr(response, "message") else response["message"]
-            content = message.content if hasattr(message, "content") else message["content"]
-            return json.loads(content)
+            raw_content = message.content if hasattr(message, "content") else message["content"]
+            return _extract_json_from_text(raw_content)
         except Exception as exc:
             raise RuntimeError(
                 f"Ollama 結構化輸出失敗；請確認模型 `{self.model}` 可用：{exc}"
@@ -241,8 +261,29 @@ class AIService:
             f"對象：{audience}\n語氣：{tone}\n總時長：{duration} 分鐘\n投影片：{slide_count} 頁\n\n教材：\n{context}",
             schema,
         )
-        slides = [Slide(**item) for item in payload["slides"]]
-        title, subtitle = payload["title"], payload["subtitle"]
+        slides = []
+        for item in payload.get("slides", []):
+            if not isinstance(item, dict):
+                continue
+            title = item.get("title") or item.get("header") or "無標題投影片"
+            raw_bullets = item.get("bullets") or item.get("points") or item.get("bullet_points") or item.get("content") or ["摘要點 1", "摘要點 2"]
+            if isinstance(raw_bullets, str):
+                bullets = [b.strip() for b in raw_bullets.split("\n") if b.strip()]
+            elif isinstance(raw_bullets, list):
+                bullets = [str(b) for b in raw_bullets]
+            else:
+                bullets = ["詳細內容請參閱教材"]
+            speaker_notes = item.get("speaker_notes") or item.get("notes") or item.get("script") or item.get("content") or "講者說明"
+            raw_pages = item.get("source_pages") or item.get("pages") or item.get("page") or []
+            if isinstance(raw_pages, int):
+                source_pages = [raw_pages]
+            elif isinstance(raw_pages, list):
+                source_pages = [int(p) for p in raw_pages if isinstance(p, (int, str)) and str(p).isdigit()]
+            else:
+                source_pages = []
+            slides.append(Slide(title=title, bullets=bullets, speaker_notes=speaker_notes, source_pages=source_pages))
+        title = payload.get("title") or payload.get("topic") or payload.get("lesson_title") or payload.get("name") or "教學簡報"
+        subtitle = payload.get("subtitle") or payload.get("description") or payload.get("sub_title") or "課程簡報與逐頁講稿"
 
         deck = Deck(
             id=uuid.uuid4().hex[:12], document_id=document.id, title=title, subtitle=subtitle,
