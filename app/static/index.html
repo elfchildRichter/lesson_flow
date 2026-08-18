@@ -10,7 +10,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Intel+One+Mono:ital,wght@0,400..700;1,400..700&family=Noto+Sans+TC:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=1.0.8">
+  <link rel="stylesheet" href="/styles.css?v=1.1.0">
 </head>
 
 <body>
@@ -30,9 +30,17 @@
     </nav>
     <div class="sidebar-spacer"></div>
     <div class="plan-card">
-      <div class="plan-head"><span>每日提問額度</span><b id="quotaBadge">未登入</b></div>
-      <div class="usage-bar"><i id="quotaBar"></i></div>
-      <p id="quotaText"><strong>-</strong> / 20 次提問</p>
+      <div class="plan-head"><span>每日使用額度</span><b id="quotaBadge">未登入</b></div>
+      <div class="quota-list" id="quotaList">
+        <div class="quota-item">
+          <div class="quota-label"><small>教學簡報</small><span id="deckQuotaText">- / 3 份</span></div>
+          <div class="usage-bar"><i id="deckQuotaBar" style="width: 0%"></i></div>
+        </div>
+        <div class="quota-item" style="margin-top: 8px;">
+          <div class="quota-label"><small>文件提問</small><span id="askQuotaText">- / 10 次</span></div>
+          <div class="usage-bar"><i id="askQuotaBar" style="width: 0%"></i></div>
+        </div>
+      </div>
     </div>
     <button class="profile" id="sidebarProfileBtn">
       <span class="avatar" id="userAvatar">客</span>
@@ -388,7 +396,7 @@
     <p id="loadingCopy">整理章節與核心概念…</p>
     <div class="loading-track"><span></span></div>
   </div>
-  <script src="/app.js?v=1.0.8"></script>
+  <script src="/app.js?v=1.1.0"></script>
 </body>
 
 </html>
