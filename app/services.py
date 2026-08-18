@@ -185,7 +185,19 @@ class AIService:
             )
             message = response.message if hasattr(response, "message") else response["message"]
             content = message.content if hasattr(message, "content") else message["content"]
-            return json.loads(content)
+            
+            # 清理與容錯解析 JSON (相容 thinking 標籤與 markdown 程式碼區塊)
+            content_clean = content.strip()
+            content_clean = re.sub(r"<think>.*?</think>", "", content_clean, flags=re.DOTALL).strip()
+            match = re.search(r"```(?:json)?\s*(\{.*\}|\[.*\])\s*```", content_clean, re.DOTALL)
+            if match:
+                content_clean = match.group(1).strip()
+            else:
+                match_obj = re.search(r"(\{.*\})", content_clean, re.DOTALL)
+                if match_obj:
+                    content_clean = match_obj.group(1).strip()
+                    
+            return json.loads(content_clean)
         except Exception as exc:
             raise RuntimeError(
                 f"Ollama 結構化輸出失敗；請確認模型 `{self.model}` 可用：{exc}"
@@ -208,7 +220,9 @@ class AIService:
     def generate_deck(self, document: Document, audience: str, tone: str, slide_count: int, duration: int) -> Deck:
         sampled = document.chunks[: min(30, len(document.chunks))]
         context = "\n\n".join(f"[第 {c.page} 頁] {c.text}" for c in sampled)
-        schema = {
+        
+        if self.provider == "openai":
+            schema = {
                 "type": "object",
                 "properties": {
                     "title": {"type": "string"},
@@ -233,13 +247,56 @@ class AIService:
                 "required": ["title", "subtitle", "slides"],
                 "additionalProperties": False,
             }
+        else:
+            # 專為 Ollama 相容設計之 Schema (去除 minItems/maxItems/additionalProperties)
+            schema = {
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string"},
+                    "subtitle": {"type": "string"},
+                    "slides": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "title": {"type": "string"},
+                                "bullets": {"type": "array", "items": {"type": "string"}},
+                                "speaker_notes": {"type": "string"},
+                                "source_pages": {"type": "array", "items": {"type": "integer"}},
+                            },
+                            "required": ["title", "bullets", "speaker_notes"],
+                        },
+                    },
+                },
+                "required": ["title", "subtitle", "slides"],
+            }
+
         payload = self._structured_response(
             "你是資深教學設計師。只使用教材內容，以繁體中文設計投影片與自然、可直接朗讀的逐頁講稿。",
             f"對象：{audience}\n語氣：{tone}\n總時長：{duration} 分鐘\n投影片：{slide_count} 頁\n\n教材：\n{context}",
             schema,
         )
-        slides = [Slide(**item) for item in payload["slides"]]
-        title, subtitle = payload["title"], payload["subtitle"]
+
+        slides = []
+        for item in payload.get("slides", []):
+            raw_bullets = item.get("bullets") or item.get("content") or item.get("points") or []
+            if isinstance(raw_bullets, str):
+                bullets = [b.strip("•- ").strip() for b in raw_bullets.split("\n") if b.strip()]
+            else:
+                bullets = list(raw_bullets) if raw_bullets else ["重點說明"]
+                
+            speaker_notes = item.get("speaker_notes") or item.get("script") or item.get("notes") or ""
+            source_pages = item.get("source_pages") or ([item["page"]] if "page" in item else [1])
+            
+            slides.append(Slide(
+                title=item.get("title", "未命名投影片"),
+                bullets=bullets,
+                speaker_notes=speaker_notes,
+                source_pages=source_pages,
+            ))
+
+        title = payload.get("title") or (slides[0].title if slides else "簡報教案")
+        subtitle = payload.get("subtitle") or f"{audience} · {tone}語氣"
 
         deck = Deck(
             id=uuid.uuid4().hex[:12], document_id=document.id, title=title, subtitle=subtitle,
