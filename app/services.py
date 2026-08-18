@@ -13,6 +13,8 @@ from .models import Chunk, Deck, Document, Slide, Source
 
 class DocumentStore:
     def __init__(self) -> None:
+        from dotenv import load_dotenv
+        load_dotenv(override=True)
         self.documents: dict[str, Document] = {}
         self.decks: dict[str, Deck] = {}
 
@@ -147,6 +149,12 @@ class AIService:
             vectors = method(texts, normalize_embeddings=True, show_progress_bar=False)
             return vectors.tolist() if hasattr(vectors, "tolist") else [list(vector) for vector in vectors]
         except Exception as exc:
+            if self.api_key:
+                print("Hugging Face embedding 失敗，使用 OpenAI embedding 備用:", exc)
+                from openai import OpenAI
+                client = OpenAI(api_key=self.api_key)
+                response = client.embeddings.create(model="text-embedding-3-small", input=texts)
+                return [item.embedding for item in response.data]
             raise RuntimeError(f"Hugging Face embedding 模型載入或推論失敗：{exc}") from exc
 
     def index(self, document: Document) -> None:

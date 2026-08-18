@@ -20,11 +20,11 @@ from fastapi_auth_core import (
 from .models import AskRequest, AskResponse, GenerateRequest
 from .services import AIService, DocumentStore, make_pptx, make_script, parse_pdf
 
-load_dotenv()
+load_dotenv(override=True)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # 初始化資料庫 (建庫/創預設 admin)
+    load_dotenv(override=True)
     init_db()
     yield
 
