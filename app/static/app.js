@@ -44,41 +44,49 @@ function updateAuthUI(user) {
   const container = $('#authHeaderContainer');
   
   if (user) {
-    const isUnlimited = user.quota && user.quota.is_unlimited;
-    const remaining = user.quota ? user.quota.remaining : 0;
-    const limit = user.quota ? user.quota.daily_limit : 20;
-    const quotaLabel = isUnlimited ? '無限配額' : `剩餘: ${remaining}/${limit}`;
-    const roleBadge = user.role === 'admin' ? '管理員' : '一般用戶';
+    const q = user.quota || {};
+    const deckQ = q.deck || { used_count: 0, daily_limit: 3 };
+    const askQ = q.ask || { used_count: 0, daily_limit: 10 };
+    const isUnlimited = q.is_unlimited || user.role === 'admin';
+    const quotaLabel = isUnlimited ? '👑 無限配額' : `教材:${deckQ.used_count}/3 · 提問:${askQ.used_count}/10`;
+    const roleBadge = user.role === 'admin' ? '👑 管理員' : '一般用戶';
 
-    container.innerHTML = `
-      <div class="auth-user-chip">
-        <strong>👤 ${escapeHtml(user.username)}</strong>
-        <small>${quotaLabel}</small>
-        <button class="auth-logout-btn" id="logoutBtn" type="button">登出</button>
-      </div>
-    `;
+    if (container) {
+      container.innerHTML = `
+        <div class="auth-user-chip">
+          <strong>👤 ${escapeHtml(user.username)}</strong>
+          <small>${quotaLabel}</small>
+          <button class="auth-logout-btn" id="logoutBtn" type="button">登出</button>
+        </div>
+      `;
+    }
 
     // 更新側邊欄 Profile 卡片
-    $('#quotaBadge').textContent = isUnlimited ? 'UNLIMITED' : 'DAILY';
-    if (isUnlimited) {
-      $('#quotaBar').style.width = '100%';
-      $('#quotaText').innerHTML = `<strong>∞</strong> / 管理員無限額度`;
-    } else {
-      const usedPct = Math.min(100, Math.round((user.quota.used_count / limit) * 100));
-      $('#quotaBar').style.width = `${usedPct}%`;
-      $('#quotaText').innerHTML = `<strong>${remaining}</strong> / ${limit} 次剩餘`;
+    if ($('#quotaBadge')) $('#quotaBadge').textContent = isUnlimited ? '👑 管理員' : '已開通';
+    if ($('#deckQuotaText')) $('#deckQuotaText').textContent = isUnlimited ? '無限' : `${deckQ.used_count} / ${deckQ.daily_limit} 份`;
+    if ($('#deckQuotaBar')) {
+      $('#deckQuotaBar').style.width = isUnlimited ? '100%' : `${Math.min(100, (deckQ.used_count / deckQ.daily_limit) * 100)}%`;
+      $('#deckQuotaBar').style.background = isUnlimited ? '#d97706' : 'var(--green)';
     }
-    $('#userAvatar').textContent = user.username.charAt(0).toUpperCase();
-    $('#userProfileInfo').innerHTML = `${escapeHtml(user.username)}<small>${roleBadge}</small>`;
+    if ($('#askQuotaText')) $('#askQuotaText').textContent = isUnlimited ? '無限' : `${askQ.used_count} / ${askQ.daily_limit} 次`;
+    if ($('#askQuotaBar')) {
+      $('#askQuotaBar').style.width = isUnlimited ? '100%' : `${Math.min(100, (askQ.used_count / askQ.daily_limit) * 100)}%`;
+      $('#askQuotaBar').style.background = isUnlimited ? '#d97706' : 'var(--green)';
+    }
+
+    if ($('#userAvatar')) $('#userAvatar').textContent = user.role === 'admin' ? '👑' : user.username.charAt(0).toUpperCase();
+    if ($('#userProfileInfo')) $('#userProfileInfo').innerHTML = `${escapeHtml(user.username)}<small>${roleBadge}</small>`;
   } else {
-    container.innerHTML = `<button class="auth-btn" id="openAuthBtn" type="button">登入 / 註冊</button>`;
+    if (container) container.innerHTML = `<button class="auth-btn" id="openAuthBtn" type="button">登入 / 註冊</button>`;
 
     // 重置側邊欄 Profile 卡片
-    $('#quotaBadge').textContent = '未登入';
-    $('#quotaBar').style.width = '0%';
-    $('#quotaText').innerHTML = `<strong>-</strong> / 請先登入`;
-    $('#userAvatar').textContent = '客';
-    $('#userProfileInfo').innerHTML = `訪客用戶<small>點擊登入帳號</small>`;
+    if ($('#quotaBadge')) $('#quotaBadge').textContent = '未登入';
+    if ($('#deckQuotaText')) $('#deckQuotaText').textContent = '- / 3 份';
+    if ($('#deckQuotaBar')) $('#deckQuotaBar').style.width = '0%';
+    if ($('#askQuotaText')) $('#askQuotaText').textContent = '- / 10 次';
+    if ($('#askQuotaBar')) $('#askQuotaBar').style.width = '0%';
+    if ($('#userAvatar')) $('#userAvatar').textContent = '客';
+    if ($('#userProfileInfo')) $('#userProfileInfo').innerHTML = `訪客用戶<small>點擊登入帳號</small>`;
   }
   updateAdminUI();
   const profileNavBtn = $('#profileNavBtn');
