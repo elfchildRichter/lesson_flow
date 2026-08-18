@@ -13,8 +13,6 @@ from .models import Chunk, Deck, Document, Slide, Source
 
 class DocumentStore:
     def __init__(self) -> None:
-        from dotenv import load_dotenv
-        load_dotenv(override=True)
         self.documents: dict[str, Document] = {}
         self.decks: dict[str, Deck] = {}
 
@@ -25,25 +23,6 @@ class DocumentStore:
         if document_id not in self.documents:
             raise KeyError(document_id)
         return self.documents[document_id]
-
-
-
-def _clean_model_text(text: str) -> str:
-    text = text.strip()
-    text = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL).strip()
-    return text
-
-def _extract_json_from_text(text: str) -> dict:
-    text = _clean_model_text(text)
-    match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL)
-    if match:
-        text = match.group(1)
-    else:
-        start = text.find('{')
-        end = text.rfind('}')
-        if start != -1 and end != -1 and end > start:
-            text = text[start:end+1]
-    return json.loads(text)
 
 
 def _clean(text: str) -> str:
@@ -108,7 +87,7 @@ class AIService:
                 raise ValueError("AI_PROVIDER=openai 時必須設定 OPENAI_API_KEY")
             from openai import OpenAI
 
-            self.model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+            self.model = os.getenv("OPENAI_MODEL", "gpt-5-mini")
             self.embedding_model = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
             self.openai = OpenAI(api_key=self.api_key)
         else:
@@ -119,10 +98,7 @@ class AIService:
                 "HUGGINGFACE_EMBEDDING_MODEL",
                 "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
             )
-            host = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434").strip()
-            ollama_key = os.getenv("OLLAMA_API_KEY", "").strip()
-            headers = {"Authorization": f"Bearer {ollama_key}"} if ollama_key else None
-            self.ollama = Client(host=host, headers=headers)
+            self.ollama = Client(host=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"))
 
     @property
     def info(self) -> dict[str, str]:
@@ -149,12 +125,6 @@ class AIService:
             vectors = method(texts, normalize_embeddings=True, show_progress_bar=False)
             return vectors.tolist() if hasattr(vectors, "tolist") else [list(vector) for vector in vectors]
         except Exception as exc:
-            if self.api_key:
-                print("Hugging Face embedding 失敗，使用 OpenAI embedding 備用:", exc)
-                from openai import OpenAI
-                client = OpenAI(api_key=self.api_key)
-                response = client.embeddings.create(model="text-embedding-3-small", input=texts)
-                return [item.embedding for item in response.data]
             raise RuntimeError(f"Hugging Face embedding 模型載入或推論失敗：{exc}") from exc
 
     def index(self, document: Document) -> None:
@@ -186,8 +156,7 @@ class AIService:
                 options={"temperature": 0.1},
             )
             message = response.message if hasattr(response, "message") else response["message"]
-            raw_text = message.content if hasattr(message, "content") else message["content"]
-            return _clean_model_text(raw_text)
+            return (message.content if hasattr(message, "content") else message["content"]).strip()
         except Exception as exc:
             raise RuntimeError(
                 f"Ollama 回應失敗；請確認服務已啟動且已執行 `ollama pull {self.model}`：{exc}"
@@ -215,8 +184,20 @@ class AIService:
                 options={"temperature": 0},
             )
             message = response.message if hasattr(response, "message") else response["message"]
-            raw_content = message.content if hasattr(message, "content") else message["content"]
-            return _extract_json_from_text(raw_content)
+            content = message.content if hasattr(message, "content") else message["content"]
+            
+            # 清理與容錯解析 JSON (相容 thinking 標籤與 markdown 程式碼區塊)
+            content_clean = content.strip()
+            content_clean = re.sub(r"<think>.*?</think>", "", content_clean, flags=re.DOTALL).strip()
+            match = re.search(r"```(?:json)?\s*(\{.*\}|\[.*\])\s*```", content_clean, re.DOTALL)
+            if match:
+                content_clean = match.group(1).strip()
+            else:
+                match_obj = re.search(r"(\{.*\})", content_clean, re.DOTALL)
+                if match_obj:
+                    content_clean = match_obj.group(1).strip()
+                    
+            return json.loads(content_clean)
         except Exception as exc:
             raise RuntimeError(
                 f"Ollama 結構化輸出失敗；請確認模型 `{self.model}` 可用：{exc}"
@@ -239,7 +220,9 @@ class AIService:
     def generate_deck(self, document: Document, audience: str, tone: str, slide_count: int, duration: int) -> Deck:
         sampled = document.chunks[: min(30, len(document.chunks))]
         context = "\n\n".join(f"[第 {c.page} 頁] {c.text}" for c in sampled)
-        schema = {
+        
+        if self.provider == "openai":
+            schema = {
                 "type": "object",
                 "properties": {
                     "title": {"type": "string"},
@@ -264,34 +247,56 @@ class AIService:
                 "required": ["title", "subtitle", "slides"],
                 "additionalProperties": False,
             }
+        else:
+            # 專為 Ollama 相容設計之 Schema (去除 minItems/maxItems/additionalProperties)
+            schema = {
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string"},
+                    "subtitle": {"type": "string"},
+                    "slides": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "title": {"type": "string"},
+                                "bullets": {"type": "array", "items": {"type": "string"}},
+                                "speaker_notes": {"type": "string"},
+                                "source_pages": {"type": "array", "items": {"type": "integer"}},
+                            },
+                            "required": ["title", "bullets", "speaker_notes"],
+                        },
+                    },
+                },
+                "required": ["title", "subtitle", "slides"],
+            }
+
         payload = self._structured_response(
             "你是資深教學設計師。只使用教材內容，以繁體中文設計投影片與自然、可直接朗讀的逐頁講稿。",
             f"對象：{audience}\n語氣：{tone}\n總時長：{duration} 分鐘\n投影片：{slide_count} 頁\n\n教材：\n{context}",
             schema,
         )
+
         slides = []
         for item in payload.get("slides", []):
-            if not isinstance(item, dict):
-                continue
-            title = item.get("title") or item.get("header") or "無標題投影片"
-            raw_bullets = item.get("bullets") or item.get("points") or item.get("bullet_points") or item.get("content") or ["摘要點 1", "摘要點 2"]
+            raw_bullets = item.get("bullets") or item.get("content") or item.get("points") or []
             if isinstance(raw_bullets, str):
-                bullets = [b.strip() for b in raw_bullets.split("\n") if b.strip()]
-            elif isinstance(raw_bullets, list):
-                bullets = [str(b) for b in raw_bullets]
+                bullets = [b.strip("•- ").strip() for b in raw_bullets.split("\n") if b.strip()]
             else:
-                bullets = ["詳細內容請參閱教材"]
-            speaker_notes = item.get("speaker_notes") or item.get("notes") or item.get("script") or item.get("content") or "講者說明"
-            raw_pages = item.get("source_pages") or item.get("pages") or item.get("page") or []
-            if isinstance(raw_pages, int):
-                source_pages = [raw_pages]
-            elif isinstance(raw_pages, list):
-                source_pages = [int(p) for p in raw_pages if isinstance(p, (int, str)) and str(p).isdigit()]
-            else:
-                source_pages = []
-            slides.append(Slide(title=title, bullets=bullets, speaker_notes=speaker_notes, source_pages=source_pages))
-        title = payload.get("title") or payload.get("topic") or payload.get("lesson_title") or payload.get("name") or "教學簡報"
-        subtitle = payload.get("subtitle") or payload.get("description") or payload.get("sub_title") or "課程簡報與逐頁講稿"
+                bullets = list(raw_bullets) if raw_bullets else ["重點說明"]
+                
+            speaker_notes = item.get("speaker_notes") or item.get("script") or item.get("notes") or ""
+            source_pages = item.get("source_pages") or ([item["page"]] if "page" in item else [1])
+            
+            slides.append(Slide(
+                title=item.get("title", "未命名投影片"),
+                bullets=bullets,
+                speaker_notes=speaker_notes,
+                source_pages=source_pages,
+            ))
+
+        title = payload.get("title") or (slides[0].title if slides else "簡報教案")
+        subtitle = payload.get("subtitle") or f"{audience} · {tone}語氣"
 
         deck = Deck(
             id=uuid.uuid4().hex[:12], document_id=document.id, title=title, subtitle=subtitle,
