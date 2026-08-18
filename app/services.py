@@ -87,7 +87,7 @@ class AIService:
                 raise ValueError("AI_PROVIDER=openai 時必須設定 OPENAI_API_KEY")
             from openai import OpenAI
 
-            self.model = os.getenv("OPENAI_MODEL", "gpt-5-mini")
+            self.model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
             self.embedding_model = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
             self.openai = OpenAI(api_key=self.api_key)
         else:
@@ -98,7 +98,10 @@ class AIService:
                 "HUGGINGFACE_EMBEDDING_MODEL",
                 "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
             )
-            self.ollama = Client(host=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"))
+            host = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434").strip()
+            ollama_key = os.getenv("OLLAMA_API_KEY", "").strip()
+            headers = {"Authorization": f"Bearer {ollama_key}"} if ollama_key else None
+            self.ollama = Client(host=host, headers=headers)
 
     @property
     def info(self) -> dict[str, str]:
