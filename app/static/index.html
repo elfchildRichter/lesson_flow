@@ -1,17 +1,15 @@
-<!doctype html>
-<html lang="zh-Hant">
+<!DOCTYPE html>
+<html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="把教材變成一堂好課：PDF 轉簡報、講稿與文件問答。">
-  <title>課伴 LessonFlow — AI 教學助理</title>
+  <title>課伴 LessonFlow · AI 教學設計與簡報生成</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Intel+One+Mono:ital,wght@0,400..700;1,400..700&family=Noto+Sans+TC:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <div class="grain"></div>
   <aside class="sidebar">
     <a class="brand" href="#" aria-label="課伴首頁">
       <span class="brand-mark"><span></span><span></span><span></span></span>
@@ -24,13 +22,13 @@
     </nav>
     <div class="sidebar-spacer"></div>
     <div class="plan-card">
-      <div class="plan-head"><span>本月用量</span><b>FREE</b></div>
-      <div class="usage-bar"><i></i></div>
-      <p><strong>1</strong> / 5 份教材</p>
+      <div class="plan-head"><span>每日提問額度</span><b id="quotaBadge">未登入</b></div>
+      <div class="usage-bar"><i id="quotaBar"></i></div>
+      <p id="quotaText"><strong>-</strong> / 20 次提問</p>
     </div>
-    <button class="profile">
-      <span class="avatar">林</span>
-      <span>林老師<small>teacher@example.com</small></span>
+    <button class="profile" id="sidebarProfileBtn">
+      <span class="avatar" id="userAvatar">客</span>
+      <span id="userProfileInfo">訪客用戶<small>請先登入帳號</small></span>
       <span class="more">•••</span>
     </button>
   </aside>
@@ -41,6 +39,12 @@
       <div class="breadcrumb"><span>工作台</span><i>/</i><strong id="crumb">建立新課程</strong></div>
       <div class="top-actions">
         <span class="status-dot"><i></i><span id="modeText">系統就緒</span></span>
+        
+        <!-- 右上角 登入/註冊 與 使用者資訊按鈕 -->
+        <div class="auth-header-container" id="authHeaderContainer">
+          <button class="auth-btn" id="openAuthBtn">登入 / 註冊</button>
+        </div>
+        
         <button class="icon-button" aria-label="通知">♢<span></span></button>
       </div>
     </header>
@@ -139,6 +143,53 @@
       </div>
     </section>
   </main>
+
+  <!-- 登入 / 註冊 Modal 對話視窗 -->
+  <div class="auth-modal-overlay hidden" id="authModal">
+    <div class="auth-modal-card">
+      <button class="auth-modal-close" id="closeAuthModalBtn" aria-label="關閉">&times;</button>
+      
+      <div class="auth-tabs">
+        <button class="auth-tab-btn active" id="tabLoginBtn" data-tab="login">用戶登入</button>
+        <button class="auth-tab-btn" id="tabRegisterBtn" data-tab="register">註冊新帳號</button>
+      </div>
+
+      <!-- 登入 Form -->
+      <form class="auth-form" id="loginForm">
+        <h3>歡迎回來</h3>
+        <p class="auth-sub">請輸入您的帳號與密碼以取得 API 使用權限與配額</p>
+        <div class="auth-field">
+          <label for="loginUsername">帳號</label>
+          <input type="text" id="loginUsername" placeholder="輸入帳號" required autocomplete="username">
+        </div>
+        <div class="auth-field">
+          <label for="loginPassword">密碼</label>
+          <input type="password" id="loginPassword" placeholder="輸入密碼" required autocomplete="current-password">
+        </div>
+        <div class="auth-error-msg hidden" id="loginError"></div>
+        <button type="submit" class="primary-button auth-submit-btn">登入系統</button>
+        <p class="auth-hint">預設管理員帳號：<code>admin</code> / 密碼：<code>admin123</code></p>
+      </form>
+
+      <!-- 註冊 Form -->
+      <form class="auth-form hidden" id="registerForm">
+        <h3>建立新帳號</h3>
+        <p class="auth-sub">註冊後需經管理員開通，方可登入並開始使用每日 20 次提問額度</p>
+        <div class="auth-field">
+          <label for="regUsername">帳號</label>
+          <input type="text" id="regUsername" placeholder="長度至少 3 個字元" required autocomplete="username">
+        </div>
+        <div class="auth-field">
+          <label for="regPassword">密碼</label>
+          <input type="password" id="regPassword" placeholder="長度至少 4 個字元" required autocomplete="new-password">
+        </div>
+        <div class="auth-error-msg hidden" id="regError"></div>
+        <div class="auth-success-msg hidden" id="regSuccess"></div>
+        <button type="submit" class="primary-button auth-submit-btn">送出註冊</button>
+      </form>
+    </div>
+  </div>
+
   <div class="toast" id="toast"><span>✓</span><p></p></div>
   <div class="loading-overlay hidden" id="loadingOverlay"><div class="loader-mark"><i></i><i></i><i></i></div><b id="loadingTitle">正在讀懂你的教材</b><p id="loadingCopy">整理章節與核心概念…</p><div class="loading-track"><span></span></div></div>
   <script src="/app.js"></script>
