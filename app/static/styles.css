@@ -522,3 +522,12 @@
   font-size: 14px;
   color: #111827;
 }
+
+/* === Hide Hidden and Empty Error/Success Message Boxes === */
+.hidden,
+.auth-error-msg:empty,
+.auth-success-msg:empty,
+.auth-error-msg.hidden,
+.auth-success-msg.hidden {
+  display: none !important;
+}
