@@ -435,6 +435,13 @@ async function fetchAllUsers() {
     const data = await api('/api/users/all');
     const users = data.users || [];
 
+    const total = users.length;
+    const pending = users.filter(u => u.status === 'pending').length;
+    const admins = users.filter(u => u.role === 'admin').length;
+    if ($('#metricTotalUsers')) $('#metricTotalUsers').textContent = total;
+    if ($('#metricPendingUsers')) $('#metricPendingUsers').textContent = pending;
+    if ($('#metricAdminUsers')) $('#metricAdminUsers').textContent = admins;
+
     if (users.length === 0) {
       tbody.innerHTML = '<tr><td colspan="6" class="text-center muted">系統尚無用戶紀錄</td></tr>';
       return;

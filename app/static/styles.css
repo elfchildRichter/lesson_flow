@@ -411,3 +411,65 @@
   margin-top: 20px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
+
+/* === Admin View & Metric Cards Styles === */
+
+.admin-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.admin-metric-card {
+  background: white;
+  border: 1px solid var(--line, #e2e8f0);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.admin-metric-card .metric-icon {
+  font-size: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-metric-card div b {
+  display: block;
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.admin-metric-card div small {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.admin-metric-card.warning .metric-icon {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.admin-metric-card.primary .metric-icon {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.admin-panel-shell {
+  background: white;
+  border: 1px solid var(--line, #e2e8f0);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
