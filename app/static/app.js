@@ -81,6 +81,11 @@ function updateAuthUI(user) {
     $('#userProfileInfo').innerHTML = `訪客用戶<small>點擊登入帳號</small>`;
   }
   updateAdminUI();
+  const profileNavBtn = $('#profileNavBtn');
+  if (profileNavBtn) {
+    if (state.user) profileNavBtn.classList.remove('hidden');
+    else profileNavBtn.classList.add('hidden');
+  }
 }
 
 async function fetchCurrentUser() {
@@ -146,7 +151,7 @@ document.addEventListener('click', (e) => {
   if (profileBtn) {
     e.preventDefault();
     if (state.user) {
-      openProfileModal();
+      switchView('profile');
     } else {
       openAuthModal('login');
     }
@@ -264,14 +269,36 @@ function switchView(name) {
     toast('僅限管理員存取控制台', true);
     return;
   }
+  if (name === 'profile' && !state.user) {
+    toast('請先登入帳號', true);
+    openAuthModal('login');
+    return;
+  }
   $$('.view').forEach(v => v.classList.remove('active'));
   $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === name));
   if ($(`#${name}View`)) $(`#${name}View`).classList.add('active');
-  $('#crumb').textContent = name === 'workspace' ? '建立新課程' : name === 'deck' ? '簡報預覽' : name === 'chat' ? '文件問答' : '管理員控制台';
+  $('#crumb').textContent = name === 'workspace' ? '建立新課程' : name === 'deck' ? '簡報預覽' : name === 'chat' ? '文件問答' : name === 'profile' ? '個人帳號設定' : '管理員控制台';
   if (innerWidth < 950) $('.sidebar').classList.remove('open');
 
   if (name === 'admin') {
     fetchAllUsers();
+  } else if (name === 'profile') {
+    renderProfileView();
+  }
+}
+
+function renderProfileView() {
+  if (!state.user) return;
+  if ($('#profileUsernameText')) $('#profileUsernameText').textContent = state.user.username;
+  if ($('#profileRoleText')) $('#profileRoleText').textContent = state.user.role === 'admin' ? '👑 系統管理員' : '一般用戶';
+  if ($('#profileRoleBadge')) {
+    $('#profileRoleBadge').textContent = state.user.role === 'admin' ? '👑 管理員' : '一般用戶';
+    $('#profileRoleBadge').className = `role-chip ${state.user.role}`;
+  }
+  if ($('#profileQuotaText')) {
+    const used = state.user.quota ? state.user.quota.used_count : 0;
+    const limit = state.user.quota ? state.user.quota.daily_limit : 20;
+    $('#profileQuotaText').textContent = state.user.role === 'admin' ? '👑 無限提問額度' : `今日已使用 ${used} / ${limit} 次`;
   }
 }
 $$('.nav-item').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
