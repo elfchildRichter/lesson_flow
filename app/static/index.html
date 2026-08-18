@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Intel+One+Mono:ital,wght@0,400..700;1,400..700&family=Noto+Sans+TC:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/styles.css?v=1.0.1">
 </head>
 <body>
   <aside class="sidebar">
@@ -28,7 +28,7 @@
     </div>
     <button class="profile" id="sidebarProfileBtn">
       <span class="avatar" id="userAvatar">客</span>
-      <span id="userProfileInfo">訪客用戶<small>請先登入帳號</small></span>
+      <span id="userProfileInfo">訪客用戶<small>點擊登入帳號</small></span>
       <span class="more">•••</span>
     </button>
   </aside>
@@ -42,7 +42,7 @@
         
         <!-- 右上角 登入/註冊 與 使用者資訊按鈕 -->
         <div class="auth-header-container" id="authHeaderContainer">
-          <button class="auth-btn" id="openAuthBtn">登入 / 註冊</button>
+          <button class="auth-btn" id="openAuthBtn" type="button">登入 / 註冊</button>
         </div>
         
         <button class="icon-button" aria-label="通知">♢<span></span></button>
@@ -147,11 +147,11 @@
   <!-- 登入 / 註冊 Modal 對話視窗 -->
   <div class="auth-modal-overlay hidden" id="authModal">
     <div class="auth-modal-card">
-      <button class="auth-modal-close" id="closeAuthModalBtn" aria-label="關閉">&times;</button>
+      <button class="auth-modal-close" id="closeAuthModalBtn" type="button" aria-label="關閉">&times;</button>
       
       <div class="auth-tabs">
-        <button class="auth-tab-btn active" id="tabLoginBtn" data-tab="login">用戶登入</button>
-        <button class="auth-tab-btn" id="tabRegisterBtn" data-tab="register">註冊新帳號</button>
+        <button class="auth-tab-btn active" id="tabLoginBtn" type="button" data-tab="login">用戶登入</button>
+        <button class="auth-tab-btn" id="tabRegisterBtn" type="button" data-tab="register">註冊新帳號</button>
       </div>
 
       <!-- 登入 Form -->
@@ -192,6 +192,6 @@
 
   <div class="toast" id="toast"><span>✓</span><p></p></div>
   <div class="loading-overlay hidden" id="loadingOverlay"><div class="loader-mark"><i></i><i></i><i></i></div><b id="loadingTitle">正在讀懂你的教材</b><p id="loadingCopy">整理章節與核心概念…</p><div class="loading-track"><span></span></div></div>
-  <script src="/app.js"></script>
+  <script src="/app.js?v=1.0.1"></script>
 </body>
 </html>

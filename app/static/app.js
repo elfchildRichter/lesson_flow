@@ -29,7 +29,6 @@ async function api(path, options = {}) {
     const errorMsg = body.detail || '服務暫時無法使用';
     
     if (response.status === 401 && token) {
-      // Token 過期或無效
       logoutUser(false);
       openAuthModal('login');
     }
@@ -55,11 +54,9 @@ function updateAuthUI(user) {
       <div class="auth-user-chip">
         <strong>👤 ${escapeHtml(user.username)}</strong>
         <small>${quotaLabel}</small>
-        <button class="auth-logout-btn" id="logoutBtn">登出</button>
+        <button class="auth-logout-btn" id="logoutBtn" type="button">登出</button>
       </div>
     `;
-
-    $('#logoutBtn').addEventListener('click', () => logoutUser(true));
 
     // 更新側邊欄 Profile 卡片
     $('#quotaBadge').textContent = isUnlimited ? 'UNLIMITED' : 'DAILY';
@@ -74,15 +71,14 @@ function updateAuthUI(user) {
     $('#userAvatar').textContent = user.username.charAt(0).toUpperCase();
     $('#userProfileInfo').innerHTML = `${escapeHtml(user.username)}<small>${roleBadge}</small>`;
   } else {
-    container.innerHTML = `<button class="auth-btn" id="openAuthBtn">登入 / 註冊</button>`;
-    $('#openAuthBtn').addEventListener('click', () => openAuthModal('login'));
+    container.innerHTML = `<button class="auth-btn" id="openAuthBtn" type="button">登入 / 註冊</button>`;
 
     // 重置側邊欄 Profile 卡片
     $('#quotaBadge').textContent = '未登入';
     $('#quotaBar').style.width = '0%';
     $('#quotaText').innerHTML = `<strong>-</strong> / 請先登入`;
     $('#userAvatar').textContent = '客';
-    $('#userProfileInfo').innerHTML = `訪客用戶<small>請先登入帳號</small>`;
+    $('#userProfileInfo').innerHTML = `訪客用戶<small>點擊登入帳號</small>`;
   }
 }
 
@@ -113,7 +109,8 @@ function openAuthModal(tab = 'login') {
   $('#loginError').classList.add('hidden');
   $('#regError').classList.add('hidden');
   $('#regSuccess').classList.add('hidden');
-  $('#authModal').classList.remove('hidden');
+  const modal = $('#authModal');
+  modal.classList.remove('hidden');
 }
 
 function closeAuthModal() {
@@ -128,21 +125,40 @@ function switchAuthTab(tab) {
   $('#registerForm').classList.toggle('hidden', isLogin);
 }
 
-// Event Listeners for Modal
-$('#openAuthBtn')?.addEventListener('click', () => openAuthModal('login'));
-$('#sidebarProfileBtn')?.addEventListener('click', () => {
-  if (state.user) {
-    logoutUser(true);
-  } else {
+// 事件委派：點擊登入按鈕、登出按鈕或側邊欄
+document.addEventListener('click', (e) => {
+  const openBtn = e.target.closest('#openAuthBtn') || e.target.closest('.auth-btn');
+  if (openBtn) {
+    e.preventDefault();
     openAuthModal('login');
+    return;
+  }
+
+  const logoutBtn = e.target.closest('#logoutBtn');
+  if (logoutBtn) {
+    e.preventDefault();
+    logoutUser(true);
+    return;
+  }
+
+  const profileBtn = e.target.closest('#sidebarProfileBtn');
+  if (profileBtn) {
+    e.preventDefault();
+    if (state.user) {
+      logoutUser(true);
+    } else {
+      openAuthModal('login');
+    }
+    return;
   }
 });
-$('#closeAuthModalBtn').addEventListener('click', closeAuthModal);
-$('#authModal').addEventListener('click', (e) => {
+
+$('#closeAuthModalBtn')?.addEventListener('click', closeAuthModal);
+$('#authModal')?.addEventListener('click', (e) => {
   if (e.target === $('#authModal')) closeAuthModal();
 });
-$('#tabLoginBtn').addEventListener('click', () => switchAuthTab('login'));
-$('#tabRegisterBtn').addEventListener('click', () => switchAuthTab('register'));
+$('#tabLoginBtn')?.addEventListener('click', () => switchAuthTab('login'));
+$('#tabRegisterBtn')?.addEventListener('click', () => switchAuthTab('register'));
 
 // 登入表單提交
 $('#loginForm').addEventListener('submit', async (e) => {
@@ -262,7 +278,7 @@ $('#generateBtn').addEventListener('click', async () => {
   try {
     state.deck = await api('/api/decks', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
     renderDeck(); $$('.step')[1].classList.add('done'); $$('.step')[2].classList.add('active','done'); $('#deckCount').textContent='1';
-    await fetchCurrentUser(); // 更新用量配額
+    await fetchCurrentUser();
     toast('簡報與逐頁講稿已經準備好了'); switchView('deck');
   } catch(e) { toast(e.message,true); } finally { loading(false); }
 });
@@ -301,7 +317,7 @@ $('#chatForm').addEventListener('submit', async e=>{
     const data=await api('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({document_id:state.document.id,question})});
     typing.remove();
     addAssistantMessage(data);
-    await fetchCurrentUser(); // 更新用量配額
+    await fetchCurrentUser();
   } catch(err){typing.remove();toast(err.message,true)} finally{$('#sendBtn').disabled=false}
 });
 $('#questionInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#chatForm').requestSubmit()}});
