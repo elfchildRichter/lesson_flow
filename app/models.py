@@ -34,6 +34,7 @@ class Source(BaseModel):
 class AskRequest(BaseModel):
     document_id: str
     question: str = Field(min_length=2, max_length=1000)
+    enable_web_search: bool = Field(default=False)
 
 
 class AskResponse(BaseModel):
@@ -48,6 +49,7 @@ class GenerateRequest(BaseModel):
     tone: str = Field(default="清楚易懂", max_length=50)
     slide_count: int = Field(default=8, ge=4, le=20)
     duration: int = Field(default=30, ge=10, le=180)
+    enable_web_search: bool = Field(default=False)
 
 
 class Slide(BaseModel):

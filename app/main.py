@@ -91,7 +91,7 @@ def ask(
     except KeyError as exc:
         raise HTTPException(404, "找不到文件，請重新上傳") from exc
     try:
-        answer, sources, mode = ai.ask(document, request.question)
+        answer, sources, mode = ai.ask(document, request.question, request.enable_web_search)
     except Exception as exc:
         raise HTTPException(502, f"AI 暫時無法回答：{exc}") from exc
     return AskResponse(answer=answer, sources=sources, mode=mode)
@@ -107,7 +107,9 @@ def generate_deck(
     except KeyError as exc:
         raise HTTPException(404, "找不到文件，請重新上傳") from exc
     try:
-        deck = ai.generate_deck(document, request.audience, request.tone, request.slide_count, request.duration)
+        deck = ai.generate_deck(
+            document, request.audience, request.tone, request.slide_count, request.duration, request.enable_web_search
+        )
     except Exception as exc:
         raise HTTPException(502, f"產生教材時發生錯誤：{exc}") from exc
     store.decks[deck.id] = deck

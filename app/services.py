@@ -9,6 +9,7 @@ import uuid
 from pypdf import PdfReader
 
 from .models import Chunk, Deck, Document, Slide, Source
+from .workflows import build_deck_graph, build_qa_graph
 
 
 class DocumentStore:
@@ -99,6 +100,9 @@ class AIService:
                 "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
             )
             self.ollama = Client(host=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"))
+
+        self.qa_graph = build_qa_graph()
+        self.deck_graph = build_deck_graph()
 
     @property
     def info(self) -> dict[str, str]:
@@ -203,105 +207,42 @@ class AIService:
                 f"Ollama 結構化輸出失敗；請確認模型 `{self.model}` 可用：{exc}"
             ) from exc
 
-    def ask(self, document: Document, question: str) -> tuple[str, list[Source], str]:
-        matches = self.retrieve(document, question)
-        sources = [
-            Source(page=c.page, excerpt=c.text[:180] + ("…" if len(c.text) > 180 else ""), score=max(0, min(1, round(s, 2))))
-            for c, s in matches
-        ]
-        context = "\n\n".join(f"[第 {c.page} 頁]\n{c.text}" for c, _ in matches)
-        answer = self._text_response(
-            "你是嚴謹的繁體中文教學助理。只能根據提供的教材片段回答。"
-            "若教材沒有答案，直接說教材未提及。回答清楚、精簡，並以（第 X 頁）標示依據。",
-            f"教材片段：\n{context}\n\n學生問題：{question}",
-        )
+    def ask(
+        self, document: Document, question: str, enable_web_search: bool = False
+    ) -> tuple[str, list[Source], str]:
+        initial_state = {
+            "question": question,
+            "document": document,
+            "enable_web_search": enable_web_search,
+            "ai_service": self,
+        }
+        result = self.qa_graph.invoke(initial_state)
+        answer = result.get("answer", "")
+        sources = result.get("sources", [])
         return answer, sources, self.provider
 
-    def generate_deck(self, document: Document, audience: str, tone: str, slide_count: int, duration: int) -> Deck:
-        sampled = document.chunks[: min(30, len(document.chunks))]
-        context = "\n\n".join(f"[第 {c.page} 頁] {c.text}" for c in sampled)
-        
-        if self.provider == "openai":
-            schema = {
-                "type": "object",
-                "properties": {
-                    "title": {"type": "string"},
-                    "subtitle": {"type": "string"},
-                    "slides": {
-                        "type": "array",
-                        "minItems": slide_count,
-                        "maxItems": slide_count,
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "title": {"type": "string"},
-                                "bullets": {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 5},
-                                "speaker_notes": {"type": "string"},
-                                "source_pages": {"type": "array", "items": {"type": "integer"}},
-                            },
-                            "required": ["title", "bullets", "speaker_notes", "source_pages"],
-                            "additionalProperties": False,
-                        },
-                    },
-                },
-                "required": ["title", "subtitle", "slides"],
-                "additionalProperties": False,
-            }
-        else:
-            # 專為 Ollama 相容設計之 Schema (去除 minItems/maxItems/additionalProperties)
-            schema = {
-                "type": "object",
-                "properties": {
-                    "title": {"type": "string"},
-                    "subtitle": {"type": "string"},
-                    "slides": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "title": {"type": "string"},
-                                "bullets": {"type": "array", "items": {"type": "string"}},
-                                "speaker_notes": {"type": "string"},
-                                "source_pages": {"type": "array", "items": {"type": "integer"}},
-                            },
-                            "required": ["title", "bullets", "speaker_notes"],
-                        },
-                    },
-                },
-                "required": ["title", "subtitle", "slides"],
-            }
-
-        payload = self._structured_response(
-            "你是資深教學設計師。只使用教材內容，以繁體中文設計投影片與自然、可直接朗讀的逐頁講稿。",
-            f"對象：{audience}\n語氣：{tone}\n總時長：{duration} 分鐘\n投影片：{slide_count} 頁\n\n教材：\n{context}",
-            schema,
-        )
-
-        slides = []
-        for item in payload.get("slides", []):
-            raw_bullets = item.get("bullets") or item.get("content") or item.get("points") or []
-            if isinstance(raw_bullets, str):
-                bullets = [b.strip("•- ").strip() for b in raw_bullets.split("\n") if b.strip()]
-            else:
-                bullets = list(raw_bullets) if raw_bullets else ["重點說明"]
-                
-            speaker_notes = item.get("speaker_notes") or item.get("script") or item.get("notes") or ""
-            source_pages = item.get("source_pages") or ([item["page"]] if "page" in item else [1])
-            
-            slides.append(Slide(
-                title=item.get("title", "未命名投影片"),
-                bullets=bullets,
-                speaker_notes=speaker_notes,
-                source_pages=source_pages,
-            ))
-
-        title = payload.get("title") or (slides[0].title if slides else "簡報教案")
-        subtitle = payload.get("subtitle") or f"{audience} · {tone}語氣"
-
-        deck = Deck(
-            id=uuid.uuid4().hex[:12], document_id=document.id, title=title, subtitle=subtitle,
-            slides=slides, duration=duration, mode=self.provider,
-        )
+    def generate_deck(
+        self,
+        document: Document,
+        audience: str,
+        tone: str,
+        slide_count: int,
+        duration: int,
+        enable_web_search: bool = False,
+    ) -> Deck:
+        initial_state = {
+            "document": document,
+            "audience": audience,
+            "tone": tone,
+            "slide_count": slide_count,
+            "duration": duration,
+            "enable_web_search": enable_web_search,
+            "ai_service": self,
+        }
+        result = self.deck_graph.invoke(initial_state)
+        deck = result.get("deck")
+        if not deck:
+            raise RuntimeError("簡報生成圖未傳回有效 Deck 物件")
         return deck
 
 

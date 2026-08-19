@@ -153,6 +153,10 @@
                 <option value="12">12 頁</option>
                 <option value="15">15 頁</option>
               </select></label>
+            <label class="checkbox-label" style="grid-column: span 2; display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; color: #404d47;">
+              <input type="checkbox" id="deckWebSearch" style="width: auto; margin: 0;">
+              <span>開啟網路補充搜尋（延伸最新案例與外部數據）</span>
+            </label>
           </div>
           <button class="primary-button" id="generateBtn" disabled><span>✦</span> 生成教學內容 <i>→</i></button>
           <p class="estimate">預計需要 1–2 分鐘，可留在此頁等待</p>
@@ -218,9 +222,17 @@
             </div>
           </div>
         </div>
-        <form class="chat-input" id="chatForm"><textarea id="questionInput" rows="1" placeholder="向教材提問…"
-            disabled></textarea><button type="submit" disabled id="sendBtn">↑</button><small><span>↵</span> Enter 傳送 ·
-            Shift + Enter 換行</small></form>
+        <form class="chat-input" id="chatForm">
+          <div style="display: flex; align-items: center; justify-content: flex-start; margin-bottom: 6px; font-size: 11px; color: #66706b; grid-column: span 2;">
+            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+              <input type="checkbox" id="qaWebSearch" style="width: auto; margin: 0;">
+              <span>開啟網路補充搜尋（教材中查無解答時聯網檢索）</span>
+            </label>
+          </div>
+          <textarea id="questionInput" rows="1" placeholder="向教材提問…" disabled></textarea>
+          <button type="submit" disabled id="sendBtn">↑</button>
+          <small><span>↵</span> Enter 傳送 · Shift + Enter 換行</small>
+        </form>
       </div>
     </section>
 

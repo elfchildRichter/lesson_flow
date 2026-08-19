@@ -323,7 +323,14 @@ $('#generateBtn').addEventListener('click', async () => {
   }
   if (!state.document) return;
   loading(true, '正在設計這堂課', '安排教學節奏、投影片與逐頁講稿…');
-  const payload = { document_id: state.document.id, audience: $('#audience').value, tone: $('#tone').value, duration: +$('#duration').value, slide_count: +$('#slideCount').value };
+  const payload = {
+    document_id: state.document.id,
+    audience: $('#audience').value,
+    tone: $('#tone').value,
+    duration: +$('#duration').value,
+    slide_count: +$('#slideCount').value,
+    enable_web_search: $('#deckWebSearch') ? $('#deckWebSearch').checked : false,
+  };
   try {
     state.deck = await api('/api/decks', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
     renderDeck(); $$('.step')[1].classList.add('done'); $$('.step')[2].classList.add('active','done'); $('#deckCount').textContent='1';
@@ -361,9 +368,10 @@ $('#chatForm').addEventListener('submit', async e=>{
     return;
   }
   const input=$('#questionInput'); const question=input.value.trim(); if(!question||!state.document)return; addUserMessage(question); input.value=''; $('#sendBtn').disabled=true;
-  const typing=document.createElement('div');typing.className='message assistant';typing.innerHTML='<span class="bot-avatar">✦</span><div><p>正在教材中尋找依據…</p></div>';$('#messages').append(typing);scrollMessages();
+  const enable_web_search = $('#qaWebSearch') ? $('#qaWebSearch').checked : false;
+  const typing=document.createElement('div');typing.className='message assistant';typing.innerHTML='<span class="bot-avatar">✦</span><div><p>正在檢索教材與分析中…</p></div>';$('#messages').append(typing);scrollMessages();
   try {
-    const data=await api('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({document_id:state.document.id,question})});
+    const data=await api('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({document_id:state.document.id,question,enable_web_search})});
     typing.remove();
     addAssistantMessage(data);
     await fetchCurrentUser();

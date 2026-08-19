@@ -28,6 +28,9 @@ class FakeOllama:
         return SimpleNamespace(message=SimpleNamespace(content="RAG 會先檢索教材，再根據片段回答。（第 2 頁）"))
 
 
+from app.workflows import build_deck_graph, build_qa_graph
+
+
 def ollama_service():
     service = AIService.__new__(AIService)
     service.provider = "ollama"
@@ -36,6 +39,8 @@ def ollama_service():
     service.openai = None
     service.ollama = FakeOllama()
     service._embedder = FakeEmbedder()
+    service.qa_graph = build_qa_graph()
+    service.deck_graph = build_deck_graph()
     return service
 
 

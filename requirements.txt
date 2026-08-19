@@ -9,4 +9,7 @@ sentence-transformers>=3,<6
 python-dotenv>=1.0,<2
 pytest>=8,<9
 httpx>=0.27,<1
+langgraph>=0.2,<2
+langchain-core>=0.3,<2
+duckduckgo-search>=6.0
 -e /Users/Archer/Repos/fastapi-auth-core
