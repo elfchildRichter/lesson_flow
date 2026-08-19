@@ -1,13 +1,13 @@
 # 課伴 LessonFlow
 
-課伴是一個以檢索增強生成 (RAG: Retrieval-Augmented Generation）為核心的 AI 教學助理。上傳 PDF 教材後，可以：
+課伴是一個以 **LangGraph 狀態圖** 與 **檢索增強生成 (RAG: Retrieval-Augmented Generation)** 為核心的 AI 教學助理。上傳 PDF 教材後，可以：
 
-- 產生可下載的 PowerPoint 教學簡報
-- 產生逐頁演講稿與講者備註
-- 使用自然語言向教材提問
-- 從語意相關的文件片段生成回答，並標示來源頁碼
+- 產生可下載的 PowerPoint 教學簡報與高品質逐頁演講稿
+- 使用自然語言向教材提問，獲得附帶頁碼標示的精準回答
+- **Self-RAG 防幻覺審查**：自動校對回答真實性，避免模型自創不實資訊
+- **可選性網路補充搜尋 (Corrective RAG)**：當教材資訊不足或需延伸案例時，可勾選開啟聯網搜尋補足內容
 
-專案支援兩種執行模式：
+專案支援兩種 AI 執行模式：
 
 | 模式 | 文字生成 | Embedding | 適用情境 |
 |---|---|---|---|
@@ -15,6 +15,23 @@
 | OpenAI | OpenAI Responses API | OpenAI Embeddings API | 較高生成品質、不需在本機執行模型 |
 
 專案不包含範例教材、固定回答或模板生成降級；內容均來自使用者上傳的 PDF。
+
+## 核心架構：LangGraph 工作流 (Workflows)
+
+本專案採用 **LangGraph** 重構兩大 AI 核心作業：
+
+1. **問答工作流 (Self-RAG + CRAG QA Flow)**:
+   - `retrieve` ➔ `grade_documents`（相關性審查）
+   - 若相關 ➔ `generate_answer` ➔ `check_hallucination`（防幻覺核對） ➔ 輸出解答
+   - 若不相關 & 開啟網路搜尋 ➔ `web_search` ➔ `generate_answer`
+   - 若不相關 & 未開啟網路搜尋 ➔ `fallback_answer`（安全降級提示）
+
+2. **簡報生成工作流 (Multi-Stage Deck Flow)**:
+   - `plan_outline`（第一階段：簡報大綱與單頁目標規劃）
+   - `enrich_with_web`（第二階段：可選聯網檢索延伸案例與數據）
+   - `generate_contents`（第三階段：單頁重點與逐字講稿生成）
+   - `audit_quality`（第四階段：品質與長度檢測，不達標自動回溯精進）
+   - `finalize_deck`（格式驗證與 `Deck` 模型輸出）
 
 ## 系統需求
 
@@ -127,7 +144,7 @@ uvicorn app.main:app --reload
 
 1. 開啟 <http://127.0.0.1:8000>。
 2. 上傳包含可擷取文字的 PDF。
-3. 選擇學習對象、教學語氣、課程時間與投影片數量。
+3. 選擇學習對象、教學語氣、課程時間、投影片數量，並可勾選「開啟網路補充搜尋」。
 4. 產生並預覽投影片及逐頁講稿。
 5. 下載 `.pptx` 或 `.md`，或切換至「文件問答」向教材提問。
 
@@ -155,8 +172,8 @@ Ollama 模式的回應範例：
 |---|---|---|
 | `GET` | `/api/health` | 顯示目前的 AI 提供者與模型 |
 | `POST` | `/api/documents` | 上傳 PDF 並建立 embedding 索引 |
-| `POST` | `/api/ask` | 根據指定文件回答問題 |
-| `POST` | `/api/decks` | 產生投影片及逐頁講稿 |
+| `POST` | `/api/ask` | 根據指定文件回答問題（可選 `enable_web_search: bool`） |
+| `POST` | `/api/decks` | 產生投影片及逐頁講稿（可選 `enable_web_search: bool`） |
 | `GET` | `/api/decks/{deck_id}/pptx` | 下載 PowerPoint |
 | `GET` | `/api/decks/{deck_id}/script` | 下載 Markdown 講稿 |
 
@@ -166,13 +183,18 @@ Ollama 模式的回應範例：
 
 ```text
 app/
-├── main.py          # FastAPI 路由、PDF 上傳及下載端點
-├── models.py        # 文件、來源、問答與簡報資料模型
-├── services.py      # PDF 解析、embedding、RAG、AI 與 PPTX 產生
-└── static/          # HTML、CSS、JavaScript 前端
+├── main.py          # FastAPI 路由、PDF 上傳、問答與簡報端點
+├── models.py        # 文件、來源、問答與簡報 Pydantic/Dataclass 模型
+├── services.py      # PDF 解析、Embedding、向量檢索與 LangGraph 調用
+├── workflows/       # LangGraph 狀態圖工作流模組
+│   ├── state.py     # QAState 與 DeckState 狀態定義
+│   ├── qa_graph.py  # Self-RAG + CRAG 問答狀態圖
+│   └── deck_graph.py# 多階段簡報生成狀態圖
+└── static/          # HTML、CSS、JavaScript 前端 UI
 tests/
 ├── test_api.py
-└── test_services.py
+├── test_services.py
+└── test_workflows.py
 ```
 
 文件與向量索引目前儲存在程序記憶體中，重新啟動服務後會清除，適合本機開發與 MVP。正式部署可改用 PostgreSQL + pgvector 或其他向量資料庫。
@@ -182,7 +204,7 @@ tests/
 測試使用假的 embedding 與 Ollama 回應，不需要連線到外部服務：
 
 ```bash
-pytest -q
+PYTHONPATH=. .venv/bin/pytest -v
 ```
 
 ## 常見問題
