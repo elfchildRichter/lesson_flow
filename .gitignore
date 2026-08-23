@@ -216,4 +216,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# data and output
 data/
+output/
+
+# Notes and TODO
+Notes.md
+TODO.md

@@ -1,0 +1,15 @@
+.git
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.env
+data/*.db
+output/*
+*.pptx
+script-*.md
+.DS_Store
+.vscode
+.idea

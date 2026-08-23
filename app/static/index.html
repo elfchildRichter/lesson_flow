@@ -10,12 +10,12 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Intel+One+Mono:ital,wght@0,400..700;1,400..700&family=Noto+Sans+TC:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=1.1.1">
+  <link rel="stylesheet" href="/styles.css?v=1.2.1">
 </head>
 
 <body>
   <aside class="sidebar">
-    <a class="brand" href="#" aria-label="課伴首頁">
+    <a class="brand" href="#" aria-label="課伴首頁" data-view="workspace">
       <span class="brand-mark"><span></span><span></span><span></span></span>
       <span>課伴<small>LESSONFLOW</small></span>
     </a>
@@ -24,10 +24,27 @@
       <button class="nav-item" data-view="deck"><span class="icon">▤</span>我的簡報<span class="nav-count"
           id="deckCount">0</span></button>
       <button class="nav-item" data-view="chat"><span class="icon">◇</span>文件問答</button>
-      <button class="nav-item user-only hidden" data-view="profile" id="profileNavBtn"><span class="icon">⚙️</span>個人帳號設定</button>
+      <button class="nav-item user-only hidden" data-view="profile" id="profileNavBtn"><span
+          class="icon">⚙️</span>個人帳號設定</button>
       <button class="nav-item admin-only hidden" data-view="admin"><span class="icon">👑</span>管理員控制台<span
           class="nav-count badge-pending" id="pendingBadge">0</span></button>
     </nav>
+    <div>
+      <br />
+    </div>
+    <div class="provider-card">
+      <div class="provider-head">
+        <span>⚡ AI 模型提供者</span>
+      </div>
+      <div class="provider-select-wrapper">
+        <select id="providerSelect" class="provider-select" style="font-size: 12px !important;"
+          aria-label="選擇 AI 模型提供者">
+          <option value="ollama_cloud" style="font-size: 12px !important;">Ollama 雲端 (Cloud API)</option>
+          <option value="ollama_local" style="font-size: 12px !important;">Ollama 本機 (Local LLM)</option>
+          <option value="openai" style="font-size: 12px !important;">OpenAI 雲端 (GPT-4o)</option>
+        </select>
+      </div>
+    </div>
     <div class="sidebar-spacer"></div>
     <div class="plan-card">
       <div class="plan-head"><span>每日使用額度</span><b id="quotaBadge">未登入</b></div>
@@ -52,7 +69,8 @@
   <main>
     <header class="topbar">
       <button class="menu-toggle" aria-label="切換選單">☰</button>
-      <div class="breadcrumb"><span>工作台</span><i>/</i><strong id="crumb">建立新課程</strong></div>
+      <div class="breadcrumb"><span data-view="workspace" style="cursor:pointer;">工作台</span><i>/</i><strong
+          id="crumb">建立新課程</strong></div>
       <div class="top-actions">
         <span class="status-dot"><i></i><span id="modeText">系統就緒</span></span>
 
@@ -153,7 +171,8 @@
                 <option value="12">12 頁</option>
                 <option value="15">15 頁</option>
               </select></label>
-            <label class="checkbox-label" style="grid-column: span 2; display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; color: #404d47;">
+            <label class="checkbox-label"
+              style="grid-column: span 2; display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; color: #404d47;">
               <input type="checkbox" id="deckWebSearch" style="width: auto; margin: 0;">
               <span>開啟網路補充搜尋（延伸最新案例與外部數據）</span>
             </label>
@@ -223,7 +242,8 @@
           </div>
         </div>
         <form class="chat-input" id="chatForm">
-          <div style="display: flex; align-items: center; justify-content: flex-start; margin-bottom: 6px; font-size: 11px; color: #66706b; grid-column: span 2;">
+          <div
+            style="display: flex; align-items: center; justify-content: flex-start; margin-bottom: 6px; font-size: 11px; color: #66706b; grid-column: span 2;">
             <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
               <input type="checkbox" id="qaWebSearch" style="width: auto; margin: 0;">
               <span>開啟網路補充搜尋（教材中查無解答時聯網檢索）</span>
@@ -291,7 +311,7 @@
         </div>
       </div>
     </section>
-      <section class="view" id="profileView">
+    <section class="view" id="profileView">
       <div class="section-head">
         <div>
           <p class="eyebrow"><span></span> 個人帳號與安全性設定</p>
@@ -304,7 +324,9 @@
         <!-- 帳號資訊卡片 -->
         <div class="panel profile-panel">
           <div class="panel-heading">
-            <div><span class="panel-index">01</span><h2>帳號基本資訊</h2></div>
+            <div><span class="panel-index">01</span>
+              <h2>帳號基本資訊</h2>
+            </div>
             <span class="role-chip" id="profileRoleBadge">一般用戶</span>
           </div>
           <div class="profile-info-list">
@@ -321,13 +343,16 @@
               <strong id="profileQuotaText">-</strong>
             </div>
           </div>
-          <button type="button" class="secondary-button" id="profileLogoutBtn" style="margin-top: 24px; width: 100%; color: #dc2626; border-color: #fca5a5;">登出系統</button>
+          <button type="button" class="secondary-button" id="profileLogoutBtn"
+            style="margin-top: 24px; width: 100%; color: #dc2626; border-color: #fca5a5;">登出系統</button>
         </div>
 
         <!-- 修改密碼卡片 -->
         <div class="panel profile-panel">
           <div class="panel-heading">
-            <div><span class="panel-index">02</span><h2>修改個人密碼</h2></div>
+            <div><span class="panel-index">02</span>
+              <h2>修改個人密碼</h2>
+            </div>
           </div>
           <form class="auth-form" id="changePasswordForm" style="margin-top: 16px;">
             <div class="auth-field">
@@ -336,7 +361,8 @@
             </div>
             <div class="auth-field">
               <label for="newPasswordInput">新密碼</label>
-              <input type="password" id="newPasswordInput" placeholder="輸入新密碼 (至少4字元)" required autocomplete="new-password">
+              <input type="password" id="newPasswordInput" placeholder="輸入新密碼 (至少4字元)" required
+                autocomplete="new-password">
             </div>
             <div class="auth-error-msg hidden" id="changePassError"></div>
             <div class="auth-success-msg hidden" id="changePassSuccess"></div>
@@ -398,7 +424,7 @@
 
 
 
-  
+
 
   <div class="toast" id="toast"><span>✓</span>
     <p></p>
@@ -408,7 +434,7 @@
     <p id="loadingCopy">整理章節與核心概念…</p>
     <div class="loading-track"><span></span></div>
   </div>
-  <script src="/app.js?v=1.1.1"></script>
+  <script src="/app.js?v=1.2.0"></script>
 </body>
 
 </html>

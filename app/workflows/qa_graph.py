@@ -60,6 +60,7 @@ def generate_answer_node(state: QAState) -> QAState:
     question = state["question"]
     retrieved = state.get("retrieved_chunks", [])
     web_results = state.get("web_results", "")
+    hallucination_feedback = state.get("hallucination_feedback", "")
 
     sources = [
         Source(
@@ -84,6 +85,8 @@ def generate_answer_node(state: QAState) -> QAState:
     user_prompt = f"教材片段：\n{context_str}\n\n"
     if web_results:
         user_prompt += f"網路補充資料：\n{web_results}\n\n"
+    if hallucination_feedback:
+        user_prompt += f"【修正提示】：前次回答經自我審查發現未完全對齊資料（{hallucination_feedback}）。請務必依據參考資料精準回答。\n\n"
     user_prompt += f"學生問題：{question}"
 
     answer = ai_service._text_response(system_prompt, user_prompt)
@@ -91,8 +94,58 @@ def generate_answer_node(state: QAState) -> QAState:
 
 
 def check_hallucination_node(state: QAState) -> QAState:
-    # 檢查回答是否有依據
-    return state
+    ai_service = state.get("ai_service")
+    answer = state.get("answer", "")
+    retrieved = state.get("retrieved_chunks", [])
+    web_results = state.get("web_results", "")
+    retry_count = state.get("hallucination_retry", 0)
+
+    if not answer or not ai_service or retry_count >= 1:
+        return {"is_hallucinated": False}
+
+    context_str = "\n".join(c.text for c, _ in retrieved) if retrieved else ""
+    if web_results:
+        context_str += "\n" + web_results
+
+    if not context_str.strip():
+        return {"is_hallucinated": False}
+
+    system_prompt = (
+        "你是嚴謹的 Self-RAG 防幻覺審查員。"
+        "請評估 AI 的回答內容是否完全來自給定的參考資料。若回答中包含了參考資料中完全未提及的自創內容，請判定為幻覺。"
+    )
+    user_prompt = f"參考資料：\n{context_str}\n\nAI回答：\n{answer}"
+
+    schema = {
+        "type": "object",
+        "properties": {
+            "is_grounded": {"type": "boolean"},
+            "reason": {"type": "string"},
+        },
+        "required": ["is_grounded", "reason"],
+    }
+
+    try:
+        res = ai_service._structured_response(system_prompt, user_prompt, schema)
+        is_grounded = res.get("is_grounded", True)
+        reason = res.get("reason", "")
+        if not is_grounded:
+            logger.info("Self-RAG 檢測到幻覺內容，觸發重試修正：%s", reason)
+            return {
+                "is_hallucinated": True,
+                "hallucination_retry": retry_count + 1,
+                "hallucination_feedback": reason,
+            }
+    except Exception as exc:
+        logger.warning("防幻覺審查執行失敗，跳過審查：%s", exc)
+
+    return {"is_hallucinated": False}
+
+
+def route_after_hallucination_check(state: QAState) -> Literal["generate_answer", "end"]:
+    if state.get("is_hallucinated", False) and state.get("hallucination_retry", 0) <= 1:
+        return "generate_answer"
+    return "end"
 
 
 def fallback_answer_node(state: QAState) -> QAState:
@@ -125,7 +178,17 @@ def build_qa_graph() -> StateGraph:
 
     workflow.add_edge("web_search", "generate_answer")
     workflow.add_edge("generate_answer", "check_hallucination")
-    workflow.add_edge("check_hallucination", END)
+
+    workflow.add_conditional_edges(
+        "check_hallucination",
+        route_after_hallucination_check,
+        {
+            "generate_answer": "generate_answer",
+            "end": END,
+        },
+    )
+
     workflow.add_edge("fallback_answer", END)
 
     return workflow.compile()
+

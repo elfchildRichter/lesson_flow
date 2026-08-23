@@ -1,6 +1,7 @@
-const state = { document: null, deck: null, activeSlide: 0, user: null };
+const state = { document: null, deck: null, activeSlide: 0, user: null, provider: null };
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
+
 
 function toast(message, error = false) {
   const el = $('#toast'); el.querySelector('p').textContent = message; el.querySelector('span').textContent = error ? '!' : '✓';
@@ -313,6 +314,20 @@ function renderProfileView() {
   }
 }
 $$('.nav-item').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
+
+document.addEventListener('click', (e) => {
+  const target = e.target.closest('[data-view]');
+  if (target) {
+    const viewName = target.dataset.view;
+    if (viewName) {
+      if (target.tagName === 'A' || target.getAttribute('href') === '#') {
+        e.preventDefault();
+      }
+      switchView(viewName);
+    }
+  }
+});
+
 $('.menu-toggle').addEventListener('click', () => $('.sidebar').classList.toggle('open'));
 
 $('#generateBtn').addEventListener('click', async () => {
@@ -382,9 +397,45 @@ $$('.suggestions button').forEach(btn=>btn.addEventListener('click',()=>{if(!sta
 $('#pptDownload').addEventListener('click',()=>toast('正在下載 PowerPoint 簡報'));
 $('#scriptDownload').addEventListener('click',()=>toast('正在下載逐頁演講稿'));
 
+// ── AI 提供者 (Provider) 切換與 UI 更新 ──
+function updateProviderUI(info) {
+  if (!info) return;
+  state.provider = info.provider;
+  if ($('#providerSelect')) $('#providerSelect').value = info.provider;
+  const badges = {
+    'openai': 'OpenAI 雲端',
+    'ollama_cloud': 'Ollama 雲端',
+    'ollama_local': 'Ollama 本機'
+  };
+  if ($('#providerBadge')) $('#providerBadge').textContent = badges[info.provider] || 'Ollama';
+  if ($('#modeText')) $('#modeText').textContent = info.provider_label || badges[info.provider] || 'AI 就緒';
+}
+
 // 頁面加載時拉取當前服務資訊與登入狀態
-fetch('/api/health').then(r=>r.json()).then(x=>{$('#modeText').textContent=x.provider_label}).catch(()=>{$('#modeText').textContent='服務未連線'});
+fetch('/api/health')
+  .then(r => r.json())
+  .then(x => updateProviderUI(x))
+  .catch(() => { if ($('#modeText')) $('#modeText').textContent = '服務未連線'; });
+
+$('#providerSelect')?.addEventListener('change', async (e) => {
+  const newProvider = e.target.value;
+  const oldProvider = state.provider;
+  try {
+    const data = await api('/api/provider', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ provider: newProvider })
+    });
+    updateProviderUI(data);
+    toast(`已切換 AI 模型提供者為：${data.provider_label || newProvider}`);
+  } catch (err) {
+    if ($('#providerSelect')) $('#providerSelect').value = oldProvider;
+    toast(err.message, true);
+  }
+});
+
 fetchCurrentUser();
+
 
 
 // === 管理員控制台 (Admin Modal) 與 個人設定 (Profile Modal) 邏輯 ===

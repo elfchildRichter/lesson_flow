@@ -7,6 +7,11 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 
+class ProviderRequest(BaseModel):
+    provider: Literal["openai", "ollama", "ollama_cloud", "ollama_local"]
+
+
+
 @dataclass
 class Chunk:
     text: str
@@ -40,7 +45,7 @@ class AskRequest(BaseModel):
 class AskResponse(BaseModel):
     answer: str
     sources: list[Source]
-    mode: Literal["openai", "ollama"]
+    mode: str
 
 
 class GenerateRequest(BaseModel):
@@ -66,4 +71,5 @@ class Deck(BaseModel):
     subtitle: str
     slides: list[Slide]
     duration: int
-    mode: Literal["openai", "ollama"]
+    mode: str
+

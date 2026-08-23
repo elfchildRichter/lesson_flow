@@ -101,3 +101,12 @@ def test_ollama_deck_uses_structured_model_output():
     assert len(deck.slides) == 4
     assert deck.mode == "ollama"
     assert all(slide.speaker_notes for slide in deck.slides)
+
+
+def test_set_provider():
+    service = ollama_service()
+    info = service.set_provider("ollama_cloud")
+    assert info["provider"] == "ollama_cloud"
+    assert info["provider_label"] == "Ollama 雲端 API"
+
+

@@ -75,38 +75,74 @@ def parse_pdf(content: bytes, filename: str) -> Document:
 
 class AIService:
     def __init__(self) -> None:
-        self.provider = os.getenv("AI_PROVIDER", "ollama").strip().lower()
-        if self.provider not in {"openai", "ollama"}:
-            raise ValueError("AI_PROVIDER 必須是 openai 或 ollama")
-
         self.openai = None
         self.ollama = None
         self._embedder = None
         self.api_key = os.getenv("OPENAI_API_KEY", "").strip()
-        if self.provider == "openai":
+        self.qa_graph = build_qa_graph()
+        self.deck_graph = build_deck_graph()
+
+        initial_provider = os.getenv("AI_PROVIDER", "ollama_cloud").strip().lower()
+        self.set_provider(initial_provider if initial_provider in {"openai", "ollama", "ollama_cloud", "ollama_local"} else "ollama_cloud")
+
+    def set_provider(self, provider: str) -> dict[str, str]:
+        provider = provider.strip().lower()
+        if provider == "ollama":
+            base_url = os.getenv("OLLAMA_BASE_URL", "")
+            provider = "ollama_local" if "localhost" in base_url or "127.0.0.1" in base_url else "ollama_cloud"
+
+        if provider not in {"openai", "ollama_cloud", "ollama_local"}:
+            raise ValueError("AI_PROVIDER 必須是 openai, ollama_cloud 或 ollama_local")
+
+        if provider == "openai":
             if not self.api_key:
-                raise ValueError("AI_PROVIDER=openai 時必須設定 OPENAI_API_KEY")
-            from openai import OpenAI
+                raise ValueError("未設定 OPENAI_API_KEY，無法切換至 OpenAI")
+            if self.openai is None:
+                from openai import OpenAI
 
-            self.model = os.getenv("OPENAI_MODEL", "gpt-5-mini")
+                self.openai = OpenAI(api_key=self.api_key)
+            self.model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
             self.embedding_model = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
-            self.openai = OpenAI(api_key=self.api_key)
-        else:
-            from ollama import Client
 
-            self.model = os.getenv("OLLAMA_MODEL", "qwen3:4b")
+        elif provider == "ollama_local":
+            from ollama import Client
+            local_url = os.getenv("OLLAMA_LOCAL_URL", "http://localhost:11434")
+            local_client = Client(host=local_url)
+            try:
+                local_client.list()
+            except Exception as exc:
+                raise ValueError(f"未偵測到 Ollama 本機服務，請確認已安裝並啟動 Ollama ({local_url})。") from exc
+
+            self.ollama = local_client
+            self.model = os.getenv("OLLAMA_LOCAL_MODEL", os.getenv("OLLAMA_MODEL", "qwen3:4b"))
             self.embedding_model = os.getenv(
                 "HUGGINGFACE_EMBEDDING_MODEL",
                 "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
             )
-            self.ollama = Client(host=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"))
 
-        self.qa_graph = build_qa_graph()
-        self.deck_graph = build_deck_graph()
+        elif provider == "ollama_cloud":
+            from ollama import Client
+            cloud_url = os.getenv("OLLAMA_BASE_URL", "https://api.ollama.com")
+            ollama_key = os.getenv("OLLAMA_API_KEY", "").strip()
+            headers = {"Authorization": f"Bearer {ollama_key}"} if ollama_key else {}
+            self.ollama = Client(host=cloud_url, headers=headers)
+            self.model = os.getenv("OLLAMA_MODEL", "deepseek-v4-pro:cloud")
+            self.embedding_model = os.getenv(
+                "HUGGINGFACE_EMBEDDING_MODEL",
+                "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+            )
+
+        self.provider = provider
+        return self.info
 
     @property
     def info(self) -> dict[str, str]:
-        label = "Ollama + Hugging Face" if self.provider == "ollama" else "OpenAI"
+        labels = {
+            "openai": "OpenAI 雲端 API",
+            "ollama_cloud": "Ollama 雲端 API",
+            "ollama_local": "Ollama 本機服務",
+        }
+        label = labels.get(self.provider, "Ollama")
         return {
             "provider": self.provider,
             "provider_label": label,
@@ -136,8 +172,10 @@ class AIService:
 
     def retrieve(self, document: Document, query: str, limit: int = 4) -> list[tuple[Chunk, float]]:
         if not document.vectors:
-            raise RuntimeError("文件尚未建立 embedding 索引，請重新上傳")
+            self.index(document)
         query_vector = self._embed([query], query=True)[0]
+        if document.vectors and len(document.vectors[0]) != len(query_vector):
+            self.index(document)
         ranked = []
         for chunk, vector in zip(document.chunks, document.vectors):
             dot = sum(a * b for a, b in zip(query_vector, vector))

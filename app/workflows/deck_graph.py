@@ -4,6 +4,7 @@ import logging
 import uuid
 from typing import Literal
 
+# pyrefly: ignore [missing-import]
 from duckduckgo_search import DDGS
 from langgraph.graph import END, StateGraph
 
@@ -87,6 +88,7 @@ def generate_contents_node(state: DeckState) -> DeckState:
     duration = state.get("duration", 30)
     outline = state.get("outline", {})
     web_results = state.get("web_results", "")
+    audit_feedback = state.get("audit_feedback", "")
 
     sampled = document.chunks[: min(30, len(document.chunks))]
     context = "\n\n".join(f"[第 {c.page} 頁] {c.text}" for c in sampled)
@@ -150,6 +152,8 @@ def generate_contents_node(state: DeckState) -> DeckState:
     )
     if web_results:
         user_prompt += f"網路補充案例參考：\n{web_results}\n\n"
+    if audit_feedback:
+        user_prompt += f"【品質優化要求】：前次生成的講稿未達品質門檻（{audit_feedback}）。請大幅擴充每一頁的 speaker_notes，確保為詳細流暢的教師演講口語稿！\n\n"
 
     payload = ai_service._structured_response(system_prompt, user_prompt, schema)
     return {"raw_slides": payload.get("slides", []), "outline": payload}
@@ -160,21 +164,23 @@ def audit_quality_node(state: DeckState) -> DeckState:
     retry_count = state.get("retry_count", 0)
 
     if not raw_slides:
-        return {"is_quality_passed": False, "retry_count": retry_count + 1}
+        feedback = "未生成任何投影片內容，請重新繪製完整投影片與講稿。"
+        return {"is_quality_passed": False, "retry_count": retry_count + 1, "audit_feedback": feedback}
 
     # 檢測講稿長度品質
     total_notes_len = sum(len(s.get("speaker_notes", "")) for s in raw_slides)
     avg_len = total_notes_len / len(raw_slides) if raw_slides else 0
 
     if avg_len < 15 and retry_count < 1:
+        feedback = f"講稿平均長度僅有 {int(avg_len)} 字，過於簡略。每一頁 speaker_notes 必須是一篇至少 150～300 字的完整教師朗讀口語稿"
         logger.info("講稿平均字數低於 15 字，觸發二次精進生成流程...")
-        return {"is_quality_passed": False, "retry_count": retry_count + 1}
+        return {"is_quality_passed": False, "retry_count": retry_count + 1, "audit_feedback": feedback}
 
     return {"is_quality_passed": True}
 
 
 def route_after_audit(state: DeckState) -> Literal["generate_contents", "finalize_deck"]:
-    if state.get("is_quality_passed", False) or state.get("retry_count", 0) >= 1:
+    if state.get("is_quality_passed", False) or state.get("retry_count", 0) > 1:
         return "finalize_deck"
     return "generate_contents"
 

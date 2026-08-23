@@ -17,7 +17,7 @@ from fastapi_auth_core import (
     require_quota,
 )
 
-from .models import AskRequest, AskResponse, GenerateRequest
+from .models import AskRequest, AskResponse, GenerateRequest, ProviderRequest
 from .services import AIService, DocumentStore, make_pptx, make_script, parse_pdf
 
 load_dotenv(override=True)
@@ -46,6 +46,21 @@ STATIC_DIR = Path(__file__).parent / "static"
 @app.get("/api/health")
 def health() -> dict:
     return {"status": "ok", **ai.info}
+
+
+@app.get("/api/provider")
+def get_provider() -> dict:
+    return ai.info
+
+
+@app.post("/api/provider")
+def set_provider(request: ProviderRequest) -> dict:
+    try:
+        info = ai.set_provider(request.provider)
+        return {"status": "ok", **info}
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+
 
 
 def document_payload(document) -> dict:

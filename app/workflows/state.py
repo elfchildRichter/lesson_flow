@@ -14,6 +14,9 @@ class QAState(TypedDict, total=False):
     answer: str
     sources: list[Source]
     ai_service: Any
+    is_hallucinated: bool
+    hallucination_retry: int
+    hallucination_feedback: str
 
 
 class DeckState(TypedDict, total=False):
@@ -29,4 +32,6 @@ class DeckState(TypedDict, total=False):
     raw_slides: list[dict]
     is_quality_passed: bool
     retry_count: int
+    audit_feedback: str
     deck: Deck | None
+
