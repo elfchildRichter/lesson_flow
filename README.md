@@ -21,20 +21,57 @@
 
 本專案採用 **LangGraph 狀態圖 (StateGraph)** 重構兩大 AI 核心作業：
 
-1. **問答工作流 (Self-RAG + CRAG QA Flow)**:
-   - `retrieve` ➔ `grade_documents`（相關性審查）
-   - 若相關 ➔ `generate_answer` ➔ `check_hallucination`（防幻覺核對）
-     - 若核對合規 ➔ 輸出解答
-     - 若偵測到幻覺 ➔ 帶入 `hallucination_feedback` 回溯 `generate_answer` 重新修正生成（最多重試 1 次）
-   - 若不相關 & 開啟網路搜尋 ➔ `web_search` ➔ `generate_answer`
-   - 若不相關 & 未開啟網路搜尋 ➔ `fallback_answer`（安全降級提示）
+### 1. 問答工作流 (Self-RAG + CRAG QA Flow)
 
-2. **簡報生成工作流 (Multi-Stage Deck Flow with Audit Feedback Loop)**:
-   - `plan_outline`（第一階段：簡報大綱與單頁主題規劃）
-   - `enrich_with_web`（第二階段：可選聯網檢索延伸教學案例與數據）
-   - `generate_contents`（第三階段：單頁重點與逐字講稿生成；支援接收 `audit_feedback` 精進修訂）
-   - `audit_quality`（第四階段：品質與講稿長度檢測，未達標自動產生改進建議並回溯至 `generate_contents` 精進內容）
-   - `finalize_deck`（格式驗證與 `Deck` 模型輸出）
+- `retrieve` ➔ `grade_documents`（相關性審查）
+- 若相關 ➔ `generate_answer` ➔ `check_hallucination`（防幻覺核對）
+  - 若核對合規 ➔ 輸出解答
+  - 若偵測到幻覺 ➔ 帶入 `hallucination_feedback` 回溯 `generate_answer` 重新修正生成（最多重試 1 次）
+- 若不相關 & 開啟網路搜尋 ➔ `web_search` ➔ `generate_answer`
+- 若不相關 & 未開啟網路搜尋 ➔ `fallback_answer`（安全降級提示）
+
+```mermaid
+flowchart TD
+    START([開始]) --> retrieve[1. retrieve<br/>檢索教材片段]
+    retrieve --> grade[2. grade_documents<br/>相關性審查]
+    
+    grade -- 教材相關 --> generate[3. generate_answer<br/>生成回答並標示頁碼]
+    grade -- 不相關 & 已勾選聯網 --> web[web_search<br/>DuckDuckGo 搜尋]
+    grade -- 不相關 & 未勾選聯網 --> fallback[fallback_answer<br/>降級安全提示]
+    
+    web --> generate
+    fallback --> END1([結束])
+    
+    generate --> check[4. check_hallucination<br/>Self-RAG 防幻覺審查]
+    
+    check -- 偵測到幻覺<br/>(重試修訂 <= 1) --> generate
+    check -- 審查合規 / 通過 --> END2([結束])
+```
+
+### 2. 簡報生成工作流 (Multi-Stage Deck Flow with Audit Feedback Loop)
+
+- `plan_outline`（第一階段：簡報大綱與單頁主題規劃）
+- `enrich_with_web`（第二階段：可選聯網檢索延伸教學案例與數據）
+- `generate_contents`（第三階段：單頁重點與逐字講稿生成；支援接收 `audit_feedback` 精進修訂）
+- `audit_quality`（第四階段：品質與講稿長度檢測，未達標自動產生改進建議並回溯至 `generate_contents` 精進內容）
+- `finalize_deck`（格式驗證與 `Deck` 模型輸出）
+
+```mermaid
+flowchart TD
+    START([開始]) --> outline[1. plan_outline<br/>大綱與單頁主題規劃]
+    
+    outline -- 已勾選聯網補充 --> web[2. enrich_with_web<br/>聯網搜尋延伸案例與數據]
+    outline -- 未勾選聯網 --> contents[3. generate_contents<br/>單頁重點與逐字講稿生成]
+    
+    web --> contents
+    
+    contents --> audit[4. audit_quality<br/>品質與講稿長度檢測]
+    
+    audit -- 講稿過簡 / 未達標<br/>(重試精進 <= 1) --> contents
+    audit -- 品質通過 --> finalize[5. finalize_deck<br/>格式驗證與 Deck 輸出]
+    
+    finalize --> END([結束])
+```
 
 ## 系統需求
 
