@@ -252,15 +252,12 @@ PYTHONPATH=. .venv/bin/pytest -v
 本專案支援透過 Docker 鏡像檔直接部署至 [Railway](https://railway.app)。
 
 ### 部署重點說明：
-1. **私有模組與 Submodule**：本專案將私有認證庫 `fastapi-auth-core` 掛載於 `vendor/fastapi-auth-core` 子模組。推送至 GitHub 前請確保子模組同步更新：
-   ```bash
-   git submodule update --init --recursive
-   git push origin main
-   ```
-2. **環境變數設定 (Variables)**：請於 Railway 控制台設定 `AI_PROVIDER`、`OLLAMA_BASE_URL`（或 `OPENAI_API_KEY`）、`JWT_SECRET_KEY`、`AUTH_DB_PATH=/app/data/users.db` 等變數。
-3. **資料持久化 (Persistent Volume)**：請於 Railway 新增 Volume 並將挂載路徑設定為 `/app/data`，確保 SQLite 使用者資料庫重啟不遺失。
+1. **私有模組與 GITHUB_TOKEN**：本專案依賴私有庫 `fastapi-auth-core`。請在 Railway 的 **Variables** 頁面新增 `GITHUB_TOKEN`（填入具備 `fastapi-auth-core` Read-only 權限的 Personal Access Token），Docker 建置時會自動從私有 GitHub 庫下載安裝。
+2. **環境變數設定 (Variables)**：請於 Railway 控制台設定 `GITHUB_TOKEN`、`AI_PROVIDER`、`OLLAMA_BASE_URL`（或 `OPENAI_API_KEY`）、`JWT_SECRET_KEY`、`AUTH_DB_PATH=/app/data/users.db` 等變數。
+3. **資料持久化 (Persistent Volume)**：請於 Railway 新增 Volume 並將掛載路徑設定為 `/app/data`，確保 SQLite 使用者資料庫重啟不遺失。
 
-更詳細的 Step-by-Step 步驟與常見問題請參閱 [Notes.md](file:///Users/Archer/Repos/lesson_flow/Notes.md#模組七railway-雲端-docker-部署實務)。
+更詳細的 Step-by-Step 步驟請參閱 [Notes.md](file:///Users/Archer/Repos/lesson_flow/Notes.md#模組七railway-雲端-docker-部署實務)。
+
 
 
 ## 常見問題

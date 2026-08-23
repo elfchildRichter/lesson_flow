@@ -1,3 +1,0 @@
-[submodule "vendor/fastapi-auth-core"]
-	path = vendor/fastapi-auth-core
-	url = https://github.com/elfchildRichter/fastapi-auth-core.git
