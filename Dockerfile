@@ -11,24 +11,25 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     gcc \
+    git \
     python3-dev \
     && rm -rf /var/lib/apt-lists/*
 
-# Copy editable sibling dependency and requirements file
-# Note: Expected build context is parent directory (..) or managed via docker-compose.yml
-COPY fastapi-auth-core /fastapi-auth-core
-COPY lesson_flow/requirements.txt /app/requirements.txt
+# Copy requirements file and vendor dependencies
+COPY requirements.txt /app/requirements.txt
+COPY vendor/fastapi-auth-core /app/vendor/fastapi-auth-core
 
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 # Copy application source code
-COPY lesson_flow /app
+COPY . /app
 
 # Ensure data and output directories exist
 RUN mkdir -p /app/data /app/output
 
 EXPOSE 8000
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+

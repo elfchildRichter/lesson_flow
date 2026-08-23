@@ -3,8 +3,8 @@ version: '3.8'
 services:
   app:
     build:
-      context: ..
-      dockerfile: lesson_flow/Dockerfile
+      context: .
+      dockerfile: Dockerfile
     container_name: lesson_flow_app
     ports:
       - "8000:8000"
