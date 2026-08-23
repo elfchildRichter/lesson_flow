@@ -58,14 +58,40 @@ def plan_outline_node(state: DeckState) -> DeckState:
     return {"outline": outline, "retry_count": 0}
 
 
+def _clean_search_query(text: str) -> str:
+    import re
+    cleaned = re.sub(r"[：:｜|—\-_【】\[\]\(\)（）？?！!，,。.]", " ", text)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    return cleaned[:35]
+
+
 def enrich_with_web_node(state: DeckState) -> DeckState:
     outline = state.get("outline", {})
     title = outline.get("title", "")
+    topics = outline.get("topics", [])
     web_results = ""
+
+    search_keyword = _clean_search_query(title)
+    if not search_keyword or search_keyword in ("教學簡報", "簡報教案", "簡報"):
+        if topics:
+            search_keyword = _clean_search_query(" ".join(topics[:2]))
+
+    if not search_keyword:
+        query_str = "教學案例 簡報"
+    else:
+        query_str = f"{search_keyword} 教學案例"
+
     try:
-        results = list(DDGS().text(f"{title} 教學案例 簡報", max_results=3))
+        results = list(DDGS(timeout=10).text(query_str, max_results=3))
         if results:
-            formatted = [f"案例：{item.get('title', '')}\n內容：{item.get('body', '')}" for item in results]
+            import re
+            formatted = []
+            for item in results:
+                title_text = re.sub(r"<[^>]+>", "", item.get("title", "")).strip()
+                body_text = re.sub(r"<[^>]+>", "", item.get("body", "")).strip()
+                body_text = body_text.replace("{", "(").replace("}", ")")[:180]
+                if title_text or body_text:
+                    formatted.append(f"案例：{title_text}\n內容：{body_text}")
             web_results = "\n\n".join(formatted)
     except Exception as exc:
         logger.warning("簡報補充網路搜尋失敗：%s", exc)
@@ -142,9 +168,15 @@ def generate_contents_node(state: DeckState) -> DeckState:
             "required": ["title", "subtitle", "slides"],
         }
 
-    system_prompt = (
-        "你是資深教學設計師。請只使用教材內容，以繁體中文設計投影片與自然、可直接朗讀的逐頁講稿。"
-    )
+    if web_results:
+        system_prompt = (
+            "你是資深教學設計師。請結合教材內容與網路補充案例參考，以繁體中文設計投影片與自然、可直接朗讀的逐頁講稿。"
+        )
+    else:
+        system_prompt = (
+            "你是資深教學設計師。請只使用教材內容，以繁體中文設計投影片與自然、可直接朗讀的逐頁講稿。"
+        )
+
     user_prompt = (
         f"對象：{audience}\n語氣：{tone}\n總時長：{duration} 分鐘\n投影片：{slide_count} 頁\n"
         f"預定大綱標題：{outline.get('title', '簡報教案')}\n\n"

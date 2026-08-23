@@ -101,3 +101,75 @@ def test_deck_graph_audit_feedback_retry():
     assert any("【品質優化要求】" in p for p in prompts)
     assert deck.slides[0].speaker_notes == "這是經過品質精進優化後的超詳細逐頁講稿說明內容。"
 
+
+def test_deck_graph_with_web_search(monkeypatch):
+    service = ollama_service()
+    
+    # 模擬 DDGS 傳回搜尋結果
+    class FakeDDGS:
+        def __init__(self, timeout=10):
+            pass
+        def text(self, query, max_results=3):
+            return [{"title": "最新案例標題", "body": "網路補充內容摘要", "href": "https://example.com"}]
+
+    monkeypatch.setattr("app.workflows.deck_graph.DDGS", FakeDDGS)
+
+    systems = []
+    prompts = []
+    def fake_structured_response(system, prompt, schema):
+        systems.append(system)
+        prompts.append(prompt)
+        if "預定大綱標題" in prompt:
+            return {
+                "title": "網路補充測試簡報",
+                "subtitle": "副標題",
+                "slides": [
+                    {
+                        "title": "主題一",
+                        "bullets": ["重點 1"],
+                        "speaker_notes": "這是極度詳細且內容完整的講稿，包含網路案例說明。",
+                        "source_pages": [1],
+                    }
+                ],
+            }
+        return {"title": "網路補充測試：簡報標題", "subtitle": "副標", "topics": ["主題一"]}
+
+    service._structured_response = fake_structured_response
+
+    deck = service.generate_deck(document(), "大學生", "清楚易懂", 1, 30, enable_web_search=True)
+
+    # 驗證系統提示詞包含結合網路補充案例的指示
+    assert any("請結合教材內容與網路補充案例參考" in s for s in systems)
+    # 驗證 user_prompt 包含網路補充案例參考
+    assert any("網路補充案例參考" in p for p in prompts)
+    assert deck.title == "網路補充測試簡報"
+
+
+def test_qa_graph_with_web_search(monkeypatch):
+    service = ollama_service()
+    doc = document()
+    doc.chunks = [Chunk("與問題無關的內容", 1, 0)]
+    doc.vectors = [[0.0, 0.0]]
+
+    class FakeDDGS:
+        def __init__(self, timeout=10):
+            pass
+        def text(self, query, max_results=3):
+            return [{"title": "Python最新技術", "body": "Python 3.12 發表新功能", "href": "https://example.com"}]
+
+    monkeypatch.setattr("app.workflows.qa_graph.DDGS", FakeDDGS)
+
+    prompts = []
+    def fake_text_response(system, prompt):
+        prompts.append(prompt)
+        return "根據網路補充資料，Python 3.12 發表了新功能。"
+
+    service._text_response = fake_text_response
+    service._structured_response = lambda system, prompt, schema: {"is_grounded": True, "reason": "符合網路參考資料"}
+
+    answer, sources, mode = service.ask(doc, "最新的 Python 版本是什麼？", enable_web_search=True)
+
+    assert "Python 3.12" in answer
+    assert any("網路補充資料" in p for p in prompts)
+
+

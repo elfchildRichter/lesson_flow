@@ -73,6 +73,28 @@ def parse_pdf(content: bytes, filename: str) -> Document:
     )
 
 
+def _parse_json_response(content: str) -> dict:
+    content_clean = content.strip()
+    # 處理 reasoning/thinking 標籤 (包含未閉合的 <think>)
+    if "</think>" in content_clean:
+        content_clean = content_clean.split("</think>")[-1].strip()
+
+    match = re.search(r"```(?:json)?\s*(\{.*\}|\[.*\])\s*```", content_clean, re.DOTALL)
+    if match:
+        return json.loads(match.group(1).strip())
+
+    start_idx = content_clean.find("{")
+    end_idx = content_clean.rfind("}")
+    if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+        json_str = content_clean[start_idx : end_idx + 1]
+        try:
+            return json.loads(json_str)
+        except Exception:
+            pass
+
+    return json.loads(content_clean)
+
+
 class AIService:
     def __init__(self) -> None:
         self.openai = None
@@ -214,36 +236,42 @@ class AIService:
                 store=False,
             )
             return json.loads(response.output_text)
+        
+        messages = [
+            {"role": "system", "content": system},
+            {"role": "user", "content": prompt + "\n\n請嚴格依照指定 JSON schema 輸出。"},
+        ]
         try:
             response = self.ollama.chat(
                 model=self.model,
-                messages=[
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": prompt + "\n\n請嚴格依照指定 JSON schema 輸出。"},
-                ],
+                messages=messages,
                 format=schema,
                 stream=False,
                 options={"temperature": 0},
             )
             message = response.message if hasattr(response, "message") else response["message"]
             content = message.content if hasattr(message, "content") else message["content"]
-            
-            # 清理與容錯解析 JSON (相容 thinking 標籤與 markdown 程式碼區塊)
-            content_clean = content.strip()
-            content_clean = re.sub(r"<think>.*?</think>", "", content_clean, flags=re.DOTALL).strip()
-            match = re.search(r"```(?:json)?\s*(\{.*\}|\[.*\])\s*```", content_clean, re.DOTALL)
-            if match:
-                content_clean = match.group(1).strip()
-            else:
-                match_obj = re.search(r"(\{.*\})", content_clean, re.DOTALL)
-                if match_obj:
-                    content_clean = match_obj.group(1).strip()
-                    
-            return json.loads(content_clean)
-        except Exception as exc:
-            raise RuntimeError(
-                f"Ollama 結構化輸出失敗；請確認模型 `{self.model}` 可用：{exc}"
-            ) from exc
+            return _parse_json_response(content)
+        except Exception as exc_schema:
+            try:
+                fallback_prompt = prompt + f"\n\n請務必僅輸出合法 JSON，Schema 規定如下：\n{json.dumps(schema, ensure_ascii=False)}"
+                response = self.ollama.chat(
+                    model=self.model,
+                    messages=[
+                        {"role": "system", "content": system},
+                        {"role": "user", "content": fallback_prompt},
+                    ],
+                    format="json",
+                    stream=False,
+                    options={"temperature": 0},
+                )
+                message = response.message if hasattr(response, "message") else response["message"]
+                content = message.content if hasattr(message, "content") else message["content"]
+                return _parse_json_response(content)
+            except Exception as exc_json:
+                raise RuntimeError(
+                    f"Ollama 結構化輸出失敗；請確認模型 `{self.model}` 可用：{exc_schema} | {exc_json}"
+                ) from exc_json
 
     def ask(
         self, document: Document, question: str, enable_web_search: bool = False

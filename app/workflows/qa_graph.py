@@ -32,10 +32,13 @@ def grade_documents_node(state: QAState) -> QAState:
 
 
 def web_search_node(state: QAState) -> QAState:
+    import re
     question = state["question"]
     web_results = ""
+    clean_q = re.sub(r"[：:｜|—\-_【】\[\]\(\)（）？?！!，,。.]", " ", question)
+    clean_q = re.sub(r"\s+", " ", clean_q).strip()[:50] or question[:50]
     try:
-        results = list(DDGS().text(question, max_results=3))
+        results = list(DDGS(timeout=10).text(clean_q, max_results=3))
         if results:
             formatted = []
             for item in results:

@@ -110,3 +110,34 @@ def test_set_provider():
     assert info["provider_label"] == "Ollama 雲端 API"
 
 
+def test_parse_json_response_with_think_tags():
+    from app.services import _parse_json_response
+    raw = "<think>思考中... 需要規劃簡報內容。</think>\n```json\n{\"title\": \"測試標題\", \"slides\": []}\n```"
+    res = _parse_json_response(raw)
+    assert res["title"] == "測試標題"
+
+    # 測試未閉合的 think 標籤
+    raw_unclosed = "<think>思考中未閉合\n{\"title\": \"未閉合測試\"}"
+    res2 = _parse_json_response(raw_unclosed)
+    assert res2["title"] == "未閉合測試"
+
+
+def test_structured_response_fallback():
+    service = ollama_service()
+    calls = []
+    def fake_chat(model, messages, format, stream, options):
+        calls.append(format)
+        if isinstance(format, dict):
+            raise Exception("400 Bad Request: dict format not supported")
+        return SimpleNamespace(message=SimpleNamespace(content='{"title": "備援成功"}'))
+
+    service.ollama.chat = fake_chat
+    res = service._structured_response("system", "prompt", {"type": "object"})
+
+    assert len(calls) == 2
+    assert calls[0] == {"type": "object"}
+    assert calls[1] == "json"
+    assert res["title"] == "備援成功"
+
+
+
