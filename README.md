@@ -6,16 +6,24 @@
 - 使用自然語言向教材提問，獲得附帶頁碼標示的精準回答
 - **Self-RAG 防幻覺審查**：自動校對回答真實性，避免模型自創不實資訊
 - **可選性網路補充搜尋 (Corrective RAG)**：當教材資訊不足或需延伸案例時，可勾選開啟聯網搜尋補足內容
+- **🌐 EN / 繁體中文 雙語切換 (Bilingual i18n)**：支援點擊頂部導覽列按鈕即時切換全站介面、選單選項、提示與錯誤訊息，並持久化保存語系偏好
+- **🔐 身分驗證與管理員控制台**：整合 JWT 認證、使用者權限控制（一般用戶 / 👑 系統管理員）與每日額度限制 (Quota Control)
+
+---
+
+## 🤖 支援 AI 模型提供者
 
 專案支援三種 AI 模型提供者，並支援在網頁左側控制台即時動態切換：
 
 | 模式 | 文字生成模型 | Embedding 模型 | 特色與適用情境 |
 |---|---|---|---|
-| Ollama 雲端 (預設) | `deepseek-v4-pro:cloud` | Hugging Face Multilingual | 雲端 API 推論，免本機顯示卡與本機 Ollama 服務 |
-| Ollama 本機 | 本機 Ollama (如 `qwen3:4b`) | Hugging Face Multilingual | 本機隱私推論、教材不離本機、無 API 費用 |
-| OpenAI 雲端 | OpenAI GPT-4o-mini | OpenAI Embeddings | 穩定高品質生成，支援完整 OpenAI 生態 |
+| Ollama 雲端 (`ollama_cloud`) | `deepseek-v4-pro:cloud` | Hugging Face Multilingual | 預設模式，雲端 API 推論，免本機顯示卡與本機 Ollama 服務 |
+| Ollama 本機 (`ollama_local`) | 本機 Ollama (如 `qwen3:4b`) | Hugging Face Multilingual | 本機隱私推論、教材不離本機、無 API 費用 |
+| OpenAI 雲端 (`openai`) | OpenAI GPT-4o-mini | OpenAI Embeddings | 穩定高品質生成，支援完整 OpenAI 生態 |
 
-專案不包含範例教材、固定回答或模板生成降級；內容均來自使用者上傳的 PDF。
+> 專案不包含範例教材、固定回答或模板生成降級；內容均來自使用者上傳的 PDF。
+
+---
 
 ## 核心架構：LangGraph 工作流 (Workflows)
 
@@ -73,6 +81,8 @@ flowchart TD
     finalize --> END([結束])
 ```
 
+---
+
 ## 系統需求
 
 - **Docker & Docker Compose**（建議，包含完整執行與套件環境）
@@ -80,6 +90,8 @@ flowchart TD
 - 可選取文字的 PDF；掃描型 PDF 需先經過 OCR
 - Ollama 本機模式需要安裝 [Ollama](https://docs.ollama.com/)
 - OpenAI 模式需要有效的 OpenAI API Key
+
+---
 
 ## 快速開始與 Docker 部署
 
@@ -107,7 +119,7 @@ docker compose up
 docker compose up --build
 ```
 
-- **資料持久化**：宿主機 `./data/users.db` 將自動掛載至容器內 `/app/data`，確保使用者資料與每日配額持久保存。
+- **資料持久化**：宿主機 `./data/users.db` 將自動掛載至容器內 `/app/data/users.db`，確保使用者資料與每日配額持久保存。
 - **健康檢查**：可透過 `curl http://localhost:8000/api/health` 查看 API 與模型服務狀態。
 - **停止服務**：按 `Ctrl + C` 或執行 `docker compose down` 即可。
 
@@ -166,13 +178,17 @@ HUGGINGFACE_EMBEDDING_MODEL=sentence-transformers/paraphrase-multilingual-MiniLM
    OPENAI_EMBEDDING_MODEL=text-embedding-3-small
    ```
 
+---
+
 ## 使用方式
 
 1. 開啟 <http://127.0.0.1:8000>。
-2. 上傳包含可擷取文字的 PDF。
-3. 選擇學習對象、教學語氣、課程時間、投影片數量，並可於左側選單隨時切換 AI 提供者（Ollama 雲端 / Ollama 本機 / OpenAI）。
-4. 產生並預覽投影片及逐頁講稿。
-5. 下載 `.pptx` 或 `.md`，或切換至「文件問答」向教材提問。
+2. 可點擊頂部導覽列按鈕即時切換 **繁體中文** 或 **English**。
+3. 註冊並登入帳號（新註冊帳號需由管理員審核開通）。
+4. 上傳包含可擷取文字的 PDF 教材。
+5. 選擇學習對象、教學語氣、課程時間、投影片數量，並可於左側選單隨時切換 AI 提供者（Ollama 雲端 / Ollama 本機 / OpenAI）。
+6. 產生並預覽投影片及逐頁講稿。
+7. 下載 `.pptx` 或 `.md`，或切換至「文件問答」向教材提問。
 
 可透過健康檢查確認目前的提供者與模型：
 
@@ -192,21 +208,33 @@ Ollama 雲端模式的回應範例：
 }
 ```
 
-## API
+---
+
+## API 端點列表
 
 | Method | Endpoint | 說明 |
 |---|---|---|
 | `GET` | `/api/health` | 顯示系統健康狀態與當前 AI 提供者 |
 | `GET` | `/api/provider` | 查詢當前 AI 模型提供者詳細資訊與可切換選項 |
 | `POST` | `/api/provider` | 動態切換 AI 模型提供者 (`ollama_cloud` / `ollama_local` / `openai`) |
-| `POST` | `/api/documents` | 上傳 PDF 並建立 embedding 向量索引 |
-| `POST` | `/api/ask` | 根據指定文件回答問題（可選 `enable_web_search: bool`） |
-| `POST` | `/api/decks` | 產生投影片及逐頁講稿（可選 `enable_web_search: bool`） |
+| `POST` | `/api/auth/register` | 使用者註冊（新帳號需管理員審核） |
+| `POST` | `/api/auth/login` | 使用者登入並取得 JWT Bearer Token |
+| `GET` | `/api/user/me` | 查詢當前登入使用者身分與每日剩餘配額 |
+| `POST` | `/api/user/change-password` | 修改當前使用者密碼 |
+| `POST` | `/api/documents` | 上傳 PDF 並建立 embedding 向量索引（需登入） |
+| `POST` | `/api/ask` | 根據指定文件回答問題（需登入與配額，可選 `enable_web_search`） |
+| `POST` | `/api/decks` | 產生投影片及逐頁講稿（需登入與配額，可選 `enable_web_search`） |
 | `GET` | `/api/decks/{deck_id}/pptx` | 下載 PowerPoint 簡報文件 |
 | `GET` | `/api/decks/{deck_id}/script` | 下載 Markdown 演講腳本 |
+| `GET` | `/api/admin/users` | [管理員] 查詢全站使用者列表與待審核清單 |
+| `POST` | `/api/admin/users/review` | [管理員] 核准或拒絕使用者帳號開通 |
+| `POST` | `/api/admin/users/role` | [管理員] 調整使用者權限角色 (`user` / `admin`) |
+| `POST` | `/api/admin/users/reset-password` | [管理員] 強制重置指定使用者密碼 |
+| `DELETE` | `/api/admin/users/{username}` | [管理員] 刪除指定使用者帳號 |
 
-啟動服務後，可在 <http://127.0.0.1:8000/docs> 查看互動式 API 文件。
+啟動服務後，可在 <http://127.0.0.1:8000/docs> 查看完整互動式 OpenAPI 文件。
 
+---
 
 ## 專案結構
 
@@ -216,21 +244,21 @@ Ollama 雲端模式的回應範例：
 ├── docker-compose.yml   # Docker Compose 服務編排（包含目錄掛載與 Hot Reload）
 ├── .dockerignore        # Docker 忽略檔案設定
 ├── app/
-│   ├── main.py          # FastAPI 路由、PDF 上傳、問答與簡報端點
+│   ├── main.py          # FastAPI 路由、Auth、Admin、PDF 上傳與核心端點
 │   ├── models.py        # 文件、來源、問答與簡報 Pydantic/Dataclass 模型
 │   ├── services.py      # PDF 解析、Embedding、向量檢索與 LangGraph 調用
 │   ├── workflows/       # LangGraph 狀態圖工作流模組
 │   │   ├── state.py     # QAState 與 DeckState 狀態定義
 │   │   ├── qa_graph.py  # Self-RAG + CRAG 問答狀態圖
 │   │   └── deck_graph.py# 多階段簡報生成狀態圖
-│   └── static/          # HTML、CSS、JavaScript 前端 UI
+│   └── static/          # HTML、CSS、JavaScript 前端 UI (含 i18n 雙語模組)
 └── tests/
     ├── test_api.py
     ├── test_services.py
     └── test_workflows.py
 ```
 
-文件與向量索引目前儲存在程序記憶體中，重新啟動服務後會清除，適合本機開發與 MVP。正式部署可改用 PostgreSQL + pgvector 或其他向量資料庫。
+---
 
 ## 測試
 
@@ -241,11 +269,12 @@ Ollama 雲端模式的回應範例：
 docker compose exec app pytest -v
 ```
 
-### 透過本機環境執行測試（若保留 `.venv`）：
+### 透過本機環境執行測試：
 ```bash
-PYTHONPATH=. .venv/bin/pytest -v
+python3 -m pytest -v
 ```
 
+---
 
 ## Railway 部署
 
@@ -256,12 +285,9 @@ PYTHONPATH=. .venv/bin/pytest -v
 2. **環境變數設定 (Variables)**：請於 Railway 控制台設定 `GITHUB_TOKEN`、`AI_PROVIDER`、`OLLAMA_BASE_URL`（或 `OPENAI_API_KEY`）、`JWT_SECRET_KEY`、`AUTH_DB_PATH=/app/data/users.db` 等變數。
 3. **資料持久化 (Persistent Volume)**：請於 Railway 新增 Volume 並將掛載路徑設定為 `/app/data`，確保 SQLite 使用者資料庫重啟不遺失。
 
-更詳細的 Step-by-Step 步驟請參閱 [Notes.md](file:///Users/Archer/Repos/lesson_flow/Notes.md#模組七railway-雲端-docker-部署實務)。
-
-
+---
 
 ## 常見問題
-
 
 ### 無法連線到 Ollama
 
