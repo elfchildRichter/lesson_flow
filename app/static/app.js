@@ -893,7 +893,7 @@ function switchView(name) {
     'admin': t('nav.crumb_admin')
   };
   if ($('#crumb')) $('#crumb').textContent = crumbs[name] || t('nav.crumb_create');
-  if (innerWidth < 950) $('.sidebar').classList.remove('open');
+  if (innerWidth < 950) toggleSidebar(false);
 
   if (name === 'admin') {
     fetchAllUsers();
@@ -938,7 +938,21 @@ document.addEventListener('click', (e) => {
   }
 });
 
-$('.menu-toggle').addEventListener('click', () => $('.sidebar').classList.toggle('open'));
+function toggleSidebar(forceState) {
+  const sidebar = $('.sidebar');
+  const overlay = $('#sidebarOverlay');
+  if (!sidebar) return;
+  const isOpen = typeof forceState === 'boolean' ? forceState : !sidebar.classList.contains('open');
+  sidebar.classList.toggle('open', isOpen);
+  if (overlay) overlay.classList.toggle('active', isOpen);
+}
+
+if ($('.menu-toggle')) {
+  $('.menu-toggle').addEventListener('click', () => toggleSidebar());
+}
+if ($('#sidebarOverlay')) {
+  $('#sidebarOverlay').addEventListener('click', () => toggleSidebar(false));
+}
 
 $('#generateBtn').addEventListener('click', async () => {
   if (!state.user) {
