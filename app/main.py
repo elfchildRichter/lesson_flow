@@ -5,7 +5,7 @@ from pathlib import Path
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, HTTPException, UploadFile, Depends
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile, Depends
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 
@@ -77,6 +77,7 @@ def document_payload(document) -> dict:
 @app.post("/api/documents")
 async def upload_document(
     file: UploadFile = File(...),
+    enable_multimodal: bool = Form(False),
     current_user: dict = Depends(get_current_user)
 ) -> dict:
     if file.content_type != "application/pdf" and not (file.filename or "").lower().endswith(".pdf"):
@@ -86,7 +87,7 @@ async def upload_document(
     if len(content) > max_bytes:
         raise HTTPException(413, f"檔案不可超過 {max_bytes // 1024 // 1024} MB")
     try:
-        document = parse_pdf(content, file.filename or "教材.pdf")
+        document = parse_pdf(content, file.filename or "教材.pdf", ai_service=ai, enable_multimodal=enable_multimodal)
         ai.index(document)
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc
@@ -123,7 +124,13 @@ def generate_deck(
         raise HTTPException(404, "找不到文件，請重新上傳") from exc
     try:
         deck = ai.generate_deck(
-            document, request.audience, request.tone, request.slide_count, request.duration, request.enable_web_search
+            document,
+            request.audience,
+            request.tone,
+            request.slide_count,
+            request.duration,
+            request.enable_web_search,
+            language=request.language,
         )
     except Exception as exc:
         raise HTTPException(502, f"產生教材時發生錯誤：{exc}") from exc

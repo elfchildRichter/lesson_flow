@@ -7,7 +7,7 @@ def test_health_exposes_configured_models():
     response = TestClient(app).get("/api/health")
 
     assert response.status_code == 200
-    assert response.json()["provider"] in {"ollama", "openai", "ollama_cloud", "ollama_local"}
+    assert response.json()["provider"] in {"gemini", "ollama", "openai", "ollama_cloud", "ollama_local"}
     assert response.json()["generation_model"]
     assert response.json()["embedding_model"]
 
@@ -33,5 +33,42 @@ def test_provider_get_and_post():
     local_res = client.post("/api/provider", json={"provider": "ollama_local"})
     if local_res.status_code == 400:
         assert "未偵測到 Ollama 本機服務" in local_res.json()["detail"]
+
+
+def test_upload_invalid_file_type():
+    client = TestClient(app)
+    from fastapi_auth_core import get_current_user
+    app.dependency_overrides[get_current_user] = lambda: {"id": "test_user"}
+    try:
+        response = client.post(
+            "/api/documents",
+            files={"file": ("test.txt", b"hello world", "text/plain")}
+        )
+        assert response.status_code == 415
+        assert "只支援 PDF 檔案" in response.json()["detail"]
+    finally:
+        app.dependency_overrides.clear()
+
+
+def test_ask_non_existent_document():
+    client = TestClient(app)
+    from app.main import store
+    store.documents.clear()
+    response = client.post(
+        "/api/ask",
+        json={"document_id": "non_existent", "question": "Hi?"}
+    )
+    # 不論認證通過與否，找不到文件時應處理 401/403 或 404
+    assert response.status_code in {401, 403, 404}
+
+
+def test_deck_non_existent_document_and_download():
+    client = TestClient(app)
+    response = client.get("/api/decks/non_existent/pptx")
+    assert response.status_code == 404
+
+    script_res = client.get("/api/decks/non_existent/script")
+    assert script_res.status_code == 404
+
 
 

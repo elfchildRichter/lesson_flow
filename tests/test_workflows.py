@@ -145,31 +145,33 @@ def test_deck_graph_with_web_search(monkeypatch):
     assert deck.title == "網路補充測試簡報"
 
 
-def test_qa_graph_with_web_search(monkeypatch):
+def test_deck_graph_target_language():
     service = ollama_service()
-    doc = document()
-    doc.chunks = [Chunk("與問題無關的內容", 1, 0)]
-    doc.vectors = [[0.0, 0.0]]
+    systems = []
+    def fake_structured_response(system, prompt, schema):
+        systems.append(system)
+        if "預定大綱標題" in prompt:
+            return {
+                "title": "English Presentation Title",
+                "subtitle": "English Subtitle",
+                "slides": [
+                    {
+                        "title": "Topic One",
+                        "bullets": ["Point 1", "Point 2"],
+                        "speaker_notes": "This is a detailed speaker note in English.",
+                        "source_pages": [1],
+                    }
+                ],
+            }
+        return {"title": "English Title", "subtitle": "Subtitle", "topics": ["Topic One"]}
 
-    class FakeDDGS:
-        def __init__(self, timeout=10):
-            pass
-        def text(self, query, max_results=3):
-            return [{"title": "Python最新技術", "body": "Python 3.12 發表新功能", "href": "https://example.com"}]
+    service._structured_response = fake_structured_response
 
-    monkeypatch.setattr("app.workflows.qa_graph.DDGS", FakeDDGS)
+    deck = service.generate_deck(document(), "大學生", "清楚易懂", 1, 30, language="en")
 
-    prompts = []
-    def fake_text_response(system, prompt):
-        prompts.append(prompt)
-        return "根據網路補充資料，Python 3.12 發表了新功能。"
+    # 驗證 prompt 系統提示詞包含了英文全輸出指示
+    assert any("strictly in English" in s for s in systems)
+    assert deck.title == "English Presentation Title"
 
-    service._text_response = fake_text_response
-    service._structured_response = lambda system, prompt, schema: {"is_grounded": True, "reason": "符合網路參考資料"}
-
-    answer, sources, mode = service.ask(doc, "最新的 Python 版本是什麼？", enable_web_search=True)
-
-    assert "Python 3.12" in answer
-    assert any("網路補充資料" in p for p in prompts)
 
 

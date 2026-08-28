@@ -23,6 +23,7 @@ class DeckState(TypedDict, total=False):
     document: Document
     audience: str
     tone: str
+    language: str
     slide_count: int
     duration: int
     enable_web_search: bool

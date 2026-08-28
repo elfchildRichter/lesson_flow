@@ -1,10 +1,10 @@
-version: '3.8'
-
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        GITHUB_TOKEN: ${GITHUB_TOKEN}
     container_name: lesson_flow_app
     ports:
       - "8000:8000"
@@ -15,6 +15,8 @@ services:
       - ./app:/app/app
       - ./data:/app/data
       - ./output:/app/output
+      - ./tests:/app/tests
+      - ./.env:/app/.env
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000/api/health || exit 1"]

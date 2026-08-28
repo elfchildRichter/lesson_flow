@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 
 
 class ProviderRequest(BaseModel):
-    provider: Literal["openai", "ollama", "ollama_cloud", "ollama_local"]
+    provider: Literal["openai", "gemini", "ollama", "ollama_cloud", "ollama_local"]
 
 
 
@@ -52,6 +52,7 @@ class GenerateRequest(BaseModel):
     document_id: str
     audience: str = Field(default="大學生", max_length=50)
     tone: str = Field(default="清楚易懂", max_length=50)
+    language: Literal["zh-TW", "en", "auto"] = Field(default="zh-TW")
     slide_count: int = Field(default=8, ge=4, le=20)
     duration: int = Field(default=30, ge=10, le=180)
     enable_web_search: bool = Field(default=False)
@@ -62,6 +63,8 @@ class Slide(BaseModel):
     bullets: list[str] = Field(min_length=1, max_length=6)
     speaker_notes: str
     source_pages: list[int] = Field(default_factory=list)
+    icon: str = Field(default="💡")
+    visual_description: str = Field(default="")
 
 
 class Deck(BaseModel):

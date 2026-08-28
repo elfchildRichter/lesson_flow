@@ -126,6 +126,7 @@ def check_hallucination_node(state: QAState) -> QAState:
             "reason": {"type": "string"},
         },
         "required": ["is_grounded", "reason"],
+        "additionalProperties": False,
     }
 
     try:

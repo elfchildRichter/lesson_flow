@@ -25,6 +25,9 @@ const translations = {
     'nav.crumb_admin': '管理員控制台',
     'nav.crumb_profile': '個人帳號設定',
     'provider.title': '⚡ AI 模型提供者',
+    'multimodal.title': '📷 教材解析設定',
+    'multimodal.toggle_label': '圖表與理化公式辨識',
+    'multimodal.hint': '適合含圖表或數學符號的講義（開啟時解析時間較長）',
     'quota.title': '每日使用額度',
     'quota.unlogged': '未登入',
     'quota.unlimited': '👑 無限配額',
@@ -38,7 +41,7 @@ const translations = {
     'topbar.status_ready': '系統就緒',
     'topbar.login_reg': '登入 / 註冊',
     'topbar.logout': '登出',
-    
+
     'hero.eyebrow': 'AI 教學設計工作台',
     'hero.title': '把教材，變成一堂<br><em>真正好懂的課。</em>',
     'hero.copy': '上傳 PDF，幾分鐘內完成課程簡報、逐頁講稿，<br>還能隨時向教材提問。',
@@ -59,6 +62,7 @@ const translations = {
     'settings.tone': '教學語氣',
     'settings.duration': '課程時間',
     'settings.slide_count': '簡報頁數',
+    'settings.language': '簡報輸出語言',
     'settings.web_search': '開啟網路補充搜尋（延伸最新案例與外部數據）',
     'settings.generate_btn': '生成教學內容',
     'settings.estimate': '預計需要 1–2 分鐘，可留在此頁等待',
@@ -79,9 +83,26 @@ const translations = {
     'opt.tone.rigorous': '專業嚴謹',
     'opt.tone.story': '故事引導',
 
+    'opt.provider.gemini': '✨ Gemini 雲端 (Cloud API)',
     'opt.provider.ollama_cloud': 'Ollama 雲端 (Cloud API)',
     'opt.provider.ollama_local': 'Ollama 本機 (Local LLM)',
     'opt.provider.openai': 'OpenAI 雲端 (GPT-4o)',
+
+    'opt.duration.20': '20 分鐘',
+    'opt.duration.30': '30 分鐘',
+    'opt.duration.45': '45 分鐘',
+    'opt.duration.60': '60 分鐘',
+    'opt.duration.90': '90 分鐘',
+
+    'opt.slides.6': '6 頁',
+    'opt.slides.8': '8 頁',
+    'opt.slides.10': '10 頁',
+    'opt.slides.12': '12 頁',
+    'opt.slides.15': '15 頁',
+
+    'opt.lang.zh_tw': '🇹🇼 繁體中文 (Traditional Chinese)',
+    'opt.lang.en': '🇺🇸 English',
+    'opt.lang.auto': '🤖 與教材同語系 (Auto)',
 
     'deck.eyebrow': '教學內容已就緒',
     'deck.title': '你的教學簡報',
@@ -156,6 +177,8 @@ const translations = {
 
     'loading.read_title': '正在讀懂你的教材',
     'loading.read_copy': '整理章節與核心概念…',
+    'loading.read_multimodal_copy': '正在辨識圖表、表格與理化公式，處理時間稍長請稍候…',
+    'loading.read_fast_copy': '正在快速讀取純文字內容與章節結構…',
     'loading.deck_title': '正在規劃教學架構與講稿…',
     'loading.deck_copy': '運用 LLM 設計教學流程與產生簡報，需時約 1-2 分鐘…',
     'loading.ask_title': '正在對照教材內容並生成最佳解答…',
@@ -179,6 +202,9 @@ const translations = {
     'nav.crumb_admin': 'Admin Console',
     'nav.crumb_profile': 'Account Settings',
     'provider.title': '⚡ AI Provider',
+    'multimodal.title': '📷 PDF Reading Mode',
+    'multimodal.toggle_label': 'Diagrams & Math Formulas',
+    'multimodal.hint': 'Recommended for PDFs with figures or math',
     'quota.title': 'Daily Quota',
     'quota.unlogged': 'Not Logged In',
     'quota.unlimited': '👑 Unlimited Quota',
@@ -213,6 +239,7 @@ const translations = {
     'settings.tone': 'Teaching Tone',
     'settings.duration': 'Duration',
     'settings.slide_count': 'Slide Count',
+    'settings.language': 'Output Language',
     'settings.web_search': 'Enable Web Search (Fetch latest cases & external data)',
     'settings.generate_btn': 'Generate Lesson Content',
     'settings.estimate': 'Takes about 1–2 minutes, feel free to wait here',
@@ -233,9 +260,26 @@ const translations = {
     'opt.tone.rigorous': 'Professional & Rigorous',
     'opt.tone.story': 'Story-driven',
 
-    'opt.provider.ollama_cloud': 'Ollama Cloud (Cloud API)',
-    'opt.provider.ollama_local': 'Ollama Local (Local LLM)',
-    'opt.provider.openai': 'OpenAI Cloud (GPT-4o)',
+    'opt.provider.gemini': '✨ Gemini Cloud API',
+    'opt.provider.ollama_cloud': 'Ollama Cloud API',
+    'opt.provider.ollama_local': 'Ollama Local LLM',
+    'opt.provider.openai': 'OpenAI Cloud API',
+
+    'opt.duration.20': '20 Mins',
+    'opt.duration.30': '30 Mins',
+    'opt.duration.45': '45 Mins',
+    'opt.duration.60': '60 Mins',
+    'opt.duration.90': '90 Mins',
+
+    'opt.slides.6': '6 Slides',
+    'opt.slides.8': '8 Slides',
+    'opt.slides.10': '10 Slides',
+    'opt.slides.12': '12 Slides',
+    'opt.slides.15': '15 Slides',
+
+    'opt.lang.zh_tw': '🇹🇼 Traditional Chinese',
+    'opt.lang.en': '🇺🇸 English',
+    'opt.lang.auto': '🤖 Auto (Match Material)',
 
     'deck.eyebrow': 'Lesson Content Ready',
     'deck.title': 'Your Lesson Deck',
@@ -310,6 +354,8 @@ const translations = {
 
     'loading.read_title': 'Reading Your Material',
     'loading.read_copy': 'Analyzing chapters and key concepts...',
+    'loading.read_multimodal_copy': 'Analyzing figures, tables & math formulas, this may take a moment...',
+    'loading.read_fast_copy': 'Fast reading plain text and section structure...',
     'loading.deck_title': 'Designing Lesson Deck & Scripts...',
     'loading.deck_copy': 'Using LLM to structure lesson flow & generate slides, takes 1-2 mins...',
     'loading.ask_title': 'Searching PDF & Generating Answer...',
@@ -374,7 +420,7 @@ function updateSelectOptions() {
       { val: '職場成人', key: 'opt.audience.adult' },
       { val: '一般大眾', key: 'opt.audience.general' }
     ];
-    audienceSelect.innerHTML = audienceOpts.map(o => 
+    audienceSelect.innerHTML = audienceOpts.map(o =>
       `<option value="${o.val}" ${o.val === selectedVal ? 'selected' : ''}>${t(o.key)}</option>`
     ).join('');
   }
@@ -388,7 +434,7 @@ function updateSelectOptions() {
       { val: '專業嚴謹', key: 'opt.tone.rigorous' },
       { val: '故事引導', key: 'opt.tone.story' }
     ];
-    toneSelect.innerHTML = toneOpts.map(o => 
+    toneSelect.innerHTML = toneOpts.map(o =>
       `<option value="${o.val}" ${o.val === selectedVal ? 'selected' : ''}>${t(o.key)}</option>`
     ).join('');
   }
@@ -397,12 +443,56 @@ function updateSelectOptions() {
   if (providerSelect) {
     const selectedVal = providerSelect.value;
     const providerOpts = [
+      { val: 'gemini', key: 'opt.provider.gemini' },
       { val: 'ollama_cloud', key: 'opt.provider.ollama_cloud' },
       { val: 'ollama_local', key: 'opt.provider.ollama_local' },
       { val: 'openai', key: 'opt.provider.openai' }
     ];
     providerSelect.innerHTML = providerOpts.map(o =>
       `<option value="${o.val}" style="font-size: 12px !important;" ${o.val === selectedVal ? 'selected' : ''}>${t(o.key)}</option>`
+    ).join('');
+  }
+
+  const durationSelect = $('#duration');
+  if (durationSelect) {
+    const selectedVal = durationSelect.value;
+    const durationOpts = [
+      { val: '20', key: 'opt.duration.20' },
+      { val: '30', key: 'opt.duration.30' },
+      { val: '45', key: 'opt.duration.45' },
+      { val: '60', key: 'opt.duration.60' },
+      { val: '90', key: 'opt.duration.90' }
+    ];
+    durationSelect.innerHTML = durationOpts.map(o =>
+      `<option value="${o.val}" ${o.val === selectedVal ? 'selected' : ''}>${t(o.key)}</option>`
+    ).join('');
+  }
+
+  const slideCountSelect = $('#slideCount');
+  if (slideCountSelect) {
+    const selectedVal = slideCountSelect.value;
+    const slideOpts = [
+      { val: '6', key: 'opt.slides.6' },
+      { val: '8', key: 'opt.slides.8' },
+      { val: '10', key: 'opt.slides.10' },
+      { val: '12', key: 'opt.slides.12' },
+      { val: '15', key: 'opt.slides.15' }
+    ];
+    slideCountSelect.innerHTML = slideOpts.map(o =>
+      `<option value="${o.val}" ${o.val === selectedVal ? 'selected' : ''}>${t(o.key)}</option>`
+    ).join('');
+  }
+
+  const targetLangSelect = $('#targetLanguage');
+  if (targetLangSelect) {
+    const selectedVal = targetLangSelect.value;
+    const langOpts = [
+      { val: 'zh-TW', key: 'opt.lang.zh_tw' },
+      { val: 'en', key: 'opt.lang.en' },
+      { val: 'auto', key: 'opt.lang.auto' }
+    ];
+    targetLangSelect.innerHTML = langOpts.map(o =>
+      `<option value="${o.val}" ${o.val === selectedVal ? 'selected' : ''}>${t(o.key)}</option>`
     ).join('');
   }
 }
@@ -506,7 +596,7 @@ async function api(path, options = {}) {
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
     const errorMsg = body.detail || '服務暫時無法使用';
-    
+
     if (response.status === 401 && token) {
       logoutUser(false);
       openAuthModal('login');
@@ -521,7 +611,7 @@ async function api(path, options = {}) {
 function updateAuthUI(user) {
   state.user = user;
   const container = $('#authHeaderContainer');
-  
+
   if (user) {
     const q = user.quota || {};
     const deckQ = q.deck || { used_count: 0, daily_limit: 3 };
@@ -530,8 +620,8 @@ function updateAuthUI(user) {
     const quotaLabel = isUnlimited
       ? t('quota.unlimited')
       : (state.lang === 'en'
-          ? `Decks:${deckQ.used_count}/3 · Q&A:${askQ.used_count}/10`
-          : `教材:${deckQ.used_count}/3 · 提問:${askQ.used_count}/10`);
+        ? `Decks:${deckQ.used_count}/3 · Q&A:${askQ.used_count}/10`
+        : `教材:${deckQ.used_count}/3 · 提問:${askQ.used_count}/10`);
     const roleBadge = user.role === 'admin' ? t('quota.admin') : t('quota.regular');
 
     if (container) {
@@ -753,7 +843,12 @@ async function uploadFile(file) {
     return;
   }
   if (!file || (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf')) return toast(t('toast.pdf_invalid'), true);
-  const data = new FormData(); data.append('file', file); loading(true, t('loading.read_title'), t('loading.read_copy'));
+  const data = new FormData();
+  data.append('file', file);
+  const enableMultimodal = $('#multimodalToggle') ? $('#multimodalToggle').checked : false;
+  data.append('enable_multimodal', enableMultimodal);
+  const copyKey = enableMultimodal ? 'loading.read_multimodal_copy' : 'loading.read_fast_copy';
+  loading(true, t('loading.read_title'), t(copyKey));
   try { setDocument(await api('/api/documents', { method: 'POST', body: data })); }
   catch (e) { toast(e.message, true); }
   finally { loading(false); }
@@ -761,8 +856,8 @@ async function uploadFile(file) {
 
 $('#fileInput').addEventListener('change', e => uploadFile(e.target.files[0]));
 const dz = $('#dropzone');
-['dragenter','dragover'].forEach(name => dz.addEventListener(name, e => { e.preventDefault(); dz.classList.add('dragging'); }));
-['dragleave','drop'].forEach(name => dz.addEventListener(name, e => { e.preventDefault(); dz.classList.remove('dragging'); }));
+['dragenter', 'dragover'].forEach(name => dz.addEventListener(name, e => { e.preventDefault(); dz.classList.add('dragging'); }));
+['dragleave', 'drop'].forEach(name => dz.addEventListener(name, e => { e.preventDefault(); dz.classList.remove('dragging'); }));
 dz.addEventListener('drop', e => uploadFile(e.dataTransfer.files[0]));
 $('#removeFile').addEventListener('click', () => {
   state.document = null;
@@ -772,7 +867,7 @@ $('#removeFile').addEventListener('click', () => {
   $('#questionInput').disabled = true;
   $('#sendBtn').disabled = true;
   $('#settingStatus').textContent = t('settings.status_wait');
-  $$('.step').forEach((s,i) => { if(i) s.classList.remove('active','done'); });
+  $$('.step').forEach((s, i) => { if (i) s.classList.remove('active', 'done'); });
   toast(state.lang === 'en' ? 'Removed material from workspace' : '已從工作台移除教材');
 });
 
@@ -789,7 +884,7 @@ function switchView(name) {
   $$('.view').forEach(v => v.classList.remove('active'));
   $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === name));
   if ($(`#${name}View`)) $(`#${name}View`).classList.add('active');
-  
+
   const crumbs = {
     'workspace': t('nav.crumb_create'),
     'deck': t('nav.crumb_deck'),
@@ -857,23 +952,29 @@ $('#generateBtn').addEventListener('click', async () => {
     document_id: state.document.id,
     audience: $('#audience').value,
     tone: $('#tone').value,
+    language: $('#targetLanguage') ? $('#targetLanguage').value : 'zh-TW',
     duration: +$('#duration').value,
     slide_count: +$('#slideCount').value,
     enable_web_search: $('#deckWebSearch') ? $('#deckWebSearch').checked : false,
   };
   try {
-    state.deck = await api('/api/decks', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
-    renderDeck(); $$('.step')[1].classList.add('done'); $$('.step')[2].classList.add('active','done'); $('#deckCount').textContent='1';
+    state.deck = await api('/api/decks', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    renderDeck(); $$('.step')[1].classList.add('done'); $$('.step')[2].classList.add('active', 'done'); $('#deckCount').textContent = '1';
     await fetchCurrentUser();
     toast(state.lang === 'en' ? 'Deck and speaker notes are ready!' : '簡報與逐頁講稿已經準備好了'); switchView('deck');
-  } catch(e) { toast(e.message,true); } finally { loading(false); }
+  } catch (e) { toast(e.message, true); } finally { loading(false); }
 });
 
 function renderDeck() {
   const d = state.deck;
-  const modeText = d.mode === 'ollama'
-    ? (state.lang === 'en' ? 'Ollama Local' : 'Ollama 本機生成')
-    : (state.lang === 'en' ? 'OpenAI Generated' : 'OpenAI 生成');
+  const modeLabels = {
+    'gemini': state.lang === 'en' ? 'Gemini Cloud' : 'Gemini 雲端生成',
+    'openai': state.lang === 'en' ? 'OpenAI Cloud' : 'OpenAI 雲端生成',
+    'ollama_cloud': state.lang === 'en' ? 'Ollama Cloud' : 'Ollama 雲端生成',
+    'ollama_local': state.lang === 'en' ? 'Ollama Local' : 'Ollama 本機生成',
+    'ollama': state.lang === 'en' ? 'Ollama Local' : 'Ollama 本機生成',
+  };
+  const modeText = modeLabels[d.mode] || (state.lang === 'en' ? 'AI Generated' : 'AI 生成');
   const slideText = state.lang === 'en' ? `${d.slides.length} Slides` : `${d.slides.length} 張投影片`;
   $('#deckTitle').textContent = d.title;
   $('#deckSubtitle').textContent = `${d.subtitle} · ${slideText} · ${modeText}`;
@@ -881,54 +982,274 @@ function renderDeck() {
   $('#scriptDownload').href = `/api/decks/${d.id}/script`;
   $('#pptDownload').classList.remove('disabled');
   $('#scriptDownload').classList.remove('disabled');
-  $('#slideList').innerHTML = d.slides.map((s,i) => `<div class="slide-thumb ${i===0?'active':''}" data-index="${i}"><small>${String(i+1).padStart(2,'0')}</small><div class="mini-slide"><b>${escapeHtml(s.title)}</b>${s.bullets.slice(0,3).map(()=>'<i></i>').join('')}</div></div>`).join('');
+  $('#slideList').innerHTML = d.slides.map((s, i) => `<div class="slide-thumb ${i === 0 ? 'active' : ''}" data-index="${i}"><small>${String(i + 1).padStart(2, '0')}</small><div class="mini-slide"><b>${escapeHtml(s.title)}</b>${s.bullets.slice(0, 3).map(() => '<i></i>').join('')}</div></div>`).join('');
   $$('.slide-thumb').forEach(t => t.addEventListener('click', () => showSlide(+t.dataset.index)));
   showSlide(0);
+}
+
+const katexOptions = {
+  delimiters: [
+    { left: '$$', right: '$$', display: true },
+    { left: '$', right: '$', display: false },
+    { left: '\\(', right: '\\)', display: false },
+    { left: '\\[', right: '\\]', display: true }
+  ],
+  throwOnError: false
+};
+
+function renderMath(element) {
+  if (typeof renderMathInElement === 'function' && element) {
+    try {
+      renderMathInElement(element, katexOptions);
+    } catch (e) {
+      console.warn('KaTeX render error:', e);
+    }
+  }
+}
+
+function wrapSvgText(text, maxLineChars = 8) {
+  if (!text) return [];
+  let cleaned = text.replace(/[\*`"']/g, '').replace(/^[•\-\d\.\s、:：]+/, '').trim();
+  if (!cleaned) return [];
+  if (cleaned.length <= maxLineChars) return [cleaned];
+  
+  const clauses = cleaned.split(/[，,；;。]/);
+  if (clauses.length > 1 && clauses[0].length >= 2 && clauses[0].length <= maxLineChars + 2) {
+    return [clauses[0], clauses.slice(1).join(' ').slice(0, maxLineChars)];
+  }
+  
+  return [
+    cleaned.slice(0, maxLineChars),
+    cleaned.slice(maxLineChars, maxLineChars * 2)
+  ];
+}
+
+function renderSvgTextLines(lines, cx, startY, fontSize = 11, fontColor = "#2B3530", fontWeight = "bold") {
+  if (!lines || lines.length === 0) return '';
+  const lineHeight = Math.round(fontSize * 1.35);
+  const totalHeight = (lines.length - 1) * lineHeight;
+  const initialY = startY - (totalHeight / 2);
+  
+  return `<text x="${cx}" y="${initialY}" text-anchor="middle" font-size="${fontSize}" font-weight="${fontWeight}" fill="${fontColor}">
+    ${lines.map((line, idx) => `<tspan x="${cx}" dy="${idx === 0 ? 0 : lineHeight}">${escapeHtml(line)}</tspan>`).join('')}
+  </text>`;
+}
+
+function extractConceptualTag(bulletText, fallback) {
+  if (!bulletText) return wrapSvgText(fallback, 14);
+  let cleaned = bulletText.replace(/[\*`"']/g, '').replace(/^[•\-\d\.\s、:：]+/, '').trim();
+  if (!cleaned) return wrapSvgText(fallback, 14);
+  
+  const colonParts = cleaned.split(/[:：—\-\(（]/);
+  if (colonParts.length > 1 && colonParts[0].length >= 2 && colonParts[0].length <= 14) {
+    return wrapSvgText(colonParts[0], 14);
+  }
+  return wrapSvgText(cleaned, 14);
+}
+
+function extractEmoji(str) {
+  if (!str) return '💡';
+  const match = str.match(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{27BF}\u{2300}-\u{23FF}\u{2B50}]/u);
+  if (match) return match[0];
+  const clean = str.toLowerCase().trim();
+  if (clean.includes('bulb') || clean.includes('idea')) return '💡';
+  if (clean.includes('book') || clean.includes('text')) return '📚';
+  if (clean.includes('chart') || clean.includes('graph')) return '📊';
+  if (clean.includes('gear') || clean.includes('process')) return '⚙️';
+  if (clean.includes('brain') || clean.includes('think')) return '🧠';
+  if (clean.includes('lightning') || clean.includes('power')) return '⚡';
+  if (clean.includes('lock')) return '🔒';
+  if (clean.includes('globe') || clean.includes('web')) return '🌐';
+  if (clean.includes('target') || clean.includes('goal')) return '🎯';
+  if (clean.includes('microscope') || clean.includes('science')) return '🔬';
+  if (clean.includes('search')) return '🔍';
+  return '💡';
+}
+
+function renderDynamicDiagram(slide, index) {
+  const icon = extractEmoji(slide.icon);
+  const title = slide.title || '核心觀念';
+  const bullets = slide.bullets || [];
+
+  const l1 = extractConceptualTag(bullets[0], '基礎定義');
+  const l2 = extractConceptualTag(bullets[1], '核心推演');
+  const l3 = extractConceptualTag(bullets[2], '應用成果');
+
+  const titleLower = title.toLowerCase();
+  let type = 'flow';
+  if (titleLower.includes('架構') || titleLower.includes('系統') || titleLower.includes('結構') || titleLower.includes('組成') || titleLower.includes('分層') || titleLower.includes('流程')) {
+    type = 'arch';
+  } else if (titleLower.includes('對比') || titleLower.includes('比較') || titleLower.includes('差異') || titleLower.includes('vs') || titleLower.includes('優缺')) {
+    type = 'compare';
+  } else if (titleLower.includes('公式') || titleLower.includes('原理') || titleLower.includes('定義') || titleLower.includes('核心') || titleLower.includes('算式')) {
+    type = 'focus';
+  } else {
+    const types = ['flow', 'arch', 'compare', 'focus'];
+    type = types[index % types.length];
+  }
+
+  if (type === 'flow') {
+    return `
+      <svg viewBox="0 0 290 350" class="diagram-svg">
+        <rect x="15" y="15" width="260" height="85" rx="10" fill="#FFF" stroke="#DE5B37" stroke-width="2"/>
+        <rect x="15" y="15" width="260" height="28" rx="10" fill="#FFF5F2"/>
+        <text x="145" y="34" text-anchor="middle" font-size="13" font-weight="bold" fill="#DE5B37">① 觀念起點</text>
+        ${renderSvgTextLines(l1, 145, 66, 12, "#2B3530")}
+
+        <path d="M 145 100 L 145 118" stroke="#DE5B37" stroke-width="2"/>
+        <polygon points="145,118 140,110 150,110" fill="#DE5B37"/>
+
+        <rect x="15" y="122" width="260" height="85" rx="10" fill="#FFF" stroke="#4A5568" stroke-width="2"/>
+        <rect x="15" y="122" width="260" height="28" rx="10" fill="#EDF2F7"/>
+        <text x="145" y="141" text-anchor="middle" font-size="13" font-weight="bold" fill="#4A5568">② 核心推演</text>
+        ${renderSvgTextLines(l2, 145, 173, 12, "#2B3530")}
+
+        <path d="M 145 207 L 145 225" stroke="#2B6CB0" stroke-width="2"/>
+        <polygon points="145,225 140,217 150,217" fill="#2B6CB0"/>
+
+        <rect x="15" y="229" width="260" height="85" rx="10" fill="#FFF" stroke="#2B6CB0" stroke-width="2"/>
+        <rect x="15" y="229" width="260" height="28" rx="10" fill="#EBF8FF"/>
+        <text x="145" y="248" text-anchor="middle" font-size="13" font-weight="bold" fill="#2B6CB0">③ 應用成果</text>
+        ${renderSvgTextLines(l3, 145, 280, 12, "#2B3530")}
+      </svg>
+    `;
+  } else if (type === 'arch') {
+    return `
+      <svg viewBox="0 0 290 350" class="diagram-svg">
+        <rect x="15" y="15" width="260" height="55" rx="10" fill="#DE5B37"/>
+        <text x="145" y="49" text-anchor="middle" font-size="15" fill="#FFF" font-weight="bold">${escapeHtml(icon)} ${escapeHtml(title.slice(0, 14))}</text>
+
+        <path d="M 145 70 L 145 105 M 145 195 L 145 225" stroke="#CBD5E0" stroke-width="2" fill="none"/>
+
+        <rect x="15" y="105" width="260" height="90" rx="10" fill="#FFF" stroke="#CBD5E0" stroke-width="2"/>
+        <rect x="15" y="105" width="260" height="28" rx="10" fill="#F7FAFC"/>
+        <text x="145" y="124" text-anchor="middle" font-size="12" font-weight="bold" fill="#4A5568">🧩 核心結構與條件</text>
+        ${renderSvgTextLines(l1, 145, 158, 12, "#2D3748")}
+
+        <rect x="15" y="225" width="260" height="90" rx="10" fill="#FFF" stroke="#CBD5E0" stroke-width="2"/>
+        <rect x="15" y="225" width="260" height="28" rx="10" fill="#F7FAFC"/>
+        <text x="145" y="244" text-anchor="middle" font-size="12" font-weight="bold" fill="#2B6CB0">⚡ 作用邏輯與機制</text>
+        ${renderSvgTextLines(l2, 145, 278, 12, "#2D3748")}
+      </svg>
+    `;
+  } else if (type === 'compare') {
+    return `
+      <svg viewBox="0 0 290 350" class="diagram-svg">
+        <rect x="15" y="15" width="260" height="130" rx="10" fill="#FFF" stroke="#DE5B37" stroke-width="2"/>
+        <rect x="15" y="15" width="260" height="32" rx="10" fill="#FFF5F2"/>
+        <text x="145" y="36" text-anchor="middle" font-size="13" font-weight="bold" fill="#DE5B37">✦ 現行模式 / 原理</text>
+        ${renderSvgTextLines(l1, 145, 88, 12, "#2D3748")}
+
+        <path d="M 130 145 L 130 175 M 160 175 L 160 145" stroke="#DE5B37" stroke-width="2" fill="none"/>
+        <polygon points="130,175 125,167 135,167" fill="#DE5B37"/>
+        <polygon points="160,145 155,153 165,153" fill="#DE5B37"/>
+
+        <rect x="15" y="175" width="260" height="130" rx="10" fill="#FFF" stroke="#2B6CB0" stroke-width="2"/>
+        <rect x="15" y="175" width="260" height="32" rx="10" fill="#EBF8FF"/>
+        <text x="145" y="196" text-anchor="middle" font-size="13" font-weight="bold" fill="#2B6CB0">✦ 本課突破 / 特性</text>
+        ${renderSvgTextLines(l2, 145, 248, 12, "#2D3748")}
+      </svg>
+    `;
+  } else {
+    return `
+      <svg viewBox="0 0 290 350" class="diagram-svg">
+        <circle cx="145" cy="70" r="50" fill="#FFF5F2" stroke="#DE5B37" stroke-width="2.5"/>
+        <circle cx="145" cy="70" r="40" fill="#DE5B37"/>
+        <text x="145" y="81" text-anchor="middle" font-size="32" fill="#FFF">${escapeHtml(icon)}</text>
+
+        <path d="M 145 120 L 145 145 M 145 225 L 145 240" stroke="#CBD5E0" stroke-width="2"/>
+
+        <rect x="15" y="145" width="260" height="80" rx="10" fill="#FFF" stroke="#CBD5E0" stroke-width="2"/>
+        <rect x="15" y="145" width="260" height="26" rx="10" fill="#FFF5F2"/>
+        <text x="145" y="162" text-anchor="middle" font-size="12" font-weight="bold" fill="#DE5B37">📐 定義與條件</text>
+        ${renderSvgTextLines(l1, 145, 194, 12, "#2D3748")}
+
+        <rect x="15" y="240" width="260" height="80" rx="10" fill="#FFF" stroke="#CBD5E0" stroke-width="2"/>
+        <rect x="15" y="240" width="260" height="26" rx="10" fill="#EBF8FF"/>
+        <text x="145" y="257" text-anchor="middle" font-size="12" font-weight="bold" fill="#2B6CB0">🚀 應用與效益</text>
+        ${renderSvgTextLines(l2, 145, 289, 12, "#2D3748")}
+      </svg>
+    `;
+  }
+}
+
+function formatMarkdown(text) {
+  if (!text) return '';
+  let safe = escapeHtml(text);
+  safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  safe = safe.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  safe = safe.replace(/`(.*?)`/g, '<code>$1</code>');
+  return safe;
 }
 
 function showSlide(index) {
   state.activeSlide = index;
   const s = state.deck.slides[index];
-  $$('.slide-thumb').forEach((t,i) => t.classList.toggle('active', i === index));
-  $('#slideStage').dataset.page = String(index+1).padStart(2,'0');
-  $('#slideStage').innerHTML = `<h2>${escapeHtml(s.title)}</h2><ul>${s.bullets.map(b=>`<li>${escapeHtml(b)}</li>`).join('')}</ul>`;
+  $$('.slide-thumb').forEach((t, i) => t.classList.toggle('active', i === index));
+  $('#slideStage').dataset.page = String(index + 1).padStart(2, '0');
+  
+  const iconStr = extractEmoji(s.icon);
+  const dynamicSvg = renderDynamicDiagram(s, index);
+  
+  const visualCardHtml = `
+    <div class="visual-diagram-container">
+      ${dynamicSvg}
+    </div>
+  `;
+
+  $('#slideStage').innerHTML = `
+    <div class="slide-header-wrap">
+      <h2><span class="slide-title-icon">${escapeHtml(iconStr)}</span> ${escapeHtml(s.title)}</h2>
+    </div>
+    <div class="slide-content-grid has-visual">
+      <div class="slide-bullets-wrap">
+        <ul>${s.bullets.map(b => `<li>${formatMarkdown(b)}</li>`).join('')}</ul>
+      </div>
+      ${visualCardHtml}
+    </div>
+  `;
   $('#speakerNotes').textContent = s.speaker_notes;
-  if (s.source_pages.length) {
+  renderMath($('#slideStage'));
+  renderMath($('#speakerNotes'));
+  if (s.source_pages && s.source_pages.length) {
     $('#pageRef').textContent = state.lang === 'en' ? `Page ${s.source_pages.join(', ')}` : `教材第 ${s.source_pages.join('、')} 頁`;
   } else {
     $('#pageRef').textContent = t('deck.page_ref');
   }
 }
 
-function addUserMessage(text) { const el=document.createElement('div'); el.className='message user'; el.innerHTML=`<div>${escapeHtml(text)}</div>`; $('#messages').append(el); scrollMessages(); }
+function addUserMessage(text) { const el = document.createElement('div'); el.className = 'message user'; el.innerHTML = `<div>${escapeHtml(text)}</div>`; $('#messages').append(el); scrollMessages(); }
 function addAssistantMessage(data) {
-  const el=document.createElement('div'); el.className='message assistant'; const sources=data.sources.slice(0,3).map(s=>`<div class="source"><b>第 ${s.page} 頁</b><p>${escapeHtml(s.excerpt)}</p></div>`).join('');
-  el.innerHTML=`<span class="bot-avatar">✦</span><div><p>${escapeHtml(data.answer)}</p><div class="source-list"><span>回答依據 · ${data.mode==='ollama'?'Ollama + Hugging Face':'OpenAI'} RAG</span>${sources}</div></div>`; $('#messages').append(el); scrollMessages();
+  const el = document.createElement('div'); el.className = 'message assistant'; const sources = data.sources.slice(0, 3).map(s => `<div class="source"><b>第 ${s.page} 頁</b><p>${escapeHtml(s.excerpt)}</p></div>`).join('');
+  const providerLabel = data.mode === 'gemini' ? 'Gemini' : (data.mode === 'openai' ? 'OpenAI' : 'Ollama');
+  const formattedAnswer = formatMarkdown(data.answer).replace(/\n/g, '<br>');
+  el.innerHTML = `<span class="bot-avatar">✦</span><div><p>${formattedAnswer}</p><div class="source-list"><span>回答依據 · ${providerLabel} RAG</span>${sources}</div></div>`; $('#messages').append(el); scrollMessages();
+  renderMath(el);
 }
-function scrollMessages(){const m=$('#messages');m.scrollTop=m.scrollHeight}
-function escapeHtml(value){const d=document.createElement('div');d.textContent=value;return d.innerHTML}
+function scrollMessages() { const m = $('#messages'); m.scrollTop = m.scrollHeight }
+function escapeHtml(value) { const d = document.createElement('div'); d.textContent = value; return d.innerHTML }
 
-$('#chatForm').addEventListener('submit', async e=>{
+$('#chatForm').addEventListener('submit', async e => {
   e.preventDefault();
   if (!state.user) {
     toast('請先登入帳號以開始問答', true);
     openAuthModal('login');
     return;
   }
-  const input=$('#questionInput'); const question=input.value.trim(); if(!question||!state.document)return; addUserMessage(question); input.value=''; $('#sendBtn').disabled=true;
+  const input = $('#questionInput'); const question = input.value.trim(); if (!question || !state.document) return; addUserMessage(question); input.value = ''; $('#sendBtn').disabled = true;
   const enable_web_search = $('#qaWebSearch') ? $('#qaWebSearch').checked : false;
-  const typing=document.createElement('div');typing.className='message assistant';typing.innerHTML='<span class="bot-avatar">✦</span><div><p>正在檢索教材與分析中…</p></div>';$('#messages').append(typing);scrollMessages();
+  const typing = document.createElement('div'); typing.className = 'message assistant'; typing.innerHTML = '<span class="bot-avatar">✦</span><div><p>正在檢索教材與分析中…</p></div>'; $('#messages').append(typing); scrollMessages();
   try {
-    const data=await api('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({document_id:state.document.id,question,enable_web_search})});
+    const data = await api('/api/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ document_id: state.document.id, question, enable_web_search }) });
     typing.remove();
     addAssistantMessage(data);
     await fetchCurrentUser();
-  } catch(err){typing.remove();toast(err.message,true)} finally{$('#sendBtn').disabled=false}
+  } catch (err) { typing.remove(); toast(err.message, true) } finally { $('#sendBtn').disabled = false }
 });
-$('#questionInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#chatForm').requestSubmit()}});
-$$('.suggestions button').forEach(btn=>btn.addEventListener('click',()=>{if(!state.document)return toast('請先上傳教材',true);$('#questionInput').value=btn.textContent;$('#chatForm').requestSubmit()}));
-$('#pptDownload').addEventListener('click',()=>toast('正在下載 PowerPoint 簡報'));
-$('#scriptDownload').addEventListener('click',()=>toast('正在下載逐頁演講稿'));
+$('#questionInput').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('#chatForm').requestSubmit() } });
+$$('.suggestions button').forEach(btn => btn.addEventListener('click', () => { if (!state.document) return toast('請先上傳教材', true); $('#questionInput').value = btn.textContent; $('#chatForm').requestSubmit() }));
+$('#pptDownload').addEventListener('click', () => toast('正在下載 PowerPoint 簡報'));
+$('#scriptDownload').addEventListener('click', () => toast('正在下載逐頁演講稿'));
 
 // ── AI 提供者 (Provider) 切換與 UI 更新 ──
 function updateProviderUI(info) {
@@ -936,16 +1257,18 @@ function updateProviderUI(info) {
   state.provider = info.provider;
   if ($('#providerSelect')) $('#providerSelect').value = info.provider;
   const badges = {
+    'gemini': state.lang === 'en' ? 'Gemini Cloud' : 'Gemini 雲端',
     'openai': state.lang === 'en' ? 'OpenAI Cloud' : 'OpenAI 雲端',
     'ollama_cloud': state.lang === 'en' ? 'Ollama Cloud' : 'Ollama 雲端',
     'ollama_local': state.lang === 'en' ? 'Ollama Local' : 'Ollama 本機'
   };
   const providerLabels = {
-    'openai': state.lang === 'en' ? 'OpenAI Cloud (GPT-4o)' : 'OpenAI 雲端 (GPT-4o)',
-    'ollama_cloud': state.lang === 'en' ? 'Ollama Cloud (Cloud API)' : 'Ollama 雲端 (Cloud API)',
-    'ollama_local': state.lang === 'en' ? 'Ollama Local (Local LLM)' : 'Ollama 本機 (Local LLM)'
+    'gemini': state.lang === 'en' ? 'Gemini Cloud' : 'Gemini 雲端',
+    'openai': state.lang === 'en' ? 'OpenAI Cloud' : 'OpenAI 雲端',
+    'ollama_cloud': state.lang === 'en' ? 'Ollama Cloud' : 'Ollama 雲端',
+    'ollama_local': state.lang === 'en' ? 'Ollama Local' : 'Ollama 本機'
   };
-  if ($('#providerBadge')) $('#providerBadge').textContent = badges[info.provider] || 'Ollama';
+  if ($('#providerBadge')) $('#providerBadge').textContent = badges[info.provider] || 'Gemini';
   if ($('#modeText')) $('#modeText').textContent = providerLabels[info.provider] || info.provider_label || badges[info.provider] || (state.lang === 'en' ? 'AI Ready' : 'AI 就緒');
 }
 
@@ -983,7 +1306,7 @@ fetchCurrentUser();
 function updateAdminUI() {
   const adminNavBtn = $('#adminNavBtn') || $('#openAdminModalBtn') || $('.admin-only');
   if (!adminNavBtn) return;
-  
+
   if (state.user && state.user.role === 'admin') {
     adminNavBtn.classList.remove('hidden');
     fetchPendingCount();
@@ -1124,7 +1447,7 @@ async function fetchAllUsers() {
 
 // 代理管理員對話框內的按鈕動作
 $('#adminView')?.addEventListener('click', async (e) => {
-  
+
 
   const reviewBtn = e.target.closest('[data-review]');
   if (reviewBtn) {

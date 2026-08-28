@@ -10,7 +10,10 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Intel+One+Mono:ital,wght@0,400..700;1,400..700&family=Noto+Sans+TC:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css?v=1.2.1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"></script>
+  <link rel="stylesheet" href="/styles.css?v=2.6.0">
 </head>
 
 <body>
@@ -20,14 +23,16 @@
       <span data-i18n="nav.brand">課伴<small>LESSONFLOW (Alpha)</small></span>
     </a>
     <nav>
-      <button class="nav-item active" data-view="workspace"><span class="icon">⌂</span><span data-i18n="nav.workspace">工作台</span></button>
-      <button class="nav-item" data-view="deck"><span class="icon">▤</span><span data-i18n="nav.deck">我的簡報</span><span class="nav-count"
-          id="deckCount">0</span></button>
-      <button class="nav-item" data-view="chat"><span class="icon">◇</span><span data-i18n="nav.chat">文件問答</span></button>
-      <button class="nav-item user-only hidden" data-view="profile" id="profileNavBtn"><span
-          class="icon">⚙️</span><span data-i18n="nav.profile">個人帳號設定</span></button>
-      <button class="nav-item admin-only hidden" data-view="admin"><span class="icon">👑</span><span data-i18n="nav.admin">管理員控制台</span><span
-          class="nav-count badge-pending" id="pendingBadge">0</span></button>
+      <button class="nav-item active" data-view="workspace"><span class="icon">⌂</span><span
+          data-i18n="nav.workspace">工作台</span></button>
+      <button class="nav-item" data-view="deck"><span class="icon">▤</span><span data-i18n="nav.deck">我的簡報</span><span
+          class="nav-count" id="deckCount">0</span></button>
+      <button class="nav-item" data-view="chat"><span class="icon">◇</span><span
+          data-i18n="nav.chat">文件問答</span></button>
+      <button class="nav-item user-only hidden" data-view="profile" id="profileNavBtn"><span class="icon">⚙️</span><span
+          data-i18n="nav.profile">個人帳號設定</span></button>
+      <button class="nav-item admin-only hidden" data-view="admin"><span class="icon">👑</span><span
+          data-i18n="nav.admin">管理員控制台</span><span class="nav-count badge-pending" id="pendingBadge">0</span></button>
     </nav>
     <div>
       <br />
@@ -39,10 +44,26 @@
       <div class="provider-select-wrapper">
         <select id="providerSelect" class="provider-select" style="font-size: 12px !important;"
           aria-label="選擇 AI 模型提供者">
-          <option value="ollama_cloud" style="font-size: 12px !important;">Ollama 雲端 (Cloud API)</option>
-          <option value="ollama_local" style="font-size: 12px !important;">Ollama 本機 (Local LLM)</option>
-          <option value="openai" style="font-size: 12px !important;">OpenAI 雲端 (GPT-4o)</option>
+          <option value="gemini" style="font-size: 12px !important;">✨ Gemini 雲端 API</option>
+          <option value="ollama_cloud" style="font-size: 12px !important;">Ollama 雲端 API</option>
+          <option value="ollama_local" style="font-size: 12px !important;">Ollama 本機 LLM</option>
+          <option value="openai" style="font-size: 12px !important;">OpenAI 雲端 API</option>
         </select>
+      </div>
+    </div>
+    <div class="provider-card multimodal-card">
+      <div class="provider-head">
+        <span data-i18n="multimodal.title">📷 教材解析設定</span>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle-text">
+          <span class="toggle-title" data-i18n="multimodal.toggle_label">圖表與理化公式辨識</span>
+          <small class="toggle-hint" data-i18n="multimodal.hint">適合含圖表或數學符號的講義（開啟時解析時間較長）</small>
+        </div>
+        <label class="switch" for="multimodalToggle" title="切換圖表與公式辨識">
+          <input type="checkbox" id="multimodalToggle" />
+          <span class="slider"></span>
+        </label>
       </div>
     </div>
     <div class="sidebar-spacer"></div>
@@ -50,11 +71,13 @@
       <div class="plan-head"><span data-i18n="quota.title">每日使用額度</span><b id="quotaBadge">未登入</b></div>
       <div class="quota-list" id="quotaList">
         <div class="quota-item">
-          <div class="quota-label"><small data-i18n="quota.deck_label">教學簡報</small><span id="deckQuotaText">- / 3 份</span></div>
+          <div class="quota-label"><small data-i18n="quota.deck_label">教學簡報</small><span id="deckQuotaText">- / 3
+              份</span></div>
           <div class="usage-bar"><i id="deckQuotaBar" style="width: 0%"></i></div>
         </div>
         <div class="quota-item" style="margin-top: 8px;">
-          <div class="quota-label"><small data-i18n="quota.ask_label">文件提問</small><span id="askQuotaText">- / 10 次</span></div>
+          <div class="quota-label"><small data-i18n="quota.ask_label">文件提問</small><span id="askQuotaText">- / 10
+              次</span></div>
           <div class="usage-bar"><i id="askQuotaBar" style="width: 0%"></i></div>
         </div>
       </div>
@@ -69,8 +92,9 @@
   <main>
     <header class="topbar">
       <button class="menu-toggle" aria-label="切換選單">☰</button>
-      <div class="breadcrumb"><span data-view="workspace" style="cursor:pointer;" data-i18n="nav.workspace">工作台</span><i>/</i><strong
-          id="crumb" data-i18n="nav.crumb_create">建立新課程</strong></div>
+      <div class="breadcrumb"><span data-view="workspace" style="cursor:pointer;"
+          data-i18n="nav.workspace">工作台</span><i>/</i><strong id="crumb" data-i18n="nav.crumb_create">建立新課程</strong>
+      </div>
       <div class="top-actions">
         <span class="status-dot"><i></i><span id="modeText" data-i18n="topbar.status_ready">系統就緒</span></span>
 
@@ -176,13 +200,19 @@
                 <option value="12">12 頁</option>
                 <option value="15">15 頁</option>
               </select></label>
+            <label><span data-i18n="settings.language">簡報輸出語言</span><select id="targetLanguage">
+                <option value="zh-TW" selected>🇹🇼 繁體中文 (Traditional Chinese)</option>
+                <option value="en">🇺🇸 English</option>
+                <option value="auto">🤖 與教材同語系 (Auto)</option>
+              </select></label>
             <label class="checkbox-label"
               style="grid-column: span 2; display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; color: #404d47;">
               <input type="checkbox" id="deckWebSearch" style="width: auto; margin: 0;">
               <span data-i18n="settings.web_search">開啟網路補充搜尋（延伸最新案例與外部數據）</span>
             </label>
-          <button class="primary-button" id="generateBtn" disabled><span>✦</span> <span data-i18n="settings.generate_btn">生成教學內容</span> <i>→</i></button>
-          <p class="estimate" data-i18n="settings.estimate">預計需要 1–2 分鐘，可留在此頁等待</p>
+            <button class="primary-button" id="generateBtn" disabled><span>✦</span> <span
+                data-i18n="settings.generate_btn">生成教學內容</span> <i>→</i></button>
+            <p class="estimate" data-i18n="settings.estimate">預計需要 1–2 分鐘，可留在此頁等待</p>
         </section>
       </div>
 
@@ -206,8 +236,9 @@
           <h1 id="deckTitle" data-i18n="deck.title">你的教學簡報</h1>
           <p id="deckSubtitle" data-i18n="deck.subtitle">上傳教材後開始生成。</p>
         </div>
-        <div class="download-actions"><a class="secondary-button disabled" id="scriptDownload" data-i18n="deck.btn_script">↓ 下載講稿</a><a
-            class="primary-button disabled" id="pptDownload" data-i18n="deck.btn_pptx">↓ 匯出 PPTX</a></div>
+        <div class="download-actions"><a class="secondary-button disabled" id="scriptDownload"
+            data-i18n="deck.btn_script">↓ 下載講稿</a><a class="primary-button disabled" id="pptDownload"
+            data-i18n="deck.btn_pptx">↓ 匯出 PPTX</a></div>
       </div>
       <div class="deck-layout">
         <aside class="slide-list" id="slideList">
@@ -215,10 +246,12 @@
         </aside>
         <div class="slide-stage-wrap">
           <div class="slide-stage" id="slideStage">
-            <div class="stage-empty"><span>▤</span><b data-i18n="deck.stage_empty_b">尚未產生內容</b><small data-i18n="deck.stage_empty_s">回到工作台上傳教材並設定課程</small></div>
+            <div class="stage-empty"><span>▤</span><b data-i18n="deck.stage_empty_b">尚未產生內容</b><small
+                data-i18n="deck.stage_empty_s">回到工作台上傳教材並設定課程</small></div>
           </div>
           <div class="speaker-notes">
-            <div class="notes-label"><span>講</span><b data-i18n="deck.notes_label">這頁怎麼說</b><small id="pageRef" data-i18n="deck.page_ref">講者備註</small></div>
+            <div class="notes-label"><span>講</span><b data-i18n="deck.notes_label">這頁怎麼說</b><small id="pageRef"
+                data-i18n="deck.page_ref">講者備註</small></div>
             <p id="speakerNotes" data-i18n="deck.speaker_notes_placeholder">生成後，逐頁講稿會顯示在這裡。</p>
           </div>
         </div>
@@ -241,7 +274,8 @@
           <div class="message assistant welcome"><span class="bot-avatar">✦</span>
             <div><b data-i18n="chat.welcome_b">嗨，我是你的教材助教</b>
               <p data-i18n="chat.welcome_p">上傳文件後，你可以請我解釋概念、比較差異，或從教材中整理重點。我只會根據文件內容回答。</p>
-              <div class="suggestions"><button data-i18n="chat.sug_1">這份教材的三個核心重點是什麼？</button><button data-i18n="chat.sug_2">用簡單的例子解釋最重要的概念</button></div>
+              <div class="suggestions"><button data-i18n="chat.sug_1">這份教材的三個核心重點是什麼？</button><button
+                  data-i18n="chat.sug_2">用簡單的例子解釋最重要的概念</button></div>
             </div>
           </div>
         </div>
@@ -348,7 +382,8 @@
             </div>
           </div>
           <button type="button" class="secondary-button" id="profileLogoutBtn"
-            style="margin-top: 24px; width: 100%; color: #dc2626; border-color: #fca5a5;" data-i18n="profile.btn_logout">登出系統</button>
+            style="margin-top: 24px; width: 100%; color: #dc2626; border-color: #fca5a5;"
+            data-i18n="profile.btn_logout">登出系統</button>
         </div>
 
         <!-- 修改密碼卡片 -->
@@ -361,16 +396,18 @@
           <form class="auth-form" id="changePasswordForm" style="margin-top: 16px;">
             <div class="auth-field">
               <label for="oldPasswordInput" data-i18n="profile.lbl_old_pass">原密碼</label>
-              <input type="password" id="oldPasswordInput" placeholder="輸入原密碼" data-i18n="profile.ph_old_pass" required autocomplete="current-password">
+              <input type="password" id="oldPasswordInput" placeholder="輸入原密碼" data-i18n="profile.ph_old_pass" required
+                autocomplete="current-password">
             </div>
             <div class="auth-field">
               <label for="newPasswordInput" data-i18n="profile.lbl_new_pass">新密碼</label>
-              <input type="password" id="newPasswordInput" placeholder="輸入新密碼 (至少4字元)" data-i18n="profile.ph_new_pass" required
-                autocomplete="new-password">
+              <input type="password" id="newPasswordInput" placeholder="輸入新密碼 (至少4字元)" data-i18n="profile.ph_new_pass"
+                required autocomplete="new-password">
             </div>
             <div class="auth-error-msg hidden" id="changePassError"></div>
             <div class="auth-success-msg hidden" id="changePassSuccess"></div>
-            <button type="submit" class="primary-button auth-submit-btn" data-i18n="profile.btn_save_pass">儲存新密碼</button>
+            <button type="submit" class="primary-button auth-submit-btn"
+              data-i18n="profile.btn_save_pass">儲存新密碼</button>
           </form>
         </div>
       </div>
@@ -384,8 +421,10 @@
       <button class="auth-modal-close" id="closeAuthModalBtn" type="button" aria-label="關閉">&times;</button>
 
       <div class="auth-tabs">
-        <button class="auth-tab-btn active" id="tabLoginBtn" type="button" data-tab="login" data-i18n="auth.tab_login">用戶登入</button>
-        <button class="auth-tab-btn" id="tabRegisterBtn" type="button" data-tab="register" data-i18n="auth.tab_register">註冊新帳號</button>
+        <button class="auth-tab-btn active" id="tabLoginBtn" type="button" data-tab="login"
+          data-i18n="auth.tab_login">用戶登入</button>
+        <button class="auth-tab-btn" id="tabRegisterBtn" type="button" data-tab="register"
+          data-i18n="auth.tab_register">註冊新帳號</button>
       </div>
 
       <!-- 登入 Form -->
@@ -394,11 +433,13 @@
         <p class="auth-sub" data-i18n="auth.login_sub">請輸入您的帳號與密碼以取得 API 使用權限與配額</p>
         <div class="auth-field">
           <label for="loginUsername" data-i18n="auth.lbl_username">帳號</label>
-          <input type="text" id="loginUsername" placeholder="輸入帳號" data-i18n="auth.ph_username" required autocomplete="username">
+          <input type="text" id="loginUsername" placeholder="輸入帳號" data-i18n="auth.ph_username" required
+            autocomplete="username">
         </div>
         <div class="auth-field">
           <label for="loginPassword" data-i18n="auth.lbl_password">密碼</label>
-          <input type="password" id="loginPassword" placeholder="輸入密碼" data-i18n="auth.ph_password" required autocomplete="current-password">
+          <input type="password" id="loginPassword" placeholder="輸入密碼" data-i18n="auth.ph_password" required
+            autocomplete="current-password">
         </div>
         <div class="auth-error-msg hidden" id="loginError"></div>
         <button type="submit" class="primary-button auth-submit-btn" data-i18n="auth.btn_login">登入系統</button>
@@ -410,11 +451,13 @@
         <p class="auth-sub" data-i18n="auth.reg_sub">註冊後需經管理員開通，方可登入並開始使用每日 20 次提問額度</p>
         <div class="auth-field">
           <label for="regUsername" data-i18n="auth.lbl_username">帳號</label>
-          <input type="text" id="regUsername" placeholder="長度至少 3 個字元" data-i18n="auth.ph_reg_user" required autocomplete="username">
+          <input type="text" id="regUsername" placeholder="長度至少 3 個字元" data-i18n="auth.ph_reg_user" required
+            autocomplete="username">
         </div>
         <div class="auth-field">
           <label for="regPassword" data-i18n="auth.lbl_password">密碼</label>
-          <input type="password" id="regPassword" placeholder="長度至少 4 個字元" data-i18n="auth.ph_reg_pass" required autocomplete="new-password">
+          <input type="password" id="regPassword" placeholder="長度至少 4 個字元" data-i18n="auth.ph_reg_pass" required
+            autocomplete="new-password">
         </div>
         <div class="auth-error-msg hidden" id="regError"></div>
         <div class="auth-success-msg hidden" id="regSuccess"></div>
@@ -431,7 +474,7 @@
     <p id="loadingCopy" data-i18n="loading.read_copy">整理章節與核心概念…</p>
     <div class="loading-track"><span></span></div>
   </div>
-  <script src="/app.js?v=1.2.0"></script>
+  <script src="/app.js?v=2.6.0"></script>
 </body>
 
 </html>
