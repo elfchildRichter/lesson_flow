@@ -224,3 +224,7 @@ output/
 # Notes and TODO
 Notes.md
 TODO.md
+
+# Personal AI Customization Rules (keep .agents/ tracked for team skills)
+AGENTS.md
+GEMINI.md
