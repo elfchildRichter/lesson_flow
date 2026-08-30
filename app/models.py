@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Literal
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -27,7 +27,7 @@ class Document:
     chunks: list[Chunk]
     size_bytes: int
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    vectors: list[list[float]] | None = None
+    vectors: Optional[list[list[float]]] = None
 
 
 class Source(BaseModel):

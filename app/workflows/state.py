@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, TypedDict
+from typing import Any, Optional, TypedDict
 from app.models import Chunk, Deck, Document, Source
 
 
@@ -34,5 +34,6 @@ class DeckState(TypedDict, total=False):
     is_quality_passed: bool
     retry_count: int
     audit_feedback: str
-    deck: Deck | None
+    deck: Optional[Deck]
+
 

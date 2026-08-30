@@ -5,7 +5,7 @@ from pathlib import Path
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile, Depends
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile, Depends, Request
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 
@@ -15,6 +15,8 @@ from fastapi_auth_core import (
     admin_router,
     get_current_user,
     require_quota,
+    decode_access_token,
+    get_user_quota_info,
 )
 
 from .models import AskRequest, AskResponse, GenerateRequest, ProviderRequest
@@ -43,6 +45,54 @@ ai = AIService()
 STATIC_DIR = Path(__file__).parent / "static"
 
 
+from .workflows import company_router, skill_registry
+
+
+@app.get("/api/agent/skills")
+def get_agent_skills() -> dict:
+    skills = skill_registry.list_skills()
+    return {"skills": [s.to_dict() for s in skills]}
+
+
+@app.post("/api/agent/dispatch")
+def dispatch_agent_task(payload: dict, request: Request) -> dict:
+    query = payload.get("query", "").strip()
+    platform = payload.get("platform", "FB / 社群媒體")
+    if not query:
+        raise HTTPException(400, "請提供有效的任務指令說明")
+
+    # 擷取當前請求的 JWT 身份與真實 Quota 資訊
+    user_info = None
+    auth_header = request.headers.get("Authorization")
+    if auth_header and auth_header.startswith("Bearer "):
+        token = auth_header.split(" ", 1)[1]
+        user_payload = decode_access_token(token)
+        if user_payload:
+            user_id = user_payload.get("user_id", 0)
+            username = user_payload.get("sub", "訪客")
+            role = user_payload.get("role", "guest")
+            quota = get_user_quota_info(user_id, username, role)
+            user_info = {
+                "user_id": user_id,
+                "username": username,
+                "role": role,
+                "quota": quota,
+            }
+
+    full_payload = {
+        "query": query,
+        "platform": platform,
+        "ai_service": ai,
+        "user_info": user_info,
+    }
+    try:
+        state = company_router.invoke({"input_query": query, "payload": full_payload})
+        return state.get("result", {})
+    except Exception as exc:
+        raise HTTPException(500, f"Agent 任務派發失敗：{exc}") from exc
+
+
+
 @app.get("/api/health")
 def health() -> dict:
     return {"status": "ok", **ai.info}
@@ -58,6 +108,7 @@ def set_provider(request: ProviderRequest) -> dict:
     try:
         info = ai.set_provider(request.provider)
         return {"status": "ok", **info}
+
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
 

@@ -18,12 +18,44 @@ const translations = {
     'nav.chat': '文件問答',
     'nav.profile': '個人帳號設定',
     'nav.admin': '管理員控制台',
+    'nav.agent': 'Agent 指揮所',
     'nav.crumb_create': '建立新課程',
     'nav.crumb_workspace': '工作台',
     'nav.crumb_deck': '簡報檢視',
     'nav.crumb_chat': '教材 AI 助手',
     'nav.crumb_admin': '管理員控制台',
+    'nav.crumb_agent': 'Agent 指揮所',
     'nav.crumb_profile': '個人帳號設定',
+    'agent.eyebrow': '多部門 AI 團隊動態指揮',
+    'agent.title': '🤖 Agent 指揮所',
+    'agent.subtitle': '跨部門 AI 團隊動態調度、即時任務派發與技能狀態監控。',
+    'agent.metric_depts': '4 大部門',
+    'agent.metric_depts_sub': '教務 · 行政 · 技術 · 行銷',
+    'agent.metric_skills': '5 個 Skills',
+    'agent.metric_skills_sub': '外掛式動態註冊表 (Registry)',
+    'agent.metric_router': 'CompanyRouter',
+    'agent.metric_router_sub': '意圖自適應分流與容錯',
+    'agent.dept_status_active': '🟢 服務中',
+    'agent.dept_academic_title': '教務教學部',
+    'agent.dept_academic_role': 'Lesson Flow 小老師',
+    'agent.dept_academic_desc': '負責教材解析、問答流調優、簡報大綱與逐頁演講稿生成。',
+    'agent.dept_ops_title': '營運與行政部',
+    'agent.dept_ops_role': '事務負責人',
+    'agent.dept_ops_desc': '負責使用者身份驗證 (JWT)、每日限額 (Quota) 管理與系統規則。',
+    'agent.dept_devops_title': '技術維護部',
+    'agent.dept_devops_role': '技術維護工程師',
+    'agent.dept_devops_desc': '負責 Railway 部署診斷、OOM 記憶體排查、Volume 與 AI Provider 設定。',
+    'agent.dept_mkt_title': '市場與營銷部',
+    'agent.dept_mkt_role': '營銷推廣負責人',
+    'agent.dept_mkt_desc': '負責 SaaS 商業化模式、產品賣點包裝、FB/Threads 社群文案與 SEO。',
+    'agent.dept_mkt_platform_label': '文案推廣平台：',
+    'agent.welcome_title': '🤖 歡迎使用 Agent 指揮所',
+    'agent.welcome_desc': '輸入任何任務指令，CompanyRouter 會自動辨識意圖並分發至教務、行政、技術或行銷部門處理。',
+    'agent.sug_1': '🎓 說明牛頓第二定律大綱',
+    'agent.sug_2': '📋 查詢每日 Quota 配額',
+    'agent.sug_3': '🛠️ 排查 Railway OOM 錯誤',
+    'agent.sug_4': '🚀 撰寫 Self-RAG 宣傳文案',
+    'agent.placeholder': '向全域 Orchestrator 下達任務指令 (例: \'排查 Railway 部署錯誤\' 或 \'寫一篇 FB 貼文\')...',
     'provider.title': '⚡ AI 模型提供者',
     'multimodal.title': '📷 教材解析設定',
     'multimodal.toggle_label': '圖表與理化公式辨識',
@@ -195,12 +227,44 @@ const translations = {
     'nav.chat': 'PDF Chat',
     'nav.profile': 'Account Settings',
     'nav.admin': 'Admin Console',
+    'nav.agent': 'Agent Ops',
     'nav.crumb_create': 'Create Course',
     'nav.crumb_workspace': 'Workspace',
     'nav.crumb_deck': 'Deck View',
     'nav.crumb_chat': 'Lesson Assistant',
     'nav.crumb_admin': 'Admin Console',
+    'nav.crumb_agent': 'Agent Ops Center',
     'nav.crumb_profile': 'Account Settings',
+    'agent.eyebrow': 'Multi-Department AI Orchestration',
+    'agent.title': '🤖 Agent Ops Command Center',
+    'agent.subtitle': 'Dynamic AI team dispatch, task routing, and skill monitoring.',
+    'agent.metric_depts': '4 Departments',
+    'agent.metric_depts_sub': 'Academic · Ops · DevOps · Marketing',
+    'agent.metric_skills': '5 Skills',
+    'agent.metric_skills_sub': 'Extensible Skill Registry',
+    'agent.metric_router': 'CompanyRouter',
+    'agent.metric_router_sub': 'Adaptive Intent Routing & Fallback',
+    'agent.dept_status_active': '🟢 Active',
+    'agent.dept_academic_title': 'Academic & Teaching',
+    'agent.dept_academic_role': 'Lesson Flow Tutor',
+    'agent.dept_academic_desc': 'Handles lesson QA, slide deck generation, lecture scripts, and Self-RAG verification.',
+    'agent.dept_ops_title': 'Operations & Admin',
+    'agent.dept_ops_role': 'Ops Manager',
+    'agent.dept_ops_desc': 'Handles JWT user auth, daily quota management, and system governance.',
+    'agent.dept_devops_title': 'DevOps & Maintenance',
+    'agent.dept_devops_role': 'DevOps Engineer',
+    'agent.dept_devops_desc': 'Handles Railway deployments, OOM diagnosis, Volume caching, and AI Provider switching.',
+    'agent.dept_mkt_title': 'Marketing & Sales',
+    'agent.dept_mkt_role': 'Marketing Lead',
+    'agent.dept_mkt_desc': 'Handles SaaS positioning, product pitch copy, social posts (FB/Threads), and SEO.',
+    'agent.dept_mkt_platform_label': 'Target Platform:',
+    'agent.welcome_title': '🤖 Welcome to Agent Ops Center',
+    'agent.welcome_desc': 'Enter any task query. CompanyRouter will automatically classify your intent and route it to the appropriate department.',
+    'agent.sug_1': '🎓 Newton\'s 2nd Law Outline',
+    'agent.sug_2': '📋 Check My Daily Quota',
+    'agent.sug_3': '🛠️ Diagnose Railway OOM Error',
+    'agent.sug_4': '🚀 Generate Self-RAG Copywriting',
+    'agent.placeholder': 'Dispatch task to Orchestrator (e.g. \'Diagnose Railway OOM error\' or \'Write a promotional post\')...',
     'provider.title': '⚡ AI Provider',
     'multimodal.title': '📷 PDF Reading Mode',
     'multimodal.toggle_label': 'Diagrams & Math Formulas',
@@ -872,7 +936,7 @@ $('#removeFile').addEventListener('click', () => {
 });
 
 function switchView(name) {
-  if (name === 'admin' && (!state.user || state.user.role !== 'admin')) {
+  if ((name === 'admin' || name === 'agent') && (!state.user || state.user.role !== 'admin')) {
     toast(state.lang === 'en' ? 'Admin access only' : '僅限管理員存取控制台', true);
     return;
   }
@@ -890,10 +954,12 @@ function switchView(name) {
     'deck': t('nav.crumb_deck'),
     'chat': t('nav.crumb_chat'),
     'profile': t('nav.crumb_profile'),
+    'agent': t('nav.crumb_agent'),
     'admin': t('nav.crumb_admin')
   };
   if ($('#crumb')) $('#crumb').textContent = crumbs[name] || t('nav.crumb_create');
   if (innerWidth < 950) toggleSidebar(false);
+
 
   if (name === 'admin') {
     fetchAllUsers();
@@ -1318,14 +1384,15 @@ fetchCurrentUser();
 // === 管理員控制台 (Admin Modal) 與 個人設定 (Profile Modal) 邏輯 ===
 
 function updateAdminUI() {
-  const adminNavBtn = $('#adminNavBtn') || $('#openAdminModalBtn') || $('.admin-only');
-  if (!adminNavBtn) return;
-
+  $$('.admin-only').forEach(el => {
+    if (state.user && state.user.role === 'admin') {
+      el.classList.remove('hidden');
+    } else {
+      el.classList.add('hidden');
+    }
+  });
   if (state.user && state.user.role === 'admin') {
-    adminNavBtn.classList.remove('hidden');
     fetchPendingCount();
-  } else {
-    adminNavBtn.classList.add('hidden');
   }
 }
 
@@ -1602,3 +1669,125 @@ $('#changePasswordForm')?.addEventListener('submit', async (e) => {
 
 // 頁面初始化語系
 setLanguage(state.lang);
+
+// === Agent Ops Command Center Logic (Chat Stream UX) ===
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.agent-sug-btn');
+  if (btn && btn.dataset.query) {
+    const input = $('#agentQueryInput');
+    if (input) input.value = btn.dataset.query;
+    dispatchAgentTask(btn.dataset.query);
+  }
+
+  const copyBtn = e.target.closest('.agent-copy-btn');
+  if (copyBtn && copyBtn.dataset.copy) {
+    navigator.clipboard.writeText(copyBtn.dataset.copy).then(() => {
+      toast(state.lang === 'en' ? 'Copied to clipboard!' : '已複製內容至剪貼簿！');
+    });
+  }
+});
+
+$('#agentForm')?.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const input = $('#agentQueryInput');
+  const query = input?.value?.trim();
+  if (query) {
+    dispatchAgentTask(query);
+    if (input) input.value = '';
+  }
+});
+
+async function dispatchAgentTask(query) {
+  const container = $('#agentMessages');
+  const sendBtn = $('#agentSendBtn');
+  const platform = $('#agentPlatformSelect')?.value || 'FB / 社群媒體';
+  const isEn = state.lang === 'en';
+
+  if (!container) return;
+
+  // 1. Append User Message Bubble
+  const userMsgEl = document.createElement('div');
+  userMsgEl.className = 'message user';
+  userMsgEl.innerHTML = `<div><b>${escapeHtml(query)}</b></div>`;
+  container.appendChild(userMsgEl);
+
+  // 2. Append Assistant Loading Bubble
+  const assistantMsgEl = document.createElement('div');
+  assistantMsgEl.className = 'message assistant';
+  assistantMsgEl.innerHTML = `
+    <span class="bot-avatar">✦</span>
+    <div>
+      <div class="agent-msg-meta">
+        <span class="agent-dept-chip">${isEn ? '⏳ Dispatching...' : '⏳ 正在分發...'}</span>
+      </div>
+      <p style="color: var(--muted); margin: 0;">${isEn ? 'Orchestrator is routing task to the target department and executing Skill...' : 'Orchestrator 正在將指令導航至對應部門並調用 Skill 處理，請稍候...'}</p>
+    </div>
+  `;
+  container.appendChild(assistantMsgEl);
+  container.scrollTop = container.scrollHeight;
+  if (sendBtn) sendBtn.disabled = true;
+
+  try {
+    const res = await api('/api/agent/dispatch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, platform })
+    });
+
+    const dept = res.department ? res.department.toUpperCase() : 'GENERAL';
+    const skill = res.matched_skill || 'general';
+    const data = res.data || {};
+    const text = (typeof data === 'object' ? (data.output_text || data.copywriting || JSON.stringify(data, null, 2)) : String(data)) || res.message || (isEn ? 'Task completed.' : '任務完成。');
+
+    const deptLabels = {
+      'ACADEMIC': isEn ? '🎓 Academic & Teaching' : '🎓 教務教學部',
+      'OPERATIONS': isEn ? '📋 Operations & Admin' : '📋 營運與行政部',
+      'DEVOPS': isEn ? '🛠️ DevOps & Infra' : '🛠️ 技術維護部',
+      'MARKETING': isEn ? '🚀 Marketing & Sales' : '🚀 市場與營銷部'
+    };
+    const deptLabel = deptLabels[dept] || (isEn ? `🎯 Dept: ${dept}` : `🎯 部門: ${dept}`);
+
+    // 3. Replace Loading with Final Assistant Response Bubble
+    assistantMsgEl.innerHTML = `
+      <span class="bot-avatar">✦</span>
+      <div>
+        <div class="agent-msg-meta">
+          <span class="agent-dept-chip">${deptLabel}</span>
+          <span class="agent-skill-chip">⚡ Skill: ${skill}</span>
+        </div>
+        <p style="white-space: pre-wrap; font-family: inherit;">${escapeHtml(text)}</p>
+        <button type="button" class="agent-copy-btn" data-copy="${escapeHtml(text)}">${isEn ? '📋 Copy Content' : '📋 複製內容'}</button>
+      </div>
+    `;
+
+    if (typeof renderMathInElement === 'function') {
+      try {
+        renderMathInElement(assistantMsgEl, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '$', right: '$', display: false }
+          ],
+          throwOnError: false
+        });
+      } catch (_) {}
+    }
+
+    toast(isEn ? `Task completed by ${deptLabel}` : `Agent 任務已由 ${deptLabel} 順利完成`);
+  } catch (err) {
+    assistantMsgEl.innerHTML = `
+      <span class="bot-avatar" style="background: #f87171; color: #fff;">!</span>
+      <div>
+        <div class="agent-msg-meta">
+          <span class="agent-dept-chip" style="background: rgba(239, 68, 68, 0.1); color: #dc2626;">${isEn ? '🔴 Dispatch Failed' : '🔴 處理失敗'}</span>
+        </div>
+        <p style="color: #dc2626; margin: 0;">❌ ${isEn ? 'Error:' : '錯誤：'}${escapeHtml(err.message)}</p>
+      </div>
+    `;
+    toast(err.message, true);
+  } finally {
+    if (sendBtn) sendBtn.disabled = false;
+    container.scrollTop = container.scrollHeight;
+  }
+}
+
+

@@ -1,7 +1,8 @@
 # 課伴 LessonFlow
 
-課伴是一個以 **LangGraph 狀態圖** 與 **多模態檢索增強生成 (Multimodal RAG)** 為核心的 AI 教學助理。上傳 PDF 教材後，可以：
+課伴是一個以 **LangGraph 狀態圖**、**多部門 AI 團隊動態調度 (Agent Orchestration)** 與 **多模態檢索增強生成 (Multimodal RAG)** 為核心的 AI 教學助理與 SaaS 自動化平台。上傳 PDF 教材後，可以：
 
+- **🤖 Agent 指揮所 (Agent Ops Command Center)**：整合 **CompanyRouter** 與 **SkillRegistry**，支援管理員動態調度 4 大 AI 專家部門（教務、行政、技術、行銷）處理自動化任務。
 - **方案 A 視覺頁面直解 (Vision-Native Direct Parsing)**：以高畫質 200 DPI PNG 頁面圖檔結合 VLM 視覺大模型，精準還原 PDF 頁面結構、排版、複雜表格與 **LaTeX 數學公式 (`$...$` / `$$...$$`)**。
 - **🌐 跨語言簡報與講稿生成**：支援上傳中/英文教材，可自由選擇產出 **繁體中文 (zh-TW)**、**English (en)** 或 **跟隨教材 (auto)** 的簡報與演講稿。
 - 產生可下載的 PowerPoint 教學簡報 (`.pptx`) 與高品質逐頁演講稿 (`.md`)。
@@ -10,6 +11,20 @@
 - **可選性聯網補充搜尋 (Corrective RAG)**：當教材資訊不足或需延伸最新案例時，可勾選開啟聯網搜尋補足內容。
 - **🌐 EN / 繁體中文 雙語介面 (Bilingual i18n)**：支援點擊頂部導覽列按鈕即時切換全站介面、選單選項、提示與錯誤訊息。
 - **🔐 身分驗證與管理員控制台**：整合 JWT 認證、使用者權限控制（一般用戶 / 👑 系統管理員）與每日額度限制 (Quota Control)。
+- **💻 CLI 命令列介面 (`app/cli.py`)**：支援直接在 Shell 執行指令派發任務至多部門 AI 團隊處理。
+
+---
+
+## 🤖 多部門 AI 團隊架構 (Company Router & Agent Ops)
+
+課伴導入公司化的跨部門 AI 團隊運作模式，透過 **CompanyRouter (`StateGraph`)** 達成自適應意圖辨識與動態任務派發：
+
+| 部門標誌 | 部門名稱 | 特化 Agent Skill | 核心職責與處理範疇 |
+|---|---|---|---|
+| 🎓 | **教務教學部** | `qa_teaching_tutor`<br/>`deck_generation_tutor` | 教材概念解析、問答流調優、簡報大綱、逐頁演講稿生成、LaTeX 數學公式渲染與 Self-RAG 審查。 |
+| 📋 | **營運與行政部** | `user_quota_operations` | 使用者身份驗證 (JWT)、每日配額 (Quota Limit) 管理、權限控制與系統營運規則廣播。 |
+| 🛠️ | **技術維護部** | `railway_devops` | Railway 部署診斷、OOM 記憶體溢出排查、HuggingFace 快取持久化與多 AI Provider 切換。 |
+| 🚀 | **市場與營銷部** | `saas_marketing` | SaaS 商業化模式、產品賣點包裝、FB/Threads/LinkedIn 社群貼文文案與 SEO 優化。 |
 
 ---
 
@@ -133,7 +148,7 @@ docker compose up --build
 
 ---
 
-### (選用) 本地宿主機環境開發 (Host Virtualenv)
+### (選用) 本地宿主機環境開發 (Host Virtualenv & CLI)
 
 若選擇不安裝 Docker，直接在宿主機上執行：
 
@@ -142,6 +157,13 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload
+```
+
+#### CLI 命令列工具測試：
+專案配備全功能命令列工具 `app/cli.py`，支援直接下達自然語言任務至 Orchestrator：
+```bash
+python3 -m app.cli "請幫我排查 Railway 部署發生的 Out of Memory 錯誤"
+python3 -m app.cli "寫一篇介紹 Self-RAG 防幻覺功能的 FB 宣傳貼文"
 ```
 
 ---
@@ -209,6 +231,7 @@ OLLAMA_EMBEDDING_MODEL=bge-m3
 5. 選擇學習對象、教學語氣、課程時間、投影片數量與 **目標輸出語言 (🇹🇼 繁體中文 / 🇺🇸 English / 🤖 跟隨教材)**，並可於左側選單隨時切換 AI 提供者（Gemini / OpenAI / Ollama 雲端 / Ollama 本機）。
 6. 產生並預覽投影片及逐頁演講稿。
 7. 下載 `.pptx` 或 `.md`，或切換至「文件問答」向教材提問。
+8. 登入管理員帳號可進入 **🤖 Agent 指揮所**（或使用 CLI）派發跨部門自動化任務。
 
 驗證健康狀態：
 
@@ -246,6 +269,8 @@ Gemini 雲端模式的回應範例：
 | `POST` | `/api/decks` | 產生投影片及逐頁講稿（需登入與配額，支援 `language: zh-TW/en/auto`） |
 | `GET` | `/api/decks/{deck_id}/pptx` | 下載 PowerPoint 簡報文件 |
 | `GET` | `/api/decks/{deck_id}/script` | 下載 Markdown 演講腳本 |
+| `GET` | `/api/agent/skills` | [管理員] 查詢多部門 AI Skills 註冊表與關鍵字 |
+| `POST` | `/api/agent/dispatch` | [管理員] 派發自然語言任務至 CompanyRouter 執行多部門調度 |
 | `GET` | `/api/users/all` | [管理員] 查詢全站使用者帳號清單與審核狀態 |
 | `GET` | `/api/admin/users/pending` | [管理員] 查詢待開通審核之使用者帳號列表 |
 | `POST` | `/api/admin/users/review` | [管理員] 核准或拒絕使用者帳號開通 |

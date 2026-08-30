@@ -9,6 +9,7 @@ import re
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from pypdf import PdfReader
+from typing import Optional
 
 from .models import Chunk, Deck, Document, Slide, Source
 from .workflows import build_deck_graph, build_qa_graph
@@ -94,8 +95,8 @@ def _page_needs_vision(page: typing.Any, text: str) -> bool:
 def parse_pdf(
     content: bytes,
     filename: str,
-    ai_service: AIService | None = None,
-    enable_multimodal: bool | None = None,
+    ai_service: Optional[AIService] = None,
+    enable_multimodal: Optional[bool] = None,
 ) -> Document:
     chunks: list[Chunk] = []
     total_pages = 0

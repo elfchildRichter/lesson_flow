@@ -32,8 +32,12 @@
           data-i18n="nav.chat">文件問答</span></button>
       <button class="nav-item user-only hidden" data-view="profile" id="profileNavBtn"><span class="icon">⚙️</span><span
           data-i18n="nav.profile">個人帳號設定</span></button>
+      <button class="nav-item admin-only hidden" data-view="agent" id="agentNavBtn"><span class="icon">🤖</span><span
+          data-i18n="nav.agent">Agent 指揮所</span></button>
+
       <button class="nav-item admin-only hidden" data-view="admin"><span class="icon">👑</span><span
           data-i18n="nav.admin">管理員控制台</span><span class="nav-count badge-pending" id="pendingBadge">0</span></button>
+
     </nav>
     <div>
       <br />
@@ -350,6 +354,145 @@
         </div>
       </div>
     </section>
+
+    <section class="view" id="agentView">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow"><span></span> <span data-i18n="agent.eyebrow">多部門 AI 團隊動態指揮</span></p>
+          <h1 data-i18n="agent.title">🤖 Agent 指揮所</h1>
+          <p data-i18n="agent.subtitle">跨部門 AI 團隊動態調度、即時任務派發與技能狀態監控。</p>
+        </div>
+      </div>
+
+      <!-- Agent Metrics Grid -->
+      <div class="admin-metrics-grid" style="margin-bottom: 20px;">
+        <div class="admin-metric-card primary">
+          <span class="metric-icon">👥</span>
+          <div>
+            <b data-i18n="agent.metric_depts">4 大部門</b>
+            <small data-i18n="agent.metric_depts_sub">教務 · 行政 · 技術 · 行銷</small>
+          </div>
+        </div>
+        <div class="admin-metric-card">
+          <span class="metric-icon">⚡</span>
+          <div>
+            <b id="agentSkillCount" data-i18n="agent.metric_skills">5 個 Skills</b>
+            <small data-i18n="agent.metric_skills_sub">外掛式動態註冊表 (Registry)</small>
+          </div>
+        </div>
+        <div class="admin-metric-card warning">
+          <span class="metric-icon">🛡️</span>
+          <div>
+            <b data-i18n="agent.metric_router">CompanyRouter</b>
+            <small data-i18n="agent.metric_router_sub">意圖自適應分流與容錯</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Department Cards Grid -->
+      <div class="agent-dept-grid">
+        <div class="agent-dept-card" data-dept="academic">
+          <div class="dept-card-head">
+            <span class="dept-icon">🎓</span>
+            <div>
+              <h3 data-i18n="agent.dept_academic_title">教務教學部</h3>
+              <small data-i18n="agent.dept_academic_role">Lesson Flow 小老師</small>
+            </div>
+            <span class="dept-badge" data-i18n="agent.dept_status_active">🟢 服務中</span>
+          </div>
+          <p class="dept-desc" data-i18n="agent.dept_academic_desc">負責教材解析、問答流調優、簡報大綱與逐頁演講稿生成。</p>
+          <div class="dept-skills-tags">
+            <span class="skill-tag">qa_teaching_tutor</span>
+            <span class="skill-tag">deck_generation_tutor</span>
+          </div>
+        </div>
+
+        <div class="agent-dept-card" data-dept="operations">
+          <div class="dept-card-head">
+            <span class="dept-icon">📋</span>
+            <div>
+              <h3 data-i18n="agent.dept_ops_title">營運與行政部</h3>
+              <small data-i18n="agent.dept_ops_role">事務負責人</small>
+            </div>
+            <span class="dept-badge" data-i18n="agent.dept_status_active">🟢 服務中</span>
+          </div>
+          <p class="dept-desc" data-i18n="agent.dept_ops_desc">負責使用者身份驗證 (JWT)、每日限額 (Quota) 管理與系統規則。</p>
+          <div class="dept-skills-tags">
+            <span class="skill-tag">user_quota_operations</span>
+          </div>
+        </div>
+
+        <div class="agent-dept-card" data-dept="devops">
+          <div class="dept-card-head">
+            <span class="dept-icon">🛠️</span>
+            <div>
+              <h3 data-i18n="agent.dept_devops_title">技術維護部</h3>
+              <small data-i18n="agent.dept_devops_role">技術維護工程師</small>
+            </div>
+            <span class="dept-badge" data-i18n="agent.dept_status_active">🟢 服務中</span>
+          </div>
+          <p class="dept-desc" data-i18n="agent.dept_devops_desc">負責 Railway 部署診斷、OOM 記憶體排查、Volume 與 AI Provider 設定。</p>
+          <div class="dept-skills-tags">
+            <span class="skill-tag">railway_devops</span>
+          </div>
+        </div>
+
+        <div class="agent-dept-card" data-dept="marketing">
+          <div class="dept-card-head">
+            <span class="dept-icon">🚀</span>
+            <div>
+              <h3 data-i18n="agent.dept_mkt_title">市場與營銷部</h3>
+              <small data-i18n="agent.dept_mkt_role">營銷推廣負責人</small>
+            </div>
+            <span class="dept-badge" data-i18n="agent.dept_status_active">🟢 服務中</span>
+          </div>
+          <p class="dept-desc" data-i18n="agent.dept_mkt_desc">負責 SaaS 商業化模式、產品賣點包裝、FB/Threads 社群文案與 SEO。</p>
+          <div
+            style="margin-bottom: 10px; display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted);">
+            <span data-i18n="agent.dept_mkt_platform_label">文案推廣平台：</span>
+            <select id="agentPlatformSelect"
+              style="font-size: 11px; padding: 2px 6px; border-radius: 6px; border: 1px solid var(--line); background: var(--paper);">
+              <option value="FB / 社群媒體">FB 社群媒體</option>
+              <option value="Threads">Threads 平台</option>
+              <option value="LinkedIn">LinkedIn 平台</option>
+              <option value="Twitter / X">Twitter / X</option>
+            </select>
+          </div>
+          <div class="dept-skills-tags">
+            <span class="skill-tag">saas_marketing</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agent Interactive Chat Shell -->
+      <div class="chat-shell agent-chat-shell">
+        <div class="messages" id="agentMessages">
+          <div class="message assistant welcome">
+            <span class="bot-avatar">✦</span>
+            <div>
+              <b data-i18n="agent.welcome_title">🤖 歡迎使用 Agent 指揮所</b>
+              <p data-i18n="agent.welcome_desc">輸入任何任務指令，CompanyRouter 會自動辨識意圖並分發至教務、行政、技術或行銷部門處理。</p>
+              <div class="suggestions">
+                <button type="button" class="agent-sug-btn" data-query="請說明牛頓第二運動定律的教學大綱" data-i18n="agent.sug_1">🎓 說明牛頓第二定律大綱</button>
+                <button type="button" class="agent-sug-btn" data-query="查詢我今天的每日配額使用量與權限" data-i18n="agent.sug_2">📋 查詢每日 Quota 配額</button>
+                <button type="button" class="agent-sug-btn" data-query="請幫我排查 Railway 部署發生的 Out of Memory 錯誤" data-i18n="agent.sug_3">🛠️ 排查 Railway OOM 錯誤</button>
+                <button type="button" class="agent-sug-btn" data-query="請幫我產出一篇介紹 Self-RAG 防幻覺功能的文案" data-i18n="agent.sug_4">🚀 撰寫 Self-RAG 宣傳文案</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <form class="chat-input" id="agentForm">
+          <textarea id="agentQueryInput" rows="1" data-i18n="agent.placeholder"
+            placeholder="向全域 Orchestrator 下達任務指令 (例: '排查 Railway 部署錯誤' 或 '寫一篇 FB 貼文')..."></textarea>
+          <button type="submit" id="agentSendBtn">↑</button>
+        </form>
+      </div>
+    </section>
+
+
+
+
     <section class="view" id="profileView">
       <div class="section-head">
         <div>

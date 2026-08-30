@@ -1731,6 +1731,18 @@ main {
     height: calc(100dvh - 330px);
   }
 
+  .agent-dept-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .agent-chat-shell {
+    height: calc(100vh - 300px);
+    height: calc(100dvh - 300px);
+    min-height: 400px;
+  }
+
+
   .messages {
     padding: 20px 12px;
   }
@@ -2464,4 +2476,155 @@ main {
 .auth-error-msg.hidden,
 .auth-success-msg.hidden {
   display: none !important;
+}
+
+/* === Agent Ops Command Center (Agent 部門指揮所) === */
+.agent-dept-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.agent-dept-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.agent-dept-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+  border-color: var(--green);
+}
+
+.dept-card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.dept-icon {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.dept-card-head h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.dept-card-head small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.dept-badge {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: rgba(33, 74, 64, 0.08);
+  color: var(--green);
+}
+
+.dept-desc {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0 0 14px 0;
+  line-height: 1.5;
+}
+
+.dept-skills-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.skill-tag {
+  font-family: "Intel One Mono", monospace;
+  font-size: 11px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  padding: 3px 8px;
+  border-radius: 6px;
+  color: var(--green);
+}
+
+/* Agent Chat Shell Styling (Matching chatView Aesthetic) */
+.agent-chat-shell {
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  background: #fff;
+  height: calc(100vh - 360px);
+  min-height: 480px;
+}
+
+.agent-msg-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 11px;
+}
+
+.agent-dept-chip {
+  background: rgba(33, 74, 64, 0.1);
+  color: var(--green);
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.agent-skill-chip {
+  background: rgba(223, 91, 56, 0.1);
+  color: var(--accent-dark);
+  font-family: "Intel One Mono", monospace;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.agent-sug-btn {
+  border: 1px solid #d7dad4;
+  background: #fff;
+  padding: 7px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.agent-sug-btn:hover {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+
+.agent-copy-btn {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.agent-copy-btn:hover {
+  border-color: var(--green);
+  color: var(--green);
 }
