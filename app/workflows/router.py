@@ -22,11 +22,31 @@ class CompanyState(TypedDict, total=False):
 def classify_intent_node(state: CompanyState) -> CompanyState:
     """Orchestrator node: Classifies intent and matches query to department & skill."""
     query = state.get("input_query", "")
-    logger.info(f"[Orchestrator] Classifying intent for query: '{query}'")
+    payload = state.get("payload", {})
+    specified_dept = payload.get("target_department")
+    logger.info(f"[Orchestrator] Classifying intent for query: '{query}' (specified_dept={specified_dept})")
     query_lower = query.lower()
 
-    # 1. High priority check: Action intent for copywriting / marketing
-    marketing_triggers = ["文案", "貼文", "宣傳", "介紹文", "產出一篇", "寫一篇", "推廣", "貼文範本", "行銷"]
+    # 1. High priority check: Operations & Institution administration
+    ops_triggers = ["額度", "權限", "帳號", "登入", "quota", "機構", "學校", "席位", "授權", "合約", "團體"]
+    if any(k in query_lower for k in ops_triggers):
+        ops_skill = skill_registry.get_skill("user_quota_operations")
+        return {
+            "target_department": "operations",
+            "matched_skill": ops_skill.name if ops_skill else "user_quota_operations",
+        }
+
+    # 2. High priority check: DevOps & Infrastructure
+    devops_triggers = ["部署", "railway", "oom", "記憶體", "docker", "gemini", "ollama", "devops", "維護", "診斷"]
+    if any(k in query_lower for k in devops_triggers):
+        devops_skill = skill_registry.get_skill("railway_devops")
+        return {
+            "target_department": "devops",
+            "matched_skill": devops_skill.name if devops_skill else "railway_devops",
+        }
+
+    # 3. High priority check: Action intent for course promotion, articles, and marketing
+    marketing_triggers = ["賣點", "亮點", "招生", "宣傳", "推廣", "文案", "貼文", "社群文案", "行銷文案", "廣告文案", "fb 貼文", "threads 貼文", "社群貼文", "課程賣點", "社群推廣", "包裝", "文章", "心得", "經驗", "分享", "撰寫"]
     if any(k in query_lower for k in marketing_triggers):
         marketing_skill = skill_registry.get_skill("saas_marketing")
         return {
@@ -34,7 +54,17 @@ def classify_intent_node(state: CompanyState) -> CompanyState:
             "matched_skill": marketing_skill.name if marketing_skill else "saas_marketing",
         }
 
-    # 2. Try matching with Skill Registry
+    # 4. 若使用者已在 UI 點選特定部門對話框 (specified_dept)，直接鎖定為該部門處理
+    if specified_dept in ["marketing", "academic", "operations", "devops"]:
+        dept_skills = skill_registry.list_skills(specified_dept)
+        matched_skill = dept_skills[0].name if dept_skills else f"{specified_dept}_general"
+        logger.info(f"[Orchestrator] Direct routing to active user department [{specified_dept}] with skill [{matched_skill}]")
+        return {
+            "target_department": specified_dept,
+            "matched_skill": matched_skill,
+        }
+
+    # 5. Try matching with Skill Registry
     matched = skill_registry.match_skill(query)
     if matched:
         logger.info(
@@ -45,13 +75,9 @@ def classify_intent_node(state: CompanyState) -> CompanyState:
             "matched_skill": matched.name,
         }
 
-    # 3. Rule-based fallback classification
+    # 5. Rule-based fallback classification
     if any(k in query_lower for k in ["簡報", "講稿", "問答", "教材", "題目", "課文", "slide", "qa"]):
         department = "academic"
-    elif any(k in query_lower for k in ["額度", "權限", "帳號", "登入", "quota", "user", "admin"]):
-        department = "operations"
-    elif any(k in query_lower for k in ["部署", "railway", "oom", "記憶體", "docker", "gemini", "ollama", "devops"]):
-        department = "devops"
     else:
         department = "academic"  # Default fallback to academic (小老師)
 
@@ -63,12 +89,48 @@ def classify_intent_node(state: CompanyState) -> CompanyState:
 
 
 def department_dispatcher_node(state: CompanyState) -> CompanyState:
-    """Dispatches payload to the corresponding department skill or handler."""
+    """Dispatches payload to the corresponding department skill or handler with Tier permission validation."""
     dept = state.get("target_department", "academic")
     skill_name = state.get("matched_skill", "")
     payload = state.get("payload", {})
+    user_info = payload.get("user_info", {})
+    user_tier = user_info.get("tier", {}) if user_info else {}
+    allowed_depts = user_tier.get("allowed_departments", ["academic"])
+    user_role = user_info.get("role", "guest") if user_info else "guest"
 
-    logger.info(f"[Orchestrator] Dispatching to department [{dept}], skill [{skill_name}]")
+    logger.info(f"[Orchestrator] Dispatching to department [{dept}], skill [{skill_name}], role [{user_role}]")
+
+    # Tier Permission Validation
+    if user_role != "admin" and dept not in allowed_depts:
+        if dept == "devops":
+            notice = (
+                "🔒 【權限限制】\n\n"
+                "技術維運診斷為 👑 【管理員專用功能】。\n"
+                "一般教師與使用者請使用「💡 備課與教務助手」產出教案大綱，或使用「🚀 社群行銷助手」撰寫推廣貼文。"
+            )
+        elif dept == "marketing":
+            notice = (
+                "⭐ 【升級提示：教師專業版獨享功能】\n\n"
+                "【社群行銷文案助手】屬於「⭐ 教師專業版」以上解鎖功能。\n"
+                "目前您處於「🎓 教師試用版」。升級至專業版後即可解鎖全套 FB / Threads / IG 教學心得與課程推廣文案自動生成功能！"
+            )
+        elif dept == "operations":
+            notice = (
+                "🏫 【升級提示：機構/學校版獨享功能】\n\n"
+                "【教務營運與行政管理助手】屬於「🏫 機構/學校版」以上解鎖功能。\n"
+                "目前您處於「🎓 教師試用版」。升級至機構/學校版後即可解鎖全套團隊席位授權管理與團體合約維護功能！"
+            )
+        else:
+            notice = f"🔒 【權限限制】您目前的會員層級無法使用 [{dept}] 部門的功能，請聯繫管理員升級。"
+
+        return {
+            "result": {
+                "status": "forbidden",
+                "department": dept,
+                "matched_skill": skill_name,
+                "data": {"output_text": notice, "department": dept, "is_restricted": True},
+            }
+        }
 
     skill = skill_registry.get_skill(skill_name)
     handler = skill.handler if (skill and skill.handler) else None
@@ -172,9 +234,9 @@ def _init_default_skills():
     skill_registry.register(
         name="saas_marketing",
         department="marketing",
-        description="SaaS 商業模式推廣、SEO 文案與產品定位包裝",
+        description="課程宣傳推廣、教學賣點包裝、招生文案與 FB/Threads/LinkedIn 社群貼文生成",
         handler=marketing_handler,
-        keywords=["行銷", "推廣", "saas", "訂閱", "文案", "readme", "貼文", "fb", "宣傳"],
+        keywords=["行銷", "推廣", "賣點", "亮點", "招生", "包裝", "文案", "貼文", "fb", "threads", "宣傳", "文章", "心得", "經驗", "分享", "撰寫"],
     )
 
 

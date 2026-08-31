@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"></script>
-  <link rel="stylesheet" href="/styles.css?v=2.6.0">
+  <link rel="stylesheet" href="/styles.css?v=5.0.0">
 </head>
 
 <body>
@@ -24,20 +24,18 @@
       <span data-i18n="nav.brand">課伴<small>LESSONFLOW (Alpha)</small></span>
     </a>
     <nav>
-      <button class="nav-item active" data-view="workspace"><span class="icon">⌂</span><span
-          data-i18n="nav.workspace">工作台</span></button>
-      <button class="nav-item" data-view="deck"><span class="icon">▤</span><span data-i18n="nav.deck">我的簡報</span><span
+      <button class="nav-item active" data-view="workspace"><span class="icon">📄</span><span
+          data-i18n="nav.workspace">教材解析</span></button>
+      <button class="nav-item" data-view="deck"><span class="icon">▤</span><span data-i18n="nav.deck">教學簡報</span><span
           class="nav-count" id="deckCount">0</span></button>
-      <button class="nav-item" data-view="chat"><span class="icon">◇</span><span
-          data-i18n="nav.chat">文件問答</span></button>
+      <button class="nav-item" data-view="chat"><span class="icon">📖</span><span
+          data-i18n="nav.chat">教材問答</span></button>
+      <button class="nav-item" data-view="agent" id="agentNavBtn"><span class="icon">💡</span><span
+          data-i18n="nav.agent">AI 備課助手</span></button>
       <button class="nav-item user-only hidden" data-view="profile" id="profileNavBtn"><span class="icon">⚙️</span><span
           data-i18n="nav.profile">個人帳號設定</span></button>
-      <button class="nav-item admin-only hidden" data-view="agent" id="agentNavBtn"><span class="icon">🤖</span><span
-          data-i18n="nav.agent">Agent 指揮所</span></button>
-
       <button class="nav-item admin-only hidden" data-view="admin"><span class="icon">👑</span><span
           data-i18n="nav.admin">管理員控制台</span><span class="nav-count badge-pending" id="pendingBadge">0</span></button>
-
     </nav>
     <div>
       <br />
@@ -49,7 +47,7 @@
       <div class="provider-select-wrapper">
         <select id="providerSelect" class="provider-select" style="font-size: 12px !important;"
           aria-label="選擇 AI 模型提供者">
-          <option value="gemini" style="font-size: 12px !important;">✨ Gemini 雲端 API</option>
+          <option value="gemini" style="font-size: 12px !important;">Gemini 雲端 API ✨</option>
           <option value="ollama_cloud" style="font-size: 12px !important;">Ollama 雲端 API</option>
           <option value="ollama_local" style="font-size: 12px !important;">Ollama 本機 LLM</option>
           <option value="openai" style="font-size: 12px !important;">OpenAI 雲端 API</option>
@@ -76,12 +74,12 @@
       <div class="plan-head"><span data-i18n="quota.title">每日使用額度</span><b id="quotaBadge">未登入</b></div>
       <div class="quota-list" id="quotaList">
         <div class="quota-item">
-          <div class="quota-label"><small data-i18n="quota.deck_label">教學簡報</small><span id="deckQuotaText">- / 3
+          <div class="quota-label"><small data-i18n="quota.deck_label">教學簡報</small><span id="deckQuotaText">- / 1
               份</span></div>
           <div class="usage-bar"><i id="deckQuotaBar" style="width: 0%"></i></div>
         </div>
         <div class="quota-item" style="margin-top: 8px;">
-          <div class="quota-label"><small data-i18n="quota.ask_label">文件提問</small><span id="askQuotaText">- / 10
+          <div class="quota-label"><small data-i18n="quota.ask_label">文件提問</small><span id="askQuotaText">- / 5
               次</span></div>
           <div class="usage-bar"><i id="askQuotaBar" style="width: 0%"></i></div>
         </div>
@@ -182,6 +180,7 @@
                 <option>大學生</option>
                 <option>高中生</option>
                 <option>國中生</option>
+                <option>國小生</option>
                 <option>職場成人</option>
                 <option>一般大眾</option>
               </select></label>
@@ -300,12 +299,17 @@
     </section>
 
     <section class="view" id="adminView">
-      <div class="section-head">
+      <div class="section-head"
+        style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
         <div>
           <p class="eyebrow"><span></span> <span data-i18n="admin.eyebrow">系統權限與用戶審核</span></p>
           <h1 data-i18n="admin.title">👑 管理員控制台</h1>
           <p data-i18n="admin.subtitle">審核新註冊帳號、調整權限、重置密碼與維護全系統使用者。</p>
         </div>
+        <button type="button" class="primary-button" id="openCreateUserModalBtn"
+          style="padding: 8px 16px; font-size: 13px; font-weight: 600;" data-i18n="admin.btn_create_user">
+          ➕ 新增用戶 / 管理員
+        </button>
       </div>
 
       <div class="admin-metrics-grid">
@@ -339,18 +343,23 @@
               <tr>
                 <th data-i18n="admin.th_id">ID</th>
                 <th data-i18n="admin.th_username">帳號名稱</th>
-                <th data-i18n="admin.th_role">角色</th>
-                <th data-i18n="admin.th_status">審核狀態</th>
+                <th data-i18n="admin.th_tier">會員層級 / 角色</th>
+                <th data-i18n="admin.th_daily_usage">今日使用 / 限額</th>
+                <th data-i18n="admin.th_total_usage">累計總使用量</th>
+                <th data-i18n="admin.th_last_login">上次上線時間</th>
                 <th data-i18n="admin.th_created">建立時間</th>
                 <th data-i18n="admin.th_actions">管理操作</th>
               </tr>
             </thead>
             <tbody id="allUsersTbody">
               <tr>
-                <td colspan="6" class="text-center muted" data-i18n="admin.loading">載入中…</td>
+                <td colspan="8" class="text-center muted" data-i18n="admin.loading">載入中…</td>
               </tr>
             </tbody>
           </table>
+        </div>
+        <div class="admin-user-cards-wrapper" id="allUsersCards">
+          <div class="text-center muted" data-i18n="admin.loading">載入中…</div>
         </div>
       </div>
     </section>
@@ -358,109 +367,68 @@
     <section class="view" id="agentView">
       <div class="section-head">
         <div>
-          <p class="eyebrow"><span></span> <span data-i18n="agent.eyebrow">多部門 AI 團隊動態指揮</span></p>
-          <h1 data-i18n="agent.title">🤖 Agent 指揮所</h1>
-          <p data-i18n="agent.subtitle">整合 CompanyRouter 自適應分流與容錯機制，支援跨部門 AI 團隊動態調度、任務派發與技能監控。</p>
-        </div>
-      </div>
-
-      <!-- Agent Metrics Grid -->
-      <div class="admin-metrics-grid" style="margin-bottom: 20px;">
-        <div class="admin-metric-card primary">
-          <span class="metric-icon">👥</span>
-          <div>
-            <b data-i18n="agent.metric_depts">4 大部門</b>
-            <small data-i18n="agent.metric_depts_sub">教務 · 行政 · 技術 · 行銷</small>
-          </div>
-        </div>
-        <div class="admin-metric-card">
-          <span class="metric-icon">⚡</span>
-          <div>
-            <b id="agentSkillCount" data-i18n="agent.metric_skills">5 個 Skills</b>
-            <small data-i18n="agent.metric_skills_sub">外掛式動態註冊表 (Registry)</small>
-          </div>
-        </div>
-        <div class="admin-metric-card warning">
-          <span class="metric-icon">🛡️</span>
-          <div>
-            <b data-i18n="agent.metric_router">CompanyRouter</b>
-            <small data-i18n="agent.metric_router_sub">意圖自適應分流與容錯</small>
-          </div>
+          <p class="eyebrow"><span></span> <span data-i18n="agent.eyebrow">💡 AI 教師備課與任務助手</span></p>
+          <h1 data-i18n="agent.title">💡 AI 備課助手</h1>
+          <p data-i18n="agent.subtitle">自動為您設計單元教案大綱、生成測驗題庫、撰寫講稿大綱與 FB/Threads 社群教學宣傳貼文。</p>
         </div>
       </div>
 
       <!-- Department Cards Grid -->
       <div class="agent-dept-grid">
-        <div class="agent-dept-card" data-dept="academic">
+        <div class="agent-dept-card" id="deptCardAcademic" data-dept="academic">
           <div class="dept-card-head">
             <span class="dept-icon">🎓</span>
             <div>
               <h3 data-i18n="agent.dept_academic_title">教務教學部</h3>
               <small data-i18n="agent.dept_academic_role">Lesson Flow 小老師</small>
             </div>
-            <span class="dept-badge" data-i18n="agent.dept_status_active">🟢 服務中</span>
+            <span class="dept-badge badge-active" id="deptBadgeAcademic">🟢 已啟用</span>
           </div>
-          <p class="dept-desc" data-i18n="agent.dept_academic_desc">負責教材解析、問答流調優、簡報大綱與逐頁演講稿生成。</p>
-          <div class="dept-skills-tags">
-            <span class="skill-tag">qa_teaching_tutor</span>
-            <span class="skill-tag">deck_generation_tutor</span>
-          </div>
+          <p class="dept-desc" data-i18n="agent.dept_academic_desc">負責教材解析、問答流調優、單元教案大綱、試題與簡報逐頁演講稿生成。</p>
+          <button type="button" class="primary-button dept-chat-btn" data-dept="academic"
+            style="width:100%; margin-top:12px; font-size:12px; padding:6px 12px;">💬 與教務小老師對話</button>
         </div>
 
-        <div class="agent-dept-card" data-dept="operations">
-          <div class="dept-card-head">
-            <span class="dept-icon">📋</span>
-            <div>
-              <h3 data-i18n="agent.dept_ops_title">營運與行政部</h3>
-              <small data-i18n="agent.dept_ops_role">事務負責人</small>
-            </div>
-            <span class="dept-badge" data-i18n="agent.dept_status_active">🟢 服務中</span>
-          </div>
-          <p class="dept-desc" data-i18n="agent.dept_ops_desc">負責使用者身份驗證 (JWT)、每日限額 (Quota) 管理與系統規則。</p>
-          <div class="dept-skills-tags">
-            <span class="skill-tag">user_quota_operations</span>
-          </div>
-        </div>
-
-        <div class="agent-dept-card" data-dept="devops">
-          <div class="dept-card-head">
-            <span class="dept-icon">🛠️</span>
-            <div>
-              <h3 data-i18n="agent.dept_devops_title">技術維護部</h3>
-              <small data-i18n="agent.dept_devops_role">技術維護工程師</small>
-            </div>
-            <span class="dept-badge" data-i18n="agent.dept_status_active">🟢 服務中</span>
-          </div>
-          <p class="dept-desc" data-i18n="agent.dept_devops_desc">負責 Railway 部署診斷、OOM 記憶體排查、Volume 與 AI Provider 設定。</p>
-          <div class="dept-skills-tags">
-            <span class="skill-tag">railway_devops</span>
-          </div>
-        </div>
-
-        <div class="agent-dept-card" data-dept="marketing">
+        <div class="agent-dept-card" id="deptCardMarketing" data-dept="marketing">
           <div class="dept-card-head">
             <span class="dept-icon">🚀</span>
             <div>
               <h3 data-i18n="agent.dept_mkt_title">市場與營銷部</h3>
               <small data-i18n="agent.dept_mkt_role">營銷推廣負責人</small>
             </div>
-            <span class="dept-badge" data-i18n="agent.dept_status_active">🟢 服務中</span>
+            <span class="dept-badge badge-active" id="deptBadgeMarketing">🟢 已啟用</span>
           </div>
-          <p class="dept-desc" data-i18n="agent.dept_mkt_desc">負責 SaaS 商業化模式、產品賣點包裝、FB/Threads 社群文案與 SEO。</p>
-          <div
-            style="margin-bottom: 10px; display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted);">
-            <span data-i18n="agent.dept_mkt_platform_label">文案推廣平台：</span>
-            <select id="agentPlatformSelect"
-              style="font-size: 11px; padding: 2px 6px; border-radius: 6px; border: 1px solid var(--line); background: var(--paper);">
-              <option value="FB / 社群媒體">FB 社群媒體</option>
-              <option value="Threads">Threads 平台</option>
-              <option value="LinkedIn">LinkedIn 平台</option>
-              <option value="Twitter / X">Twitter / X</option>
-            </select>
+          <p class="dept-desc" data-i18n="agent.dept_mkt_desc">負責課程宣傳推廣、教學賣點包裝、招生文案與 FB/Threads/LinkedIn 社群貼文生成。</p>
+          <button type="button" class="primary-button dept-chat-btn" data-dept="marketing"
+            style="width:100%; margin-top:12px; font-size:12px; padding:6px 12px;">💬 與營銷推廣負責人對話</button>
+        </div>
+
+        <div class="agent-dept-card" id="deptCardOperations" data-dept="operations">
+          <div class="dept-card-head">
+            <span class="dept-icon">🏫</span>
+            <div>
+              <h3 data-i18n="agent.dept_ops_title">營運與行政部</h3>
+              <small data-i18n="agent.dept_ops_role">教務行政特助</small>
+            </div>
+            <span class="dept-badge badge-active" id="deptBadgeOperations">🟢 已啟用</span>
           </div>
-          <div class="dept-skills-tags">
-            <span class="skill-tag">saas_marketing</span>
+          <p class="dept-desc" data-i18n="agent.dept_ops_desc">負責學校/機構團體合約、席位授權撥發、帳號開通與團隊權限維護。</p>
+          <button type="button" class="primary-button dept-chat-btn" data-dept="operations"
+            style="width:100%; margin-top:12px; font-size:12px; padding:6px 12px;">💬 與教務行政特助對話</button>
+        </div>
+
+        <div class="agent-dept-card" id="deptCardDevops" data-dept="devops">
+          <div class="dept-card-head">
+            <span class="dept-icon">🛠️</span>
+            <div>
+              <h3 data-i18n="agent.dept_devops_title">技術維護部</h3>
+              <small data-i18n="agent.dept_devops_role">技術維護工程師</small>
+            </div>
+            <span class="dept-badge badge-locked" id="deptBadgeDevops">🔒 👑 管理員專用</span>
           </div>
+          <p class="dept-desc" data-i18n="agent.dept_devops_desc">負責 JWT 身份驗證排查、系統 Quota 限額控管、Railway 部署與 OOM 診斷。</p>
+          <button type="button" class="primary-button dept-chat-btn" data-dept="devops"
+            style="width:100%; margin-top:12px; font-size:12px; padding:6px 12px;">💬 與技術維護工程師對話</button>
         </div>
       </div>
 
@@ -470,13 +438,17 @@
           <div class="message assistant welcome">
             <span class="bot-avatar">✦</span>
             <div>
-              <b data-i18n="agent.welcome_title">🤖 歡迎使用 Agent 指揮所</b>
-              <p data-i18n="agent.welcome_desc">輸入任何任務指令，CompanyRouter 會自動辨識意圖並分發至教務、行政、技術或行銷部門處理。</p>
+              <b data-i18n="agent.welcome_title">💡 歡迎使用 AI 備課助手</b>
+              <p data-i18n="agent.welcome_desc">請下達備課或教學任務（例如：「設計牛頓運動定律 45 分鐘教案」、「出 5 題高中生物題」或「寫一篇教學心得」）。</p>
               <div class="suggestions">
-                <button type="button" class="agent-sug-btn" data-query="請說明牛頓第二運動定律的教學大綱" data-i18n="agent.sug_1">🎓 說明牛頓第二定律大綱</button>
-                <button type="button" class="agent-sug-btn" data-query="查詢我今天的每日配額使用量與權限" data-i18n="agent.sug_2">📋 查詢每日 Quota 配額</button>
-                <button type="button" class="agent-sug-btn" data-query="請幫我排查 Railway 部署發生的 Out of Memory 錯誤" data-i18n="agent.sug_3">🛠️ 排查 Railway OOM 錯誤</button>
-                <button type="button" class="agent-sug-btn" data-query="請幫我產出一篇介紹 Self-RAG 防幻覺功能的文案" data-i18n="agent.sug_4">🚀 撰寫 Self-RAG 宣傳文案</button>
+                <button type="button" class="agent-sug-btn" data-query="請幫我設計一份 45 分鐘國中物理「牛頓第二運動定律」的備課教案與觀念大綱"
+                  data-i18n="agent.sug_1">🎓 45 分鐘教案設計</button>
+                <button type="button" class="agent-sug-btn" data-query="請幫我出 5 題關於「光合作用與呼吸作用」的高中生物選擇題，包含解答與觀念解析"
+                  data-i18n="agent.sug_2">📝 5 題生物選擇題與解析</button>
+                <button type="button" class="agent-sug-btn" data-query="請幫我產出一篇介紹 Self-RAG 防幻覺功能的 FB 社群推廣文案"
+                  data-i18n="agent.sug_3">🚀 FB/Threads 社群推廣文案</button>
+                <button type="button" class="agent-sug-btn" data-query="查詢我目前的會員等級與每日使用配額" data-i18n="agent.sug_4">📋
+                  查詢會員等級與每日配額</button>
               </div>
             </div>
           </div>
@@ -484,7 +456,7 @@
 
         <form class="chat-input" id="agentForm">
           <textarea id="agentQueryInput" rows="1" data-i18n="agent.placeholder"
-            placeholder="向全域 Orchestrator 下達任務指令 (例: '排查 Railway 部署錯誤' 或 '寫一篇 FB 貼文')..."></textarea>
+            placeholder="下達備課或教學任務 (例: '幫我設計一份 45 分鐘物理教案大綱' 或 '出 5 題選擇題')..."></textarea>
           <button type="submit" id="agentSendBtn">↑</button>
         </form>
       </div>
@@ -610,6 +582,50 @@
     </div>
   </div>
 
+  <!-- 新增用戶 / 管理員 Modal 對話視窗 -->
+  <div class="auth-modal-overlay hidden" id="createUserModal">
+    <div class="auth-modal-card" style="max-width: 420px;">
+      <button class="auth-modal-close" id="closeCreateUserModalBtn" type="button" aria-label="關閉">&times;</button>
+      <div style="margin-bottom: 20px; text-align: center;">
+        <h2 style="font-size: 20px; font-weight: 700; margin: 0 0 6px 0;" data-i18n="admin.create_modal_title">➕ 新增帳號
+          (管理員開通)</h2>
+        <p style="font-size: 13px; color: var(--muted); margin: 0;" data-i18n="admin.create_modal_sub">
+          直接為系統建立已開通權限之一般用戶或管理員帳號</p>
+      </div>
+      <form class="auth-form" id="createUserAdminForm">
+        <div class="auth-field">
+          <label for="createUsernameInput" data-i18n="admin.create_lbl_username">帳號名稱 (Username)</label>
+          <input type="text" id="createUsernameInput" placeholder="輸入使用者帳號 (至少3字元)" required autocomplete="off">
+        </div>
+        <div class="auth-field">
+          <label for="createPasswordInput" data-i18n="admin.create_lbl_password">初始密碼 (Password)</label>
+          <input type="password" id="createPasswordInput" placeholder="輸入初始密碼 (至少4字元)" required
+            autocomplete="new-password">
+        </div>
+        <div class="auth-field">
+          <label for="createRoleSelect" data-i18n="admin.create_lbl_role">身分角色 (Role)</label>
+          <select id="createRoleSelect"
+            style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); font-size: 13px; background: var(--paper);">
+            <option value="user" data-i18n="admin.opt_role_user">👤 一般用戶 (user)</option>
+            <option value="admin" data-i18n="admin.opt_role_admin">👑 系統管理員 (admin)</option>
+          </select>
+        </div>
+        <div class="auth-field" id="createTierWrapper">
+          <label for="createTierSelect" data-i18n="admin.create_lbl_tier">會員層級 (Tier)</label>
+          <select id="createTierSelect"
+            style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); font-size: 13px; background: var(--paper);">
+            <option value="teacher_trial" data-i18n="admin.opt_tier_trial">🎓 教師試用版 (1簡報/5提問)</option>
+            <option value="teacher_pro" selected data-i18n="admin.opt_tier_pro">⭐ 教師專業版 (10簡報/50提問+VLM)</option>
+            <option value="institution" data-i18n="admin.opt_tier_inst">🏫 機構/學校版 (100簡報/500提問)</option>
+          </select>
+        </div>
+        <div class="auth-error-msg hidden" id="createUserError"></div>
+        <button type="submit" class="primary-button auth-submit-btn" style="margin-top: 16px;"
+          data-i18n="admin.create_btn_submit">確認建立帳號</button>
+      </form>
+    </div>
+  </div>
+
   <div class="toast" id="toast"><span>✓</span>
     <p></p>
   </div>
@@ -618,7 +634,7 @@
     <p id="loadingCopy" data-i18n="loading.read_copy">整理章節與核心概念…</p>
     <div class="loading-track"><span></span></div>
   </div>
-  <script src="/app.js?v=2.6.0"></script>
+  <script src="/app.js?v=5.1.0"></script>
 </body>
 
 </html>

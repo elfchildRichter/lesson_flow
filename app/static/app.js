@@ -4,6 +4,8 @@ const state = {
   activeSlide: 0,
   user: null,
   provider: null,
+  activeDept: null,
+  agentHistory: [],
   lang: localStorage.getItem('app_lang') || 'zh-TW'
 };
 
@@ -13,24 +15,24 @@ const $$ = (selector) => [...document.querySelectorAll(selector)];
 const translations = {
   'zh-TW': {
     'nav.brand': '課伴<small>LESSONFLOW (Alpha)</small>',
-    'nav.workspace': '工作台',
-    'nav.deck': '我的簡報',
-    'nav.chat': '文件問答',
+    'nav.workspace': '教材解析',
+    'nav.deck': '教學簡報',
+    'nav.chat': '教材問答',
     'nav.profile': '個人帳號設定',
     'nav.admin': '管理員控制台',
-    'nav.agent': 'Agent 指揮所',
+    'nav.agent': 'AI 備課助手',
     'nav.crumb_create': '建立新課程',
-    'nav.crumb_workspace': '工作台',
+    'nav.crumb_workspace': '教材解析',
     'nav.crumb_deck': '簡報檢視',
-    'nav.crumb_chat': '教材 AI 助手',
+    'nav.crumb_chat': '教材問答',
     'nav.crumb_admin': '管理員控制台',
-    'nav.crumb_agent': 'Agent 指揮所',
+    'nav.crumb_agent': 'AI 備課助手',
     'nav.crumb_profile': '個人帳號設定',
-    'agent.eyebrow': '多部門 AI 團隊動態指揮',
-    'agent.title': '🤖 Agent 指揮所',
-    'agent.subtitle': '整合 CompanyRouter 自適應分流與容錯機制，支援跨部門 AI 團隊動態調度、任務派發與技能監控。',
-    'agent.metric_depts': '4 大部門',
-    'agent.metric_depts_sub': '教務 · 行政 · 技術 · 行銷',
+    'agent.eyebrow': '💡 AI 教師備課與任務助手',
+    'agent.title': '💡 AI 備課助手',
+    'agent.subtitle': '自動為您設計單元教案大綱、生成測驗題庫、撰寫講稿大綱與 FB/Threads 社群教學宣傳貼文。',
+    'agent.metric_depts': '4 大專家助手',
+    'agent.metric_depts_sub': '教務備課 · 題庫生成 · 行銷推廣 · 限額查詢',
     'agent.metric_skills': '5 個 Skills',
     'agent.metric_skills_sub': '外掛式動態註冊表 (Registry)',
     'agent.metric_router': 'CompanyRouter',
@@ -38,24 +40,24 @@ const translations = {
     'agent.dept_status_active': '🟢 服務中',
     'agent.dept_academic_title': '教務教學部',
     'agent.dept_academic_role': 'Lesson Flow 小老師',
-    'agent.dept_academic_desc': '負責教材解析、問答流調優、簡報大綱與逐頁演講稿生成。',
+    'agent.dept_academic_desc': '負責教材解析、問答流調優、單元教案大綱、試題與簡報逐頁演講稿生成。',
     'agent.dept_ops_title': '營運與行政部',
-    'agent.dept_ops_role': '事務負責人',
-    'agent.dept_ops_desc': '負責使用者身份驗證 (JWT)、每日限額 (Quota) 管理與系統規則。',
-    'agent.dept_devops_title': '技術維護部',
-    'agent.dept_devops_role': '技術維護工程師',
-    'agent.dept_devops_desc': '負責 Railway 部署診斷、OOM 記憶體排查、Volume 與 AI Provider 設定。',
+    'agent.dept_ops_role': '教務行政特助',
+    'agent.dept_ops_desc': '負責學校/機構團體合約、席位授權撥發、帳號開通與團隊權限維護。',
     'agent.dept_mkt_title': '市場與營銷部',
     'agent.dept_mkt_role': '營銷推廣負責人',
-    'agent.dept_mkt_desc': '負責 SaaS 商業化模式、產品賣點包裝、FB/Threads 社群文案與 SEO。',
+    'agent.dept_mkt_desc': '負責課程宣傳推廣、教學賣點包裝、招生文案與 FB/Threads/LinkedIn 社群貼文生成。',
+    'agent.dept_devops_title': '技術維護部',
+    'agent.dept_devops_role': '技術維護工程師',
+    'agent.dept_devops_desc': '負責 JWT 身份驗證排查、系統 Quota 限額控管、Railway 部署與 OOM 診斷。',
     'agent.dept_mkt_platform_label': '文案推廣平台：',
-    'agent.welcome_title': '🤖 歡迎使用 Agent 指揮所',
-    'agent.welcome_desc': '輸入任何任務指令，CompanyRouter 會自動辨識意圖並分發至教務、行政、技術或行銷部門處理。',
-    'agent.sug_1': '🎓 說明牛頓第二定律大綱',
-    'agent.sug_2': '📋 查詢每日 Quota 配額',
-    'agent.sug_3': '🛠️ 排查 Railway OOM 錯誤',
-    'agent.sug_4': '🚀 撰寫 Self-RAG 宣傳文案',
-    'agent.placeholder': '向全域 Orchestrator 下達任務指令 (例: \'排查 Railway 部署錯誤\' 或 \'寫一篇 FB 貼文\')...',
+    'agent.welcome_title': '💡 歡迎使用 AI 備課助手',
+    'agent.welcome_desc': '請下達備課或教學任務（例如：「設計牛頓運動定律 45 分鐘教案」、「出 5 題高中生物題」或「寫一篇教學心得」）。',
+    'agent.sug_1': '🎓 45 分鐘教案設計',
+    'agent.sug_2': '📝 5 題生物選擇題與解析',
+    'agent.sug_3': '🚀 FB/Threads 社群推廣文案',
+    'agent.sug_4': '📋 查詢會員等級與每日配額',
+    'agent.placeholder': '下達備課或教學任務 (例: \'幫我設計一份 45 分鐘物理教案大綱\' 或 \'出 5 題選擇題\')...',
     'provider.title': '⚡ AI 模型提供者',
     'multimodal.title': '📷 教材解析設定',
     'multimodal.toggle_label': '圖表與理化公式辨識',
@@ -108,6 +110,7 @@ const translations = {
     'opt.audience.college': '大學生',
     'opt.audience.high': '高中生',
     'opt.audience.middle': '國中生',
+    'opt.audience.elementary': '國小生',
     'opt.audience.adult': '職場成人',
     'opt.audience.general': '一般大眾',
     'opt.tone.clear': '清楚易懂',
@@ -164,16 +167,33 @@ const translations = {
     'admin.eyebrow': '系統權限與用戶審核',
     'admin.title': '👑 管理員控制台',
     'admin.subtitle': '審核新註冊帳號、調整權限、重置密碼與維護全系統使用者。',
+    'admin.btn_create_user': '➕ 新增用戶 / 管理員',
     'admin.metric_total': '系統總帳號數',
     'admin.metric_pending': '待開通審核',
     'admin.metric_admin': '系統管理員',
     'admin.th_id': 'ID',
     'admin.th_username': '帳號名稱',
+    'admin.th_tier': '會員層級 / 角色',
+    'admin.th_daily_usage': '今日使用 / 限額',
+    'admin.th_total_usage': '累計總使用量',
+    'admin.th_last_login': '上次上線時間',
     'admin.th_role': '角色',
     'admin.th_status': '審核狀態',
     'admin.th_created': '建立時間',
     'admin.th_actions': '管理操作',
     'admin.loading': '載入中…',
+    'admin.create_modal_title': '➕ 新增帳號 (管理員開通)',
+    'admin.create_modal_sub': '直接為系統建立已開通權限之一般用戶或管理員帳號',
+    'admin.create_lbl_username': '帳號名稱 (Username)',
+    'admin.create_lbl_password': '初始密碼 (Password)',
+    'admin.create_lbl_role': '身分角色 (Role)',
+    'admin.create_lbl_tier': '會員層級 (Tier)',
+    'admin.create_btn_submit': '確認建立帳號',
+    'admin.opt_role_user': '👤 一般用戶 (user)',
+    'admin.opt_role_admin': '👑 系統管理員 (admin)',
+    'admin.opt_tier_trial': '🎓 教師試用版 (1簡報/5提問)',
+    'admin.opt_tier_pro': '⭐ 教師專業版 (10簡報/50提問+VLM)',
+    'admin.opt_tier_inst': '🏫 機構/學校版 (100簡報/500提問)',
 
     'profile.eyebrow': '個人帳號與安全性設定',
     'profile.title': '⚙️ 個人帳號設定',
@@ -222,24 +242,24 @@ const translations = {
   },
   'en': {
     'nav.brand': 'LessonFlow<small>(Alpha)</small>',
-    'nav.workspace': 'Workspace',
-    'nav.deck': 'My Decks',
-    'nav.chat': 'PDF Chat',
+    'nav.workspace': 'Material Parsing',
+    'nav.deck': 'Presentation Decks',
+    'nav.chat': 'Material Q&A',
     'nav.profile': 'Account Settings',
     'nav.admin': 'Admin Console',
-    'nav.agent': 'Agent Ops',
+    'nav.agent': 'AI Lesson Assistant',
     'nav.crumb_create': 'Create Course',
-    'nav.crumb_workspace': 'Workspace',
+    'nav.crumb_workspace': 'Material Parsing',
     'nav.crumb_deck': 'Deck View',
-    'nav.crumb_chat': 'Lesson Assistant',
+    'nav.crumb_chat': 'Material Q&A',
     'nav.crumb_admin': 'Admin Console',
-    'nav.crumb_agent': 'Agent Ops Center',
+    'nav.crumb_agent': 'AI Lesson Assistant',
     'nav.crumb_profile': 'Account Settings',
-    'agent.eyebrow': 'Multi-Department AI Orchestration',
-    'agent.title': '🤖 Agent Ops Command Center',
-    'agent.subtitle': 'Integrated with CompanyRouter for adaptive intent routing and fault tolerance across AI team dispatch.',
-    'agent.metric_depts': '4 Departments',
-    'agent.metric_depts_sub': 'Academic · Ops · DevOps · Marketing',
+    'agent.eyebrow': '💡 AI Lesson Preparation & Task Assistant',
+    'agent.title': '💡 AI Lesson Assistant',
+    'agent.subtitle': 'Automatically design lesson plan outlines, generate quiz questions with explanations, and draft social teaching posts.',
+    'agent.metric_depts': '4 AI Assistants',
+    'agent.metric_depts_sub': 'Lesson Plan · Quiz Generator · Social Post · Quota Checker',
     'agent.metric_skills': '5 Skills',
     'agent.metric_skills_sub': 'Extensible Skill Registry',
     'agent.metric_router': 'CompanyRouter',
@@ -247,24 +267,24 @@ const translations = {
     'agent.dept_status_active': '🟢 Active',
     'agent.dept_academic_title': 'Academic & Teaching',
     'agent.dept_academic_role': 'Lesson Flow Tutor',
-    'agent.dept_academic_desc': 'Handles lesson QA, slide deck generation, lecture scripts, and Self-RAG verification.',
+    'agent.dept_academic_desc': 'Handles material parsing, Q&A, lesson plan outlines, quiz questions, and slide deck scripts.',
     'agent.dept_ops_title': 'Operations & Admin',
-    'agent.dept_ops_role': 'Ops Manager',
-    'agent.dept_ops_desc': 'Handles JWT user auth, daily quota management, and system governance.',
-    'agent.dept_devops_title': 'DevOps & Maintenance',
-    'agent.dept_devops_role': 'DevOps Engineer',
-    'agent.dept_devops_desc': 'Handles Railway deployments, OOM diagnosis, Volume caching, and AI Provider switching.',
+    'agent.dept_ops_role': 'Ops & Institution Admin',
+    'agent.dept_ops_desc': 'Handles school/institution licensing, member seat allocation, account approvals, and org permissions.',
     'agent.dept_mkt_title': 'Marketing & Sales',
     'agent.dept_mkt_role': 'Marketing Lead',
-    'agent.dept_mkt_desc': 'Handles SaaS positioning, product pitch copy, social posts (FB/Threads), and SEO.',
+    'agent.dept_mkt_desc': 'Promotes your courses, packages teaching highlights, creates enrollment copy, and generates social media posts.',
+    'agent.dept_devops_title': 'DevOps & Maintenance',
+    'agent.dept_devops_role': 'DevOps Engineer',
+    'agent.dept_devops_desc': 'Handles JWT auth diagnostics, system quota enforcement, Railway deployments, and OOM analysis.',
     'agent.dept_mkt_platform_label': 'Target Platform:',
-    'agent.welcome_title': '🤖 Welcome to Agent Ops Center',
-    'agent.welcome_desc': 'Enter any task query. CompanyRouter will automatically classify your intent and route it to the appropriate department.',
-    'agent.sug_1': '🎓 Newton\'s 2nd Law Outline',
-    'agent.sug_2': '📋 Check My Daily Quota',
-    'agent.sug_3': '🛠️ Diagnose Railway OOM Error',
-    'agent.sug_4': '🚀 Generate Self-RAG Copywriting',
-    'agent.placeholder': 'Dispatch task to Orchestrator (e.g. \'Diagnose Railway OOM error\' or \'Write a promotional post\')...',
+    'agent.welcome_title': '💡 Welcome to AI Lesson Assistant',
+    'agent.welcome_desc': 'Enter any lesson plan or teaching task (e.g. "Design a 45-min Physics lesson plan", "Generate 5 Biology quiz questions", or "Write a teaching post").',
+    'agent.sug_1': '🎓 45-min Lesson Plan Design',
+    'agent.sug_2': '📝 5 Biology Quiz Questions',
+    'agent.sug_3': '🚀 FB/Threads Promo Post',
+    'agent.sug_4': '📋 Check Tier & Daily Quota',
+    'agent.placeholder': 'Enter teaching task (e.g. \'Design a 45-min Physics lesson plan\' or \'Generate 5 quiz questions\')...',
     'provider.title': '⚡ AI Provider',
     'multimodal.title': '📷 PDF Reading Mode',
     'multimodal.toggle_label': 'Diagrams & Math Formulas',
@@ -317,6 +337,7 @@ const translations = {
     'opt.audience.college': 'College Students',
     'opt.audience.high': 'High School Students',
     'opt.audience.middle': 'Middle School Students',
+    'opt.audience.elementary': 'Elementary School Students',
     'opt.audience.adult': 'Working Adults',
     'opt.audience.general': 'General Public',
     'opt.tone.clear': 'Clear & Easy to Understand',
@@ -324,7 +345,7 @@ const translations = {
     'opt.tone.rigorous': 'Professional & Rigorous',
     'opt.tone.story': 'Story-driven',
 
-    'opt.provider.gemini': '✨ Gemini Cloud API',
+    'opt.provider.gemini': 'Gemini Cloud API ✨',
     'opt.provider.ollama_cloud': 'Ollama Cloud API',
     'opt.provider.ollama_local': 'Ollama Local LLM',
     'opt.provider.openai': 'OpenAI Cloud API',
@@ -370,19 +391,36 @@ const translations = {
     'chat.placeholder': 'Ask questions about the document...',
     'chat.shortcut': '<span>↵</span> Enter to send · Shift + Enter for new line',
 
-    'admin.eyebrow': 'Permissions & User Review',
+    'admin.eyebrow': 'Permissions & User Management',
     'admin.title': '👑 Admin Console',
-    'admin.subtitle': 'Review registered accounts, modify permissions, reset passwords and maintain users.',
-    'admin.metric_total': 'Total Users',
+    'admin.subtitle': 'Review registered accounts, modify permissions, reset passwords, and manage users.',
+    'admin.btn_create_user': '➕ Add User / Admin',
+    'admin.metric_total': 'Total Accounts',
     'admin.metric_pending': 'Pending Approval',
     'admin.metric_admin': 'System Admins',
     'admin.th_id': 'ID',
     'admin.th_username': 'Username',
+    'admin.th_tier': 'Membership Tier / Role',
+    'admin.th_daily_usage': 'Daily Usage / Quota',
+    'admin.th_total_usage': 'Cumulative Usage',
+    'admin.th_last_login': 'Last Active Time',
     'admin.th_role': 'Role',
     'admin.th_status': 'Status',
     'admin.th_created': 'Created At',
     'admin.th_actions': 'Actions',
     'admin.loading': 'Loading...',
+    'admin.create_modal_title': '➕ Create Account (Admin Pre-approved)',
+    'admin.create_modal_sub': 'Directly create pre-approved regular user or admin accounts.',
+    'admin.create_lbl_username': 'Username',
+    'admin.create_lbl_password': 'Password',
+    'admin.create_lbl_role': 'Account Role',
+    'admin.create_lbl_tier': 'Membership Tier',
+    'admin.create_btn_submit': 'Confirm Create Account',
+    'admin.opt_role_user': '👤 Regular User',
+    'admin.opt_role_admin': '👑 System Admin',
+    'admin.opt_tier_trial': '🎓 Teacher Free Trial (1 deck/5 ask)',
+    'admin.opt_tier_pro': '⭐ Teacher Pro (10 deck/50 ask + VLM)',
+    'admin.opt_tier_inst': '🏫 Institution / School (100 deck/500 ask)',
 
     'profile.eyebrow': 'Account & Security Settings',
     'profile.title': '⚙️ Account Settings',
@@ -481,6 +519,7 @@ function updateSelectOptions() {
       { val: '大學生', key: 'opt.audience.college' },
       { val: '高中生', key: 'opt.audience.high' },
       { val: '國中生', key: 'opt.audience.middle' },
+      { val: '國小生', key: 'opt.audience.elementary' },
       { val: '職場成人', key: 'opt.audience.adult' },
       { val: '一般大眾', key: 'opt.audience.general' }
     ];
@@ -670,23 +709,83 @@ async function api(path, options = {}) {
   return response.json();
 }
 
-// --- 身份驗證 UI 與狀態控制 ---
+// --- 身份驗證 UI 與 Tier 配額控制 ---
+
+function getTierInfo(user) {
+  const isEn = state.lang === 'en';
+  if (!user) {
+    return {
+      tierKey: 'teacher_trial',
+      badge: isEn ? '🎓 Teacher Free Trial' : '🎓 教師試用版',
+      deckLimit: 1,
+      askLimit: 5,
+      maxUploadMb: 10,
+      isUnlimited: false
+    };
+  }
+  if (user.role === 'admin' || user.tier === 'admin') {
+    return {
+      tierKey: 'admin',
+      badge: isEn ? '👑 Unlimited' : '👑 無限版',
+      deckLimit: -1,
+      askLimit: -1,
+      maxUploadMb: 500,
+      isUnlimited: true
+    };
+  }
+  let rawTier = (user.tier || '').toLowerCase();
+  if (rawTier.includes('inst') || rawTier.includes('school')) rawTier = 'institution';
+  else if (rawTier.includes('pro')) rawTier = 'teacher_pro';
+  else if (rawTier.includes('trial') || rawTier.includes('free')) rawTier = 'teacher_trial';
+
+  const tierKey = rawTier || (user.role === 'admin' ? 'admin' : 'teacher_trial');
+  const tiers = {
+    'teacher_trial': {
+      tierKey: 'teacher_trial',
+      badge: isEn ? '🎓 Teacher Free Trial' : '🎓 教師試用版',
+      deckLimit: 1,
+      askLimit: 5,
+      maxUploadMb: 10,
+      isUnlimited: false
+    },
+    'teacher_pro': {
+      tierKey: 'teacher_pro',
+      badge: isEn ? '⭐ Teacher Pro' : '⭐ 教師專業版',
+      deckLimit: 10,
+      askLimit: 50,
+      maxUploadMb: 30,
+      isUnlimited: false
+    },
+    'institution': {
+      tierKey: 'institution',
+      badge: isEn ? '🏫 Institution / School' : '🏫 機構/學校版',
+      deckLimit: 100,
+      askLimit: 500,
+      maxUploadMb: 100,
+      isUnlimited: false
+    }
+  };
+  return tiers[tierKey] || tiers['teacher_pro'];
+}
 
 function updateAuthUI(user) {
   state.user = user;
   const container = $('#authHeaderContainer');
+  const tier = getTierInfo(user);
 
   if (user) {
     const q = user.quota || {};
-    const deckQ = q.deck || { used_count: 0, daily_limit: 3 };
-    const askQ = q.ask || { used_count: 0, daily_limit: 10 };
-    const isUnlimited = q.is_unlimited || user.role === 'admin';
+    const deckLimit = tier.isUnlimited ? -1 : (q.deck?.daily_limit || tier.deckLimit);
+    const askLimit = tier.isUnlimited ? -1 : (q.ask?.daily_limit || tier.askLimit);
+    const deckUsed = q.deck?.used_count || 0;
+    const askUsed = q.ask?.used_count || 0;
+    const isUnlimited = tier.isUnlimited;
+
     const quotaLabel = isUnlimited
-      ? t('quota.unlimited')
+      ? tier.badge
       : (state.lang === 'en'
-        ? `Decks:${deckQ.used_count}/3 · Q&A:${askQ.used_count}/10`
-        : `教材:${deckQ.used_count}/3 · 提問:${askQ.used_count}/10`);
-    const roleBadge = user.role === 'admin' ? t('quota.admin') : t('quota.regular');
+        ? `${tier.badge} · Decks:${deckUsed}/${deckLimit}`
+        : `${tier.badge} · 教材:${deckUsed}/${deckLimit}份`);
 
     if (container) {
       container.innerHTML = `
@@ -699,38 +798,141 @@ function updateAuthUI(user) {
     }
 
     // 更新側邊欄 Profile 卡片
-    if ($('#quotaBadge')) $('#quotaBadge').textContent = isUnlimited ? t('quota.admin') : t('quota.active');
-    if ($('#deckQuotaText')) $('#deckQuotaText').textContent = isUnlimited ? (state.lang === 'en' ? 'Unlimited' : '無限') : `${deckQ.used_count} / ${deckQ.daily_limit} ${state.lang === 'en' ? '' : '份'}`;
+    if ($('#quotaBadge')) $('#quotaBadge').textContent = tier.badge;
+    if ($('#deckQuotaText')) $('#deckQuotaText').textContent = isUnlimited ? (state.lang === 'en' ? 'Unlimited' : '無限') : `${deckUsed} / ${deckLimit} ${state.lang === 'en' ? '' : '份'}`;
     if ($('#deckQuotaBar')) {
-      $('#deckQuotaBar').style.width = isUnlimited ? '100%' : `${Math.min(100, (deckQ.used_count / deckQ.daily_limit) * 100)}%`;
+      $('#deckQuotaBar').style.width = isUnlimited ? '100%' : `${Math.min(100, (deckUsed / deckLimit) * 100)}%`;
       $('#deckQuotaBar').style.background = isUnlimited ? '#d97706' : 'var(--green)';
     }
-    if ($('#askQuotaText')) $('#askQuotaText').textContent = isUnlimited ? (state.lang === 'en' ? 'Unlimited' : '無限') : `${askQ.used_count} / ${askQ.daily_limit} ${state.lang === 'en' ? '' : '次'}`;
+    if ($('#askQuotaText')) $('#askQuotaText').textContent = isUnlimited ? (state.lang === 'en' ? 'Unlimited' : '無限') : `${askUsed} / ${askLimit} ${state.lang === 'en' ? '' : '次'}`;
     if ($('#askQuotaBar')) {
-      $('#askQuotaBar').style.width = isUnlimited ? '100%' : `${Math.min(100, (askQ.used_count / askQ.daily_limit) * 100)}%`;
+      $('#askQuotaBar').style.width = isUnlimited ? '100%' : `${Math.min(100, (askUsed / askLimit) * 100)}%`;
       $('#askQuotaBar').style.background = isUnlimited ? '#d97706' : 'var(--green)';
     }
 
     if ($('#userAvatar')) $('#userAvatar').textContent = user.role === 'admin' ? '👑' : user.username.charAt(0).toUpperCase();
-    if ($('#userProfileInfo')) $('#userProfileInfo').innerHTML = `${escapeHtml(user.username)}<small>${roleBadge}</small>`;
+    if ($('#userProfileInfo')) $('#userProfileInfo').innerHTML = `${escapeHtml(user.username)}<small>${tier.badge}</small>`;
   } else {
     if (container) container.innerHTML = `<button class="auth-btn" id="openAuthBtn" type="button" data-i18n="topbar.login_reg">${t('topbar.login_reg')}</button>`;
 
     // 重置側邊欄 Profile 卡片
-    if ($('#quotaBadge')) $('#quotaBadge').textContent = t('quota.unlogged');
-    if ($('#deckQuotaText')) $('#deckQuotaText').textContent = state.lang === 'en' ? '- / 3' : '- / 3 份';
+    if ($('#quotaBadge')) $('#quotaBadge').textContent = tier.badge;
+    if ($('#deckQuotaText')) $('#deckQuotaText').textContent = state.lang === 'en' ? `- / ${tier.deckLimit}` : `- / ${tier.deckLimit} 份`;
     if ($('#deckQuotaBar')) $('#deckQuotaBar').style.width = '0%';
-    if ($('#askQuotaText')) $('#askQuotaText').textContent = state.lang === 'en' ? '- / 10' : '- / 10 次';
+    if ($('#askQuotaText')) $('#askQuotaText').textContent = state.lang === 'en' ? `- / ${tier.askLimit}` : `- / ${tier.askLimit} 次`;
     if ($('#askQuotaBar')) $('#askQuotaBar').style.width = '0%';
     if ($('#userAvatar')) $('#userAvatar').textContent = state.lang === 'en' ? 'G' : '客';
-    if ($('#userProfileInfo')) $('#userProfileInfo').innerHTML = `${t('quota.guest')}<small>${t('quota.login_hint')}</small>`;
+    if ($('#userProfileInfo')) $('#userProfileInfo').innerHTML = `${t('quota.guest')}<small>${tier.badge}</small>`;
   }
   updateAdminUI();
+  updateAgentDepartmentBadges(user);
   const profileNavBtn = $('#profileNavBtn');
   if (profileNavBtn) {
     if (state.user) profileNavBtn.classList.remove('hidden');
     else profileNavBtn.classList.add('hidden');
   }
+}
+
+function renderDeptActiveIndicators() {
+  const isEn = state.lang === 'en';
+  const activeKey = state.activeDept; // null = unsegmented omni mode
+
+  const depts = [
+    { key: 'academic', card: '#deptCardAcademic', defaultLabel: isEn ? '💬 Chat with Academic Tutor' : '💬 與教務小老師對話', activeLabel: isEn ? '✓ Active Chatting' : '✓ 對話中 (教務小老師)' },
+    { key: 'marketing', card: '#deptCardMarketing', defaultLabel: isEn ? '💬 Chat with Marketing Lead' : '💬 與營銷推廣負責人對話', activeLabel: isEn ? '✓ Active Chatting' : '✓ 對話中 (營銷推廣負責人)' },
+    { key: 'operations', card: '#deptCardOperations', defaultLabel: isEn ? '💬 Chat with Ops Admin' : '💬 與教務行政特助對話', activeLabel: isEn ? '✓ Active Chatting' : '✓ 對話中 (教務行政特助)' },
+    { key: 'devops', card: '#deptCardDevops', defaultLabel: isEn ? '💬 Chat with DevOps Engineer' : '💬 與技術維護工程師對話', activeLabel: isEn ? '✓ Active Chatting' : '✓ 對話中 (技術維護工程師)' }
+  ];
+
+  depts.forEach(item => {
+    const card = $(item.card);
+    if (!card) return;
+    const btn = card.querySelector('.dept-chat-btn');
+    const isThisActive = (activeKey === item.key);
+
+    if (isThisActive) {
+      card.classList.add('dept-card-active');
+      card.style.borderColor = '#6366f1';
+      card.style.boxShadow = '0 0 0 2px rgba(99, 102, 241, 0.25)';
+      if (btn) {
+        btn.textContent = item.activeLabel;
+        btn.style.background = '#4f46e5';
+        btn.style.color = '#ffffff';
+      }
+    } else {
+      card.classList.remove('dept-card-active');
+      card.style.borderColor = '';
+      card.style.boxShadow = '';
+      if (btn) {
+        btn.textContent = item.defaultLabel;
+        btn.style.background = '';
+        btn.style.color = '';
+      }
+    }
+  });
+}
+
+function updateAgentDepartmentBadges(user) {
+  const isEn = state.lang === 'en';
+  const role = user?.role || 'guest';
+  const tierKey = user?.tier || (role === 'admin' ? 'admin' : 'teacher_trial');
+  const isAdmin = role === 'admin' || tierKey === 'admin';
+
+  function setCardButtonStatus(cardSelector, isActive) {
+    const card = $(cardSelector);
+    if (!card) return;
+    const btn = card.querySelector('.dept-chat-btn');
+    if (btn) {
+      btn.disabled = !isActive;
+      btn.style.cursor = isActive ? 'pointer' : 'not-allowed';
+      btn.style.opacity = isActive ? '1' : '0.5';
+    }
+  }
+
+  // 1. 教務教學部 (Academic)
+  const academicBadge = $('#deptBadgeAcademic');
+  if (academicBadge) {
+    academicBadge.className = 'dept-badge badge-active';
+    academicBadge.textContent = isEn ? '🟢 Active' : '🟢 已啟用';
+  }
+  setCardButtonStatus('#deptCardAcademic', true);
+
+  // 2. 市場與營銷部 (Marketing)
+  const mktCard = $('#deptCardMarketing');
+  const mktBadge = $('#deptBadgeMarketing');
+  if (mktBadge) {
+    mktBadge.className = 'dept-badge badge-active';
+    mktBadge.textContent = isEn ? '🟢 Active' : '🟢 已啟用';
+    if (mktCard) mktCard.style.opacity = '1';
+  }
+  setCardButtonStatus('#deptCardMarketing', true);
+
+  // 3. 營運與行政部 (Operations)
+  const opsCard = $('#deptCardOperations');
+  const opsBadge = $('#deptBadgeOperations');
+  if (opsBadge) {
+    opsBadge.className = 'dept-badge badge-active';
+    opsBadge.textContent = isEn ? '🟢 Active' : '🟢 已啟用';
+    if (opsCard) opsCard.style.opacity = '1';
+  }
+  setCardButtonStatus('#deptCardOperations', true);
+
+  // 4. 技術維護部 (DevOps) - Admin Only (Far right)
+  const devopsCard = $('#deptCardDevops');
+  const devopsBadge = $('#deptBadgeDevops');
+  if (devopsBadge) {
+    if (isAdmin) {
+      devopsBadge.className = 'dept-badge badge-active';
+      devopsBadge.textContent = isEn ? '🟢 Active (Admin)' : '🟢 管理員已啟用';
+      if (devopsCard) devopsCard.style.opacity = '1';
+    } else {
+      devopsBadge.className = 'dept-badge badge-locked';
+      devopsBadge.textContent = isEn ? '🔒 Admin Only' : '🔒 👑 管理員專用';
+      if (devopsCard) devopsCard.style.opacity = '0.7';
+    }
+  }
+  setCardButtonStatus('#deptCardDevops', isAdmin);
+  renderDeptActiveIndicators();
 }
 
 async function fetchCurrentUser() {
@@ -936,7 +1138,7 @@ $('#removeFile').addEventListener('click', () => {
 });
 
 function switchView(name) {
-  if ((name === 'admin' || name === 'agent') && (!state.user || state.user.role !== 'admin')) {
+  if (name === 'admin' && (!state.user || state.user.role !== 'admin')) {
     toast(state.lang === 'en' ? 'Admin access only' : '僅限管理員存取控制台', true);
     return;
   }
@@ -1077,9 +1279,24 @@ const katexOptions = {
   throwOnError: false
 };
 
+function unescapeMathInElement(element) {
+  if (!element) return;
+  let html = element.innerHTML;
+  html = html.replace(/(\$\$[\s\S]*?\$\$|\$[^$\n]+?\$|\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\))/g, (match) => {
+    return match
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'");
+  });
+  element.innerHTML = html;
+}
+
 function renderMath(element) {
   if (typeof renderMathInElement === 'function' && element) {
     try {
+      unescapeMathInElement(element);
       renderMathInElement(element, katexOptions);
     } catch (e) {
       console.warn('KaTeX render error:', e);
@@ -1092,12 +1309,12 @@ function wrapSvgText(text, maxLineChars = 8) {
   let cleaned = text.replace(/[\*`"']/g, '').replace(/^[•\-\d\.\s、:：]+/, '').trim();
   if (!cleaned) return [];
   if (cleaned.length <= maxLineChars) return [cleaned];
-  
+
   const clauses = cleaned.split(/[，,；;。]/);
   if (clauses.length > 1 && clauses[0].length >= 2 && clauses[0].length <= maxLineChars + 2) {
     return [clauses[0], clauses.slice(1).join(' ').slice(0, maxLineChars)];
   }
-  
+
   return [
     cleaned.slice(0, maxLineChars),
     cleaned.slice(maxLineChars, maxLineChars * 2)
@@ -1109,7 +1326,7 @@ function renderSvgTextLines(lines, cx, startY, fontSize = 11, fontColor = "#2B35
   const lineHeight = Math.round(fontSize * 1.35);
   const totalHeight = (lines.length - 1) * lineHeight;
   const initialY = startY - (totalHeight / 2);
-  
+
   return `<text x="${cx}" y="${initialY}" text-anchor="middle" font-size="${fontSize}" font-weight="${fontWeight}" fill="${fontColor}">
     ${lines.map((line, idx) => `<tspan x="${cx}" dy="${idx === 0 ? 0 : lineHeight}">${escapeHtml(line)}</tspan>`).join('')}
   </text>`;
@@ -1119,7 +1336,7 @@ function extractConceptualTag(bulletText, fallback) {
   if (!bulletText) return wrapSvgText(fallback, 14);
   let cleaned = bulletText.replace(/[\*`"']/g, '').replace(/^[•\-\d\.\s、:：]+/, '').trim();
   if (!cleaned) return wrapSvgText(fallback, 14);
-  
+
   const colonParts = cleaned.split(/[:：—\-\(（]/);
   if (colonParts.length > 1 && colonParts[0].length >= 2 && colonParts[0].length <= 14) {
     return wrapSvgText(colonParts[0], 14);
@@ -1267,10 +1484,10 @@ function showSlide(index) {
   const s = state.deck.slides[index];
   $$('.slide-thumb').forEach((t, i) => t.classList.toggle('active', i === index));
   $('#slideStage').dataset.page = String(index + 1).padStart(2, '0');
-  
+
   const iconStr = extractEmoji(s.icon);
   const dynamicSvg = renderDynamicDiagram(s, index);
-  
+
   const visualCardHtml = `
     <div class="visual-diagram-container">
       ${dynamicSvg}
@@ -1327,7 +1544,7 @@ $('#chatForm').addEventListener('submit', async e => {
   } catch (err) { typing.remove(); toast(err.message, true) } finally { $('#sendBtn').disabled = false }
 });
 $('#questionInput').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('#chatForm').requestSubmit() } });
-$$('.suggestions button').forEach(btn => btn.addEventListener('click', () => { if (!state.document) return toast('請先上傳教材', true); $('#questionInput').value = btn.textContent; $('#chatForm').requestSubmit() }));
+$$('#workspace .suggestions button').forEach(btn => btn.addEventListener('click', () => { if (!state.document) return toast('請先上傳教材', true); $('#questionInput').value = btn.textContent; $('#chatForm').requestSubmit() }));
 $('#pptDownload').addEventListener('click', () => toast('正在下載 PowerPoint 簡報'));
 $('#scriptDownload').addEventListener('click', () => toast('正在下載逐頁演講稿'));
 
@@ -1384,15 +1601,23 @@ fetchCurrentUser();
 // === 管理員控制台 (Admin Modal) 與 個人設定 (Profile Modal) 邏輯 ===
 
 function updateAdminUI() {
+  const isAdmin = !!(state.user && state.user.role === 'admin');
   $$('.admin-only').forEach(el => {
-    if (state.user && state.user.role === 'admin') {
+    if (isAdmin) {
       el.classList.remove('hidden');
     } else {
       el.classList.add('hidden');
     }
   });
-  if (state.user && state.user.role === 'admin') {
+
+  if (isAdmin) {
     fetchPendingCount();
+  } else {
+    closeAdminModal();
+    const adminView = $('#adminView');
+    if (adminView && adminView.classList.contains('active')) {
+      switchView('workspace');
+    }
   }
 }
 
@@ -1439,7 +1664,8 @@ function switchAdminTab(tab) {
 async function fetchPendingUsers() {
   const tbody = $('#pendingUsersTbody');
   if (!tbody) return;
-  tbody.innerHTML = '<tr><td colspan="4" class="text-center muted">載入中…</td></tr>';
+  const isEn = state.lang === 'en';
+  tbody.innerHTML = `<tr><td colspan="4" class="text-center muted">${isEn ? 'Loading...' : '載入中…'}</td></tr>`;
 
   try {
     const data = await api('/api/admin/users/pending');
@@ -1447,34 +1673,71 @@ async function fetchPendingUsers() {
     fetchPendingCount();
 
     if (users.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" class="text-center muted">尚無待審核之帳號</td></tr>';
+      tbody.innerHTML = `<tr><td colspan="4" class="text-center muted">${isEn ? 'No pending account registrations' : '尚無待審核之帳號'}</td></tr>`;
       return;
     }
 
     tbody.innerHTML = users.map(u => `
       <tr>
         <td><b>${escapeHtml(u.username)}</b></td>
-        <td><span class="role-chip ${u.role}">${u.role === 'admin' ? '管理員' : '一般用戶'}</span></td>
-        <td>${escapeHtml(u.created_at || '最近')}</td>
+        <td><span class="role-chip ${u.role}">${u.role === 'admin' ? (isEn ? 'Admin' : '管理員') : (isEn ? 'User' : '一般用戶')}</span></td>
+        <td>${escapeHtml(u.created_at || (isEn ? 'Recent' : '最近'))}</td>
         <td>
-          <button class="btn-sm btn-approve" data-review="approve" data-user="${escapeHtml(u.username)}">✓ 核准</button>
-          <button class="btn-sm btn-reject" data-review="reject" data-user="${escapeHtml(u.username)}">✗ 拒絕</button>
+          <button class="btn-sm btn-approve" data-review="approve" data-user="${escapeHtml(u.username)}">${isEn ? '✓ Approve' : '✓ 核准'}</button>
+          <button class="btn-sm btn-reject" data-review="reject" data-user="${escapeHtml(u.username)}">${isEn ? '✗ Reject' : '✗ 拒絕'}</button>
         </td>
       </tr>
     `).join('');
   } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">載入失敗: ${escapeHtml(err.message)}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">${isEn ? 'Load failed' : '載入失敗'}: ${escapeHtml(err.message)}</td></tr>`;
+  }
+}
+
+function formatLastLoginTime(timestamp) {
+  if (!timestamp) return state.lang === 'en' ? 'Never' : '尚未上記錄';
+  try {
+    const d = new Date(timestamp.replace(' ', 'T') + 'Z');
+    if (isNaN(d.getTime())) return timestamp;
+    const now = new Date();
+    const diffSec = Math.floor((now - d) / 1000);
+    if (diffSec < 60) return state.lang === 'en' ? 'Just now' : '剛剛';
+    if (diffSec < 3600) {
+      const mins = Math.floor(diffSec / 60);
+      return state.lang === 'en' ? `${mins}m ago` : `${mins} 分鐘前`;
+    }
+    if (diffSec < 86400) {
+      const hours = Math.floor(diffSec / 3600);
+      return state.lang === 'en' ? `${hours}h ago` : `${hours} 小時前`;
+    }
+    return timestamp.slice(0, 16);
+  } catch (e) {
+    return timestamp;
   }
 }
 
 async function fetchAllUsers() {
   const tbody = $('#allUsersTbody');
+  const cardsWrapper = $('#allUsersCards');
   if (!tbody) return;
-  tbody.innerHTML = '<tr><td colspan="6" class="text-center muted">載入中…</td></tr>';
+  const isEn = state.lang === 'en';
+  tbody.innerHTML = `<tr><td colspan="8" class="text-center muted">${isEn ? 'Loading...' : '載入中…'}</td></tr>`;
+  if (cardsWrapper) cardsWrapper.innerHTML = `<div class="text-center muted">${isEn ? 'Loading...' : '載入中…'}</div>`;
 
   try {
-    const data = await api('/api/users/all');
-    const users = data.users || [];
+    const data = await api('/api/admin/users/list');
+    let users = data.users || [];
+
+    // 依據「管理員優先」+「上次上線時間 (新到舊)」進行排序
+    users.sort((a, b) => {
+      if (a.role === 'admin' && b.role !== 'admin') return -1;
+      if (a.role !== 'admin' && b.role === 'admin') return 1;
+
+      const timeA = a.last_login_at ? new Date(a.last_login_at.replace(' ', 'T') + 'Z').getTime() : 0;
+      const timeB = b.last_login_at ? new Date(b.last_login_at.replace(' ', 'T') + 'Z').getTime() : 0;
+      if (timeA !== timeB) return timeB - timeA;
+
+      return a.id - b.id;
+    });
 
     const total = users.length;
     const pending = users.filter(u => u.status === 'pending').length;
@@ -1484,47 +1747,150 @@ async function fetchAllUsers() {
     if ($('#metricAdminUsers')) $('#metricAdminUsers').textContent = admins;
 
     if (users.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" class="text-center muted">系統尚無用戶紀錄</td></tr>';
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center muted">${isEn ? 'No user records found' : '系統尚無用戶紀錄'}</td></tr>`;
+      if (cardsWrapper) cardsWrapper.innerHTML = `<div class="text-center muted">${isEn ? 'No user records found' : '系統尚無用戶紀錄'}</div>`;
       return;
     }
 
-    tbody.innerHTML = users.map(u => {
+    const tableRows = [];
+    const mobileCards = [];
+
+    users.forEach(u => {
       let actionButtons = '';
       if (u.status === 'pending') {
         actionButtons = `
-          <button class="btn-sm btn-approve" data-review="approve" data-user="${escapeHtml(u.username)}">✓ 核准</button>
-          <button class="btn-sm btn-reject" data-review="reject" data-user="${escapeHtml(u.username)}">✗ 拒絕</button>
-          <button class="btn-sm btn-reject" data-deleteuser="${escapeHtml(u.username)}">刪除</button>
+          <button class="btn-sm btn-approve" data-review="approve" data-user="${escapeHtml(u.username)}">${isEn ? '✓ Approve' : '✓ 核准'}</button>
+          <button class="btn-sm btn-reject" data-review="reject" data-user="${escapeHtml(u.username)}">${isEn ? '✗ Reject' : '✗ 拒絕'}</button>
+          <button class="btn-sm btn-reject" data-deleteuser="${escapeHtml(u.username)}">${isEn ? 'Delete' : '刪除'}</button>
         `;
       } else {
         actionButtons = `
-          ${u.role === 'user' ? `<button class="btn-sm btn-action" data-role="admin" data-user="${escapeHtml(u.username)}">升為管理員</button>` : `<button class="btn-sm btn-warning" data-role="user" data-user="${escapeHtml(u.username)}">降為用戶</button>`}
-          <button class="btn-sm btn-action" data-resetpass="${escapeHtml(u.username)}">重置密碼</button>
-          <button class="btn-sm btn-reject" data-deleteuser="${escapeHtml(u.username)}">刪除</button>
+          ${u.role === 'user' ? `<button class="btn-sm btn-action" data-role="admin" data-user="${escapeHtml(u.username)}">${isEn ? 'Promote Admin' : '升為管理員'}</button>` : `<button class="btn-sm btn-warning" data-role="user" data-user="${escapeHtml(u.username)}">${isEn ? 'Demote User' : '降為用戶'}</button>`}
+          <button class="btn-sm btn-action" data-resetpass="${escapeHtml(u.username)}">${isEn ? 'Reset Pass' : '重置密碼'}</button>
+          <button class="btn-sm btn-reject" data-deleteuser="${escapeHtml(u.username)}">${isEn ? 'Delete' : '刪除'}</button>
         `;
       }
 
-      return `
+      const tierKey = u.tier || (u.role === 'admin' ? 'admin' : 'teacher_pro');
+      const tierSelect = u.role === 'admin'
+        ? `<span style="font-size:11px; font-weight:600; color:#d97706;">${isEn ? '👑 Unlimited' : '👑 無限版'}</span>`
+        : `
+        <select class="admin-tier-select" data-user="${escapeHtml(u.username)}" style="font-size:11px; padding:2px 6px; border-radius:6px; border:1px solid var(--line); background:var(--paper);">
+          <option value="teacher_trial" ${tierKey === 'teacher_trial' ? 'selected' : ''}>${isEn ? '🎓 Trial' : '🎓 試用版'}</option>
+          <option value="teacher_pro" ${tierKey === 'teacher_pro' ? 'selected' : ''}>${isEn ? '⭐ Pro' : '⭐ 專業版'}</option>
+          <option value="institution" ${tierKey === 'institution' ? 'selected' : ''}>${isEn ? '🏫 Institution' : '🏫 機構版'}</option>
+        </select>
+      `;
+
+      const roleBadge = u.role === 'admin' ? (isEn ? '👑 Admin' : '👑 管理員') : (isEn ? 'User' : '用戶');
+      const statusBadge = u.status === 'approved'
+        ? (isEn ? 'Approved' : '已開通')
+        : (u.status === 'pending' ? (isEn ? '⏳ Pending' : '⏳ 待審核') : (isEn ? 'Rejected' : '已拒絕'));
+
+      const qs = u.quota_summary || { deck_today: 0, deck_limit: 3, ask_today: 0, ask_limit: 10, deck_total: 0, ask_total: 0, is_unlimited: false };
+      
+      const dailyUsageHtml = `
+        <div style="font-size:11px; line-height:1.4;">
+          <div>📊 ${isEn ? 'Decks' : '簡報'}: <b>${qs.deck_today}</b> / ${qs.is_unlimited ? '∞' : qs.deck_limit} ${isEn ? 'items' : '份'}</div>
+          <div>💬 ${isEn ? 'Q&A' : '提問'}: <b>${qs.ask_today}</b> / ${qs.is_unlimited ? '∞' : qs.ask_limit} ${isEn ? 'times' : '次'}</div>
+        </div>
+      `;
+
+      const totalUsageHtml = `
+        <div style="font-size:11px; line-height:1.4; color: var(--muted);">
+          <div>📊 ${isEn ? 'Decks' : '簡報'}: <b>${qs.deck_total}</b> ${isEn ? 'total' : '份'}</div>
+          <div>💬 ${isEn ? 'Q&A' : '提問'}: <b>${qs.ask_total}</b> ${isEn ? 'total' : '次'}</div>
+        </div>
+      `;
+
+      const lastLoginHtml = `<span style="font-size:11px; color: var(--muted);">${formatLastLoginTime(u.last_login_at)}</span>`;
+
+      tableRows.push(`
         <tr>
           <td>${u.id}</td>
-          <td><b>${escapeHtml(u.username)}</b></td>
           <td>
-            <span class="role-chip ${u.role}">${u.role === 'admin' ? '👑 管理員' : '用戶'}</span>
+            <b>${escapeHtml(u.username)}</b>
+            <div style="margin-top: 4px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
+              <span class="status-chip ${u.status}">${statusBadge}</span>
+              <span class="role-chip ${u.role}">${roleBadge}</span>
+            </div>
           </td>
-          <td>
-            <span class="status-chip ${u.status}">${u.status === 'approved' ? '已開通' : (u.status === 'pending' ? '⏳ 待審核' : '已拒絕')}</span>
-          </td>
-          <td>${escapeHtml(u.created_at || '-')}</td>
-          <td>
-            ${actionButtons}
-          </td>
+          <td>${tierSelect}</td>
+          <td>${dailyUsageHtml}</td>
+          <td>${totalUsageHtml}</td>
+          <td>${lastLoginHtml}</td>
+          <td><span style="font-size:11px; color:var(--muted);">${escapeHtml(u.created_at || '-')}</span></td>
+          <td>${actionButtons}</td>
         </tr>
-      `;
-    }).join('');
+      `);
+
+      mobileCards.push(`
+        <div class="admin-user-card">
+          <div class="user-card-header">
+            <div>
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <b class="username">${escapeHtml(u.username)}</b>
+                <small class="user-id">#${u.id}</small>
+                <div style="margin-left: 2px;">${tierSelect}</div>
+              </div>
+            </div>
+            <div class="badges">
+              <span class="status-chip ${u.status}">${statusBadge}</span>
+              <span class="role-chip ${u.role}">${roleBadge}</span>
+            </div>
+          </div>
+          <div class="user-card-body">
+            <div class="info-item">
+              <span class="lbl">${isEn ? 'Daily Usage' : '今日使用 / 限額'}</span>
+              <div>${dailyUsageHtml}</div>
+            </div>
+            <div class="info-item">
+              <span class="lbl">${isEn ? 'Cumulative' : '累計總使用量'}</span>
+              <div>${totalUsageHtml}</div>
+            </div>
+            <div class="info-item">
+              <span class="lbl">${isEn ? 'Last Active' : '上次上線時間'}</span>
+              <div>${lastLoginHtml}</div>
+            </div>
+            <div class="info-item">
+              <span class="lbl">${isEn ? 'Created At' : '帳號建立時間'}</span>
+              <div style="font-size:11px; color:var(--muted);">${escapeHtml(u.created_at || '-')}</div>
+            </div>
+          </div>
+          <div class="user-card-actions">
+            ${actionButtons}
+          </div>
+        </div>
+      `);
+    });
+
+    tbody.innerHTML = tableRows.join('');
+    if (cardsWrapper) cardsWrapper.innerHTML = mobileCards.join('');
   } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">載入失敗: ${escapeHtml(err.message)}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">${isEn ? 'Load failed' : '載入失敗'}: ${escapeHtml(err.message)}</td></tr>`;
+    if (cardsWrapper) cardsWrapper.innerHTML = `<div class="text-center text-danger">${isEn ? 'Load failed' : '載入失敗'}: ${escapeHtml(err.message)}</div>`;
   }
 }
+
+// 代理管理員對話框內的變更層級 (Tier) 動作
+$('#adminView')?.addEventListener('change', async (e) => {
+  const select = e.target.closest('.admin-tier-select');
+  if (select) {
+    const username = select.dataset.user;
+    const tier = select.value;
+    try {
+      const res = await api('/api/admin/users/tier', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, tier })
+      });
+      toast(res.message || '用戶層級更新成功');
+      fetchAllUsers();
+    } catch (err) {
+      toast(err.message, true);
+    }
+  }
+});
 
 // 代理管理員對話框內的按鈕動作
 $('#adminView')?.addEventListener('click', async (e) => {
@@ -1610,6 +1976,65 @@ $('#closeAdminModalBtn')?.addEventListener('click', closeAdminModal);
 $('#tabPendingUsersBtn')?.addEventListener('click', () => switchAdminTab('pending'));
 $('#tabAllUsersBtn')?.addEventListener('click', () => switchAdminTab('all'));
 
+// --- 新增帳號 (管理員開通) Modal 邏輯 ---
+function openCreateUserModal() {
+  const modal = $('#createUserModal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    $('#createUsernameInput').value = '';
+    $('#createPasswordInput').value = '';
+    if ($('#createUserError')) $('#createUserError').classList.add('hidden');
+  }
+}
+
+function closeCreateUserModal() {
+  const modal = $('#createUserModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+$('#openCreateUserModalBtn')?.addEventListener('click', openCreateUserModal);
+$('#closeCreateUserModalBtn')?.addEventListener('click', closeCreateUserModal);
+$('#createUserModal')?.addEventListener('click', (e) => {
+  if (e.target === $('#createUserModal')) closeCreateUserModal();
+});
+
+$('#createRoleSelect')?.addEventListener('change', (e) => {
+  const isAdmin = e.target.value === 'admin';
+  const tierWrapper = $('#createTierWrapper');
+  if (tierWrapper) {
+    tierWrapper.style.display = isAdmin ? 'none' : 'block';
+  }
+});
+
+$('#createUserAdminForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const username = $('#createUsernameInput').value.trim();
+  const password = $('#createPasswordInput').value.trim();
+  const role = $('#createRoleSelect').value;
+  const tier = $('#createTierSelect').value;
+  const errEl = $('#createUserError');
+
+  if (errEl) errEl.classList.add('hidden');
+
+  try {
+    const res = await api('/api/admin/users/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password, role, tier })
+    });
+    toast(res.message || '帳號建立成功');
+    closeCreateUserModal();
+    fetchAllUsers();
+  } catch (err) {
+    if (errEl) {
+      errEl.textContent = err.message;
+      errEl.classList.remove('hidden');
+    } else {
+      toast(err.message, true);
+    }
+  }
+});
+
 // --- 個人設定 Modal 與修改密碼邏輯 ---
 
 function openProfileModal() {
@@ -1671,8 +2096,128 @@ $('#changePasswordForm')?.addEventListener('submit', async (e) => {
 setLanguage(state.lang);
 
 // === Agent Ops Command Center Logic (Chat Stream UX) ===
+const DEPT_WELCOME_CONFIGS = {
+  academic: {
+    avatar: '🎓',
+    title: { 'zh-TW': '💡 歡迎與教務小老師對話', 'en': '💡 Welcome to Academic & Lesson Planning Tutor' },
+    desc: { 'zh-TW': '請下達備課或教學任務（例如：「設計牛頓運動定律 45 分鐘教案」、「出 5 題高中生物題」或「生成逐頁演講稿」）。', 'en': 'Enter lesson plan or teaching tasks (e.g. "Design a 45-min Physics plan", "Generate 5 Biology quiz questions").' },
+    suggestions: [
+      { text: '🎓 45 分鐘教案設計', query: '請幫我設計一份 45 分鐘國中物理「牛頓第二運動定律」的備課教案與觀念大綱' },
+      { text: '📝 5 題生物選擇題與解析', query: '請幫我出 5 題關於「光合作用與呼吸作用」的高中生物選擇題，包含解答與觀念解析' },
+      { text: '🎤 簡報逐頁演講稿', query: '請幫我生成這份簡報的逐頁演講稿與備課講義' }
+    ]
+  },
+  marketing: {
+    avatar: '🚀',
+    title: { 'zh-TW': '🚀 歡迎與營銷推廣負責人對話', 'en': '🚀 Welcome to Marketing & Promotion Lead' },
+    desc: { 'zh-TW': '請下達推廣或文案任務（例如：「撰寫微課教學 FB 貼文」、「梳理課程核心賣點」或「撰寫教學心得文章」）。', 'en': 'Enter marketing tasks (e.g. "Write an FB promo post", "Summarize course pitch features").' },
+    suggestions: [
+      { text: '📱 FB / Threads 社群推廣貼文', query: '請幫我產出一篇介紹微課教學與防幻覺 AI 助手的 FB 社群推廣文案' },
+      { text: '🎯 梳理課程亮點與賣點', query: '請幫我梳理這份數位課程的核心賣點與亮點介紹' },
+      { text: '✍️ 撰寫教學心得體驗文章', query: '請幫我撰寫一篇分享翻轉課堂實務心得的教學經驗文章' }
+    ]
+  },
+  operations: {
+    avatar: '🏫',
+    title: { 'zh-TW': '🏫 歡迎與教務行政特助對話', 'en': '🏫 Welcome to Ops & Institution Admin' },
+    desc: { 'zh-TW': '請下達行政或權限查詢任務（例如：「查詢學校團體合約」、「檢視團隊席位配額」或「查詢個人每日限額」）。', 'en': 'Enter admin tasks (e.g. "Check school contract terms", "View team seat allocation").' },
+    suggestions: [
+      { text: '🏫 查詢機構與學校團體合約', query: '查詢學校與機構團體授權合約與成員開通方式' },
+      { text: '📊 檢視團隊席位分配與權限', query: '檢視團隊成員席位分配與權限開通規則' },
+      { text: '📋 查詢個人每日配額與等級', query: '查詢我目前的會員等級與每日使用配額' }
+    ]
+  },
+  devops: {
+    avatar: '🛠️',
+    title: { 'zh-TW': '🛠️ 歡迎與技術維護工程師對話', 'en': '🛠️ Welcome to DevOps & Maintenance Engineer' },
+    desc: { 'zh-TW': '請下達維護或診斷任務（例如：「排查 Railway 部署狀態」、「診斷 Linux OOM 記憶體效能」或「檢視 JWT 驗證」）。', 'en': 'Enter devops tasks (e.g. "Check Railway deploy health", "Diagnose Linux Kernel OOM memory").' },
+    suggestions: [
+      { text: '🛠️ 排查 Railway 雲端部署狀態', query: '排查本機與 Railway 雲端部署運行狀態與環境設定' },
+      { text: '⚡ 診斷 Linux Kernel OOM 效能', query: '診斷 Linux Kernel OOM 記憶體排查與系統效能最佳化' },
+      { text: '🔑 檢視 JWT 驗證與過期機制', query: '檢視系統 JWT 身份驗證機制與 Token 過期設定' }
+    ]
+  }
+};
+
+function switchAgentDeptWelcome(deptKey) {
+  const lang = state.lang || 'zh-TW';
+  const container = $('#agentMessages');
+
+  // 若重複點擊當前已鎖定的部門，則切換取消指定分流，回到全域智慧導航模式
+  if (state.activeDept === deptKey) {
+    state.activeDept = null;
+    renderDeptActiveIndicators();
+
+    if (container) {
+      const sysMsgEl = document.createElement('div');
+      sysMsgEl.className = 'message assistant system-dept-switch';
+      sysMsgEl.style.borderLeft = '4px solid #10b981';
+      sysMsgEl.style.background = 'rgba(16, 185, 129, 0.05)';
+      sysMsgEl.innerHTML = `
+        <span class="bot-avatar" style="background: #10b981;">🌐</span>
+        <div>
+          <div class="agent-msg-meta">
+            <span class="agent-dept-chip" style="background: rgba(16, 185, 129, 0.2); color: #059669;">🌐 ${lang === 'en' ? 'Omni-Routing Mode' : '全域智慧導航模式'}</span>
+          </div>
+          <p style="margin: 4px 0 0 0; color: var(--fg); font-weight: 500;">
+            ${lang === 'en' ? 'Department restriction cleared. Orchestrator will now auto-route all queries dynamically.' : '已取消指定部門分流！系統現已切換回【全域智慧導航模式】，將自動辨識問題意圖並分發給最適切的部門。'}
+          </p>
+        </div>
+      `;
+      container.appendChild(sysMsgEl);
+      container.scrollTop = container.scrollHeight;
+    }
+    toast(lang === 'en' ? 'Switched to Omni-Routing Mode' : '已取消指定分流，回到全域智慧導航模式！');
+    return;
+  }
+
+  // 否則，鎖定指定部門
+  state.activeDept = deptKey;
+  renderDeptActiveIndicators();
+  const cfg = DEPT_WELCOME_CONFIGS[deptKey] || DEPT_WELCOME_CONFIGS.academic;
+  if (!container) return;
+
+  const titleText = cfg.title[lang] || cfg.title['zh-TW'];
+  const descText = cfg.desc[lang] || cfg.desc['zh-TW'];
+  const sugHtml = cfg.suggestions.map(s => `<button type="button" class="agent-sug-btn" data-query="${escapeHtml(s.query)}">${escapeHtml(s.text)}</button>`).join('');
+
+  // 建立接續對話的部門切換指示卡片 (不覆蓋歷史訊息，直接接續對話流)
+  const sysMsgEl = document.createElement('div');
+  sysMsgEl.className = 'message assistant system-dept-switch';
+  sysMsgEl.style.borderLeft = '4px solid #6366f1';
+  sysMsgEl.style.background = 'rgba(99, 102, 241, 0.05)';
+  sysMsgEl.innerHTML = `
+    <span class="bot-avatar" style="background: #6366f1;">${cfg.avatar}</span>
+    <div>
+      <div class="agent-msg-meta">
+        <span class="agent-dept-chip" style="background: rgba(99, 102, 241, 0.2); color: #4f46e5;">🎯 ${escapeHtml(titleText)}</span>
+      </div>
+      <p style="margin: 4px 0 8px 0; color: var(--fg); font-weight: 500;">${escapeHtml(descText)}</p>
+      <div class="suggestions" style="margin-top: 8px;">${sugHtml}</div>
+    </div>
+  `;
+
+  container.appendChild(sysMsgEl);
+  container.scrollTop = container.scrollHeight;
+
+  const deptNames = {
+    academic: lang === 'en' ? '🎓 Academic Tutor' : '🎓 教務小老師',
+    marketing: lang === 'en' ? '🚀 Marketing Lead' : '🚀 營銷推廣負責人',
+    operations: lang === 'en' ? '🏫 Ops Admin' : '🏫 教務行政特助',
+    devops: lang === 'en' ? '🛠️ DevOps Engineer' : '🛠️ 技術維護工程師'
+  };
+  const label = deptNames[deptKey] || deptNames.academic;
+  toast(lang === 'en' ? `Connected to ${label}` : `已切換至【${label}】專屬對話視窗！`);
+}
+
 document.addEventListener('click', (e) => {
-  const btn = e.target.closest('.agent-sug-btn');
+  const deptBtn = e.target.closest('.dept-chat-btn');
+  if (deptBtn && deptBtn.dataset.dept) {
+    if (deptBtn.disabled) return;
+    switchAgentDeptWelcome(deptBtn.dataset.dept);
+  }
+
+  const btn = e.target.closest('.agent-sug-btn, .skill-chip-btn');
   if (btn && btn.dataset.query) {
     const input = $('#agentQueryInput');
     if (input) input.value = btn.dataset.query;
@@ -1693,17 +2238,50 @@ $('#agentForm')?.addEventListener('submit', (e) => {
   const query = input?.value?.trim();
   if (query) {
     dispatchAgentTask(query);
-    if (input) input.value = '';
+    if (input) {
+      input.value = '';
+      input.style.height = 'auto';
+    }
+  }
+});
+
+$('#agentQueryInput')?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    $('#agentForm')?.requestSubmit();
+  }
+});
+
+['agentQueryInput', 'questionInput'].forEach(id => {
+  const el = $(`#${id}`);
+  if (el) {
+    el.addEventListener('input', () => {
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+    });
   }
 });
 
 async function dispatchAgentTask(query) {
+  const isEn = state.lang === 'en';
+  if (!state.user) {
+    toast(isEn ? 'Please log in to use the AI Agent Assistant' : '請先登入帳號以開始問答與使用備課助手', true);
+    openAuthModal('login');
+    return;
+  }
+
+  if (!state.agentHistory) state.agentHistory = [];
+
   const container = $('#agentMessages');
   const sendBtn = $('#agentSendBtn');
-  const platform = $('#agentPlatformSelect')?.value || 'FB / 社群媒體';
-  const isEn = state.lang === 'en';
+  const queryInput = $('#agentQueryInput');
+  const platform = 'FB / 社群媒體';
 
+  if (queryInput) queryInput.value = '';
   if (!container) return;
+
+  // 紀錄對話歷程 (User Turn)
+  state.agentHistory.push({ role: 'user', content: query });
 
   // 1. Append User Message Bubble
   const userMsgEl = document.createElement('div');
@@ -1731,13 +2309,21 @@ async function dispatchAgentTask(query) {
     const res = await api('/api/agent/dispatch', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, platform })
+      body: JSON.stringify({
+        query,
+        platform,
+        target_department: state.activeDept || 'academic',
+        history: state.agentHistory.slice(-10)
+      })
     });
 
     const dept = res.department ? res.department.toUpperCase() : 'GENERAL';
     const skill = res.matched_skill || 'general';
     const data = res.data || {};
     const text = (typeof data === 'object' ? (data.output_text || data.copywriting || JSON.stringify(data, null, 2)) : String(data)) || res.message || (isEn ? 'Task completed.' : '任務完成。');
+
+    // 紀錄對話歷程 (Assistant Turn)
+    state.agentHistory.push({ role: 'assistant', content: text });
 
     const deptLabels = {
       'ACADEMIC': isEn ? '🎓 Academic & Teaching' : '🎓 教務教學部',
@@ -1748,6 +2334,7 @@ async function dispatchAgentTask(query) {
     const deptLabel = deptLabels[dept] || (isEn ? `🎯 Dept: ${dept}` : `🎯 部門: ${dept}`);
 
     // 3. Replace Loading with Final Assistant Response Bubble
+    const showPptxBtn = (dept === 'ACADEMIC' || dept === 'GENERAL');
     assistantMsgEl.innerHTML = `
       <span class="bot-avatar">✦</span>
       <div>
@@ -1755,24 +2342,18 @@ async function dispatchAgentTask(query) {
           <span class="agent-dept-chip">${deptLabel}</span>
           <span class="agent-skill-chip">⚡ Skill: ${skill}</span>
         </div>
-        <p style="white-space: pre-wrap; font-family: inherit;">${escapeHtml(text)}</p>
-        <button type="button" class="agent-copy-btn" data-copy="${escapeHtml(text)}">${isEn ? '📋 Copy Content' : '📋 複製內容'}</button>
+        <p class="agent-output-text" style="white-space: pre-wrap; font-family: inherit;">${escapeHtml(text)}</p>
+        <div class="agent-action-bar" style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
+          <button type="button" class="agent-action-btn agent-copy-btn" data-copy="${escapeHtml(text)}">${isEn ? '📋 Copy Content' : '📋 複製內容'}</button>
+          ${showPptxBtn ? `<button type="button" class="agent-action-btn agent-pptx-btn" data-query="${escapeHtml(query)}">${isEn ? '📄 Import to Material Parsing' : '📄 導入教材解析'}</button>` : ''}
+        </div>
       </div>
     `;
 
-    if (typeof renderMathInElement === 'function') {
-      try {
-        renderMathInElement(assistantMsgEl, {
-          delimiters: [
-            { left: '$$', right: '$$', display: true },
-            { left: '$', right: '$', display: false }
-          ],
-          throwOnError: false
-        });
-      } catch (_) {}
-    }
+    renderMath(assistantMsgEl);
 
     toast(isEn ? `Task completed by ${deptLabel}` : `Agent 任務已由 ${deptLabel} 順利完成`);
+    await fetchCurrentUser();
   } catch (err) {
     assistantMsgEl.innerHTML = `
       <span class="bot-avatar" style="background: #f87171; color: #fff;">!</span>
@@ -1789,5 +2370,94 @@ async function dispatchAgentTask(query) {
     container.scrollTop = container.scrollHeight;
   }
 }
+
+function extractCleanDocTitle(query, content) {
+  // 1. 優先匹配專有名詞引號內的主題（如：「牛頓第二運動定律」、「光合作用與呼吸作用」）
+  const quoteMatch = (query || '').match(/[「『"']([^「」『』"']{2,25})[」』"']/);
+  if (quoteMatch && quoteMatch[1].trim()) {
+    return quoteMatch[1].trim();
+  }
+
+  // 2. 掃描 AI 產出內容的前 8 列，萃取 Markdown 大綱標題 (# 主題 或 **主題**)
+  if (content) {
+    const lines = content.split('\n').slice(0, 8);
+    for (let line of lines) {
+      line = line.trim();
+      const headerMatch = line.match(/^(?:#+\s*|\*\*)([^\n\*#]{2,30})(?:\*\*|\n)?/);
+      if (headerMatch && headerMatch[1].trim()) {
+        let t = headerMatch[1].trim().replace(/[\\/:*?"<>|]/g, '');
+        t = t.replace(/^(備課教案|教案大綱|教案|備課大綱|課程大綱|教學主題)[:：\s]*/g, '');
+        if (t.length >= 2 && t.length <= 25 && !t.includes('請幫我')) return t;
+      }
+    }
+  }
+
+  // 3. 提問動詞與贅字剝離演算法
+  let clean = (query || 'AI_備課教案').trim();
+  clean = clean.replace(/^(請|幫我|請幫我|需要|設計|撰寫|產出|產生|寫一篇|出\s*\d+\s*題|關於|查詢)+/g, '');
+  clean = clean.replace(/(的一份|一份|關於)+/g, '');
+  clean = clean.replace(/(的備課教案與觀念大綱|的備課教案|的教案大綱|教案大綱|教案|的宣傳文案|推廣文案|的教學心得文章|教學經驗文章|選擇題與解析|選擇題|大綱)$/g, '');
+  clean = clean.replace(/[「」『』""'']/g, '');
+
+  clean = clean.trim();
+  if (clean.length > 20) {
+    clean = clean.split(/(的|與|及|包含|包含解答)/)[0];
+  }
+
+  return clean.slice(0, 20).trim() || 'AI_備課教材';
+}
+
+// 處理 Agent 產出卡片的操作按鈕 (將生成結果當成教材導入，切換至教材解析頁面並顯示解析等待畫面)
+document.addEventListener('click', async (e) => {
+  const pptxBtn = e.target.closest('.agent-pptx-btn');
+  if (pptxBtn) {
+    const isEn = state.lang === 'en';
+    const topic = pptxBtn.getAttribute('data-query') || 'AI_備課教案';
+    const msgBox = pptxBtn.closest('.message');
+    const content = msgBox ? msgBox.querySelector('.agent-output-text')?.textContent || '' : '';
+
+    if (!content) {
+      switchView('workspace');
+      toast(isEn ? 'Switched to Material Parsing' : '已切換至【📄 教材解析】！');
+      return;
+    }
+
+    // 1. 先切換至【📄 教材解析】頁面
+    switchView('workspace');
+
+    // 2. 觸發標準教材解析中的全螢幕/等待動畫畫面
+    loading(
+      true,
+      isEn ? 'Parsing & Indexing Material...' : '正在解析與索引備課教材中...',
+      isEn ? 'AI is chunking markdown content, extracting LaTeX formulas, and indexing knowledge vector database...' : '系統正在切割 Markdown 教案段落、建立 LaTeX 數學公式與轉譯知識向量庫，請稍候...'
+    );
+
+    try {
+      // 3. 提取精簡標題，呼叫後端 API 將生成結果導入為 Document
+      const cleanTitle = extractCleanDocTitle(topic, content);
+      const doc = await api('/api/documents/import_text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: cleanTitle, content: content })
+      });
+
+      // 4. 設定已上傳/解析完成的 Document 狀態
+      setDocument(doc);
+
+      const fileCard = $('#fileCard');
+      if (fileCard) fileCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      toast(isEn
+        ? '🎉 Material imported successfully! Proceed with standard parsing and lesson design.'
+        : '🎉 已將生成結果成功導入為教材！已為您完成解析並進入教材工作區。'
+      );
+    } catch (err) {
+      toast(err.message || (isEn ? 'Import failed' : '導入教材失敗'), true);
+    } finally {
+      loading(false);
+    }
+    return;
+  }
+});
 
 

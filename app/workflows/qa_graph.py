@@ -84,6 +84,7 @@ def generate_answer_node(state: QAState) -> QAState:
         "你是嚴謹的繁體中文教學助理。"
         "只能根據提供的教材片段與網路參考資料回答。"
         "回答必須清楚、精簡，並以（第 X 頁）標示依據。"
+        "所有數學公式、理化符號與數學變數，請一律使用標準 LaTeX 語法格式（單行公式使用 $...$，獨立段落公式使用 $$...$$）。"
     )
     user_prompt = f"教材片段：\n{context_str}\n\n"
     if web_results:

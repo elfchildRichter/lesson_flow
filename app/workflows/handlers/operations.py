@@ -11,6 +11,19 @@ def operations_handler(payload: Dict[str, Any]) -> Dict[str, Any]:
     query = payload.get("query", "")
     user_info = payload.get("user_info")
     ai_service = payload.get("ai_service")
+    query_lower = query.lower()
+
+    # 跨部門職能引導：若問題屬於教學備課或行銷，主動指引專屬助手
+    if any(k in query_lower for k in ["教案", "試題", "選擇題", "課文", "演講稿", "觀念大綱", "出 5 題"]):
+        return {
+            "output_text": (
+                "👋 您好！我是【🏫 營運與行政部】的教務行政特助。\n\n"
+                "設計單元教案大綱與生成測驗試題屬於【🎓 教務教學部】（Lesson Flow 小老師）的職權範圍。\n\n"
+                "👉 建議您點擊切換至【🎓 教務教學部】（與教務小老師對話），獲得專屬備課設計支援！"
+            ),
+            "department": "operations",
+            "referred_department": "academic"
+        }
 
     provider_label = "Gemini 雲端 API"
     if ai_service:

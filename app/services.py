@@ -173,6 +173,28 @@ def parse_pdf(
     )
 
 
+def parse_text(content: str, filename: str = "AI_教案教材.md") -> Document:
+    clean_text = _clean(content)
+    if not clean_text:
+        raise ValueError("教材內容不可為空")
+
+    pages_list = [p.strip() for p in re.split(r"\n(?=# |\n---\n)", clean_text) if p.strip()]
+    if not pages_list:
+        pages_list = [clean_text]
+
+    chunks: list[Chunk] = []
+    for page_idx, page_text in enumerate(pages_list, 1):
+        chunks.extend(_split_page(page_text, page_idx, len(chunks)))
+
+    return Document(
+        id=uuid.uuid4().hex[:12],
+        name=filename,
+        pages=len(pages_list),
+        chunks=chunks,
+        size_bytes=len(content.encode("utf-8")),
+    )
+
+
 def _prepare_openai_strict_schema(schema: dict) -> dict:
     """遞迴轉換 JSON Schema 以符合 OpenAI Strict Structured Output 的語義要求 (如包含 additionalProperties: False 與 required 欄位)。"""
     if not isinstance(schema, dict):

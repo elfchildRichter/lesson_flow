@@ -2,7 +2,10 @@
 
 課伴是一個以 **LangGraph 狀態圖**、**多部門 AI 團隊動態調度 (Agent Orchestration)** 與 **多模態檢索增強生成 (Multimodal RAG)** 為核心的 AI 教學助理與 SaaS 自動化平台。上傳 PDF 教材後，可以：
 
-- **🤖 Agent 指揮所 (Agent Ops Command Center)**：整合 **CompanyRouter** 與 **SkillRegistry**，支援管理員動態調度 4 大 AI 專家部門（教務、行政、技術、行銷）處理自動化任務。
+- **🤖 Agent 指揮所 (Agent Ops Command Center)**：整合 **CompanyRouter** 與 **SkillRegistry**，支援 **全域智慧導航 (Omni-Routing)** 與管理員動態調度 4 大 AI 專家部門（教務、行政、技術、行銷）處理自動化任務。
+- **🎓 四大會員層級與流量配額 (Tiering System)**：支援「教師試用版」、「教師專業版」、「機構/學校版」與「管理員無限版」，具備每日簡報/提問上限、單檔大小與部門存取管控。
+- **📄 智慧教材檔名與主題萃取**：導入「」引號標籤識別、Markdown 標題萃取與提問動詞剝離演算法，自動產出簡明教材名稱。
+- **🎒 豐富學習對象與語意體驗**：支援選擇「國小生」、「國中生」、「高中生」、「大學生/成人」，AI 自動調適最適教學語氣。
 - **方案 A 視覺頁面直解 (Vision-Native Direct Parsing)**：以高畫質 200 DPI PNG 頁面圖檔結合 VLM 視覺大模型，精準還原 PDF 頁面結構、排版、複雜表格與 **LaTeX 數學公式 (`$...$` / `$$...$$`)**。
 - **🌐 跨語言簡報與講稿生成**：支援上傳中/英文教材，可自由選擇產出 **繁體中文 (zh-TW)**、**English (en)** 或 **跟隨教材 (auto)** 的簡報與演講稿。
 - 產生可下載的 PowerPoint 教學簡報 (`.pptx`) 與高品質逐頁演講稿 (`.md`)。
@@ -10,7 +13,7 @@
 - **Self-RAG 防幻覺審查**：自動校對回答真實性，避免模型自創不實資訊。
 - **可選性聯網補充搜尋 (Corrective RAG)**：當教材資訊不足或需延伸最新案例時，可勾選開啟聯網搜尋補足內容。
 - **🌐 EN / 繁體中文 雙語介面 (Bilingual i18n)**：支援點擊頂部導覽列按鈕即時切換全站介面、選單選項、提示與錯誤訊息。
-- **🔐 身分驗證與管理員控制台**：整合 JWT 認證、使用者權限控制（一般用戶 / 👑 系統管理員）與每日額度限制 (Quota Control)。
+- **🔐 管理員控制台與用戶資訊卡片 (User Cards & RWD)**：支援管理員優先排序、上次上線時間追蹤、無邊框平鋪滾動與手機端響應式用戶卡片。
 - **💻 CLI 命令列介面 (`app/cli.py`)**：支援直接在 Shell 執行指令派發任務至多部門 AI 團隊處理。
 
 ---
@@ -271,9 +274,10 @@ Gemini 雲端模式的回應範例：
 | `GET` | `/api/decks/{deck_id}/script` | 下載 Markdown 演講腳本 |
 | `GET` | `/api/agent/skills` | [管理員] 查詢多部門 AI Skills 註冊表與關鍵字 |
 | `POST` | `/api/agent/dispatch` | [管理員] 派發自然語言任務至 CompanyRouter 執行多部門調度 |
-| `GET` | `/api/users/all` | [管理員] 查詢全站使用者帳號清單與審核狀態 |
+| `GET` | `/api/admin/users/list` | [管理員] 查詢全站使用者帳號清單（含每日與累計用量、上次上線時間） |
 | `GET` | `/api/admin/users/pending` | [管理員] 查詢待開通審核之使用者帳號列表 |
 | `POST` | `/api/admin/users/review` | [管理員] 核准或拒絕使用者帳號開通 |
+| `POST` | `/api/admin/users/tier` | [管理員] 變更使用者會員層級 (`teacher_trial` / `teacher_pro` / `institution` / `admin`) |
 | `POST` | `/api/admin/users/role` | [管理員] 調整使用者權限角色 (`user` / `admin`) |
 | `POST` | `/api/admin/users/reset-password` | [管理員] 強制重置指定使用者密碼 |
 | `DELETE` | `/api/admin/users/{username}` | [管理員] 刪除指定使用者帳號 |
@@ -292,6 +296,7 @@ Gemini 雲端模式的回應範例：
 ├── app/
 │   ├── main.py          # FastAPI 路由、Auth、Admin、PDF 上傳與核心端點
 │   ├── models.py        # 文件、來源、問答與簡報 Pydantic/Dataclass 模型
+│   ├── tiers.py         # 四大會員層級 (Tiering) 與每日流量上限權限定義
 │   ├── services.py      # PyMuPDF 渲染、Gemini/OpenAI/Ollama 整合與向量檢索
 │   ├── workflows/       # LangGraph 狀態圖工作流模組
 │   │   ├── state.py     # QAState 與 DeckState 狀態定義

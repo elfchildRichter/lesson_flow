@@ -174,4 +174,22 @@ def test_deck_graph_target_language():
     assert deck.title == "English Presentation Title"
 
 
+def test_company_router_intent_classification():
+    from app.workflows.router import classify_intent_node
+
+    # 1. 測試課程賣點/亮點意圖 -> marketing
+    res1 = classify_intent_node({"input_query": "請幫我梳理這份數位課程的核心賣點與亮點介紹"})
+    assert res1["target_department"] == "marketing"
+    assert res1["matched_skill"] == "saas_marketing"
+
+    # 2. 測試教學心得/經驗文章意圖 -> marketing
+    res2 = classify_intent_node({"input_query": "請幫我撰寫一篇分享翻轉課堂實務心得的教學經驗文章"})
+    assert res2["target_department"] == "marketing"
+    assert res2["matched_skill"] == "saas_marketing"
+
+    # 3. 測試教案/試題意圖 -> academic
+    res3 = classify_intent_node({"input_query": "幫我設計 45 分鐘國中理化教案"})
+    assert res3["target_department"] == "academic"
+
+
 
