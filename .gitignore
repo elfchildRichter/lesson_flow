@@ -221,10 +221,10 @@ __marimo__/
 data/
 output/
 
-# Notes and TODO
+# Personal Markdown Notes & Customization Rules (keep .agents/ tracked for team skills)
 Notes.md
 TODO.md
-
-# Personal AI Customization Rules (keep .agents/ tracked for team skills)
+LEARNINGS.md
+DEVLOG.md
 AGENTS.md
 GEMINI.md

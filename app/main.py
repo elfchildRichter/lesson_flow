@@ -27,6 +27,8 @@ load_dotenv(override=True)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     load_dotenv(override=True)
+    db_path = os.getenv("AUTH_DB_PATH", "./data/users.db")
+    Path(db_path).parent.mkdir(parents=True, exist_ok=True)
     init_db()
     yield
 
