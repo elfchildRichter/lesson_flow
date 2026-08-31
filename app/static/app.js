@@ -776,6 +776,77 @@ function getTierInfo(user) {
   return tiers[tierKey] || tiers['teacher_pro'];
 }
 
+function updateFeaturePermissionsUI(user) {
+  const isEn = state.lang === 'en';
+  const tierKey = user?.tier || (user?.role === 'admin' ? 'admin' : 'teacher_trial');
+  const tierInfo = user?.tier_info || {};
+
+  const enableVlm = tierInfo.enable_vlm !== undefined
+    ? tierInfo.enable_vlm
+    : (user != null && (tierKey === 'teacher_pro' || tierKey === 'institution' || tierKey === 'admin' || user.role === 'admin'));
+
+  const enableWebSearch = tierInfo.enable_web_search !== undefined
+    ? tierInfo.enable_web_search
+    : (user != null && (tierKey === 'teacher_pro' || tierKey === 'institution' || tierKey === 'admin' || user.role === 'admin'));
+
+  // 1. Multimodal VLM Toggle (#multimodalToggle)
+  const multimodalToggle = $('#multimodalToggle');
+  const multimodalCard = $('.multimodal-card');
+  let vlmBadge = $('#vlmLockBadge');
+
+  if (multimodalToggle) {
+    if (!enableVlm) {
+      multimodalToggle.checked = false;
+      multimodalToggle.disabled = true;
+      if (multimodalCard) multimodalCard.classList.add('feature-locked');
+
+      if (!vlmBadge) {
+        vlmBadge = document.createElement('small');
+        vlmBadge.id = 'vlmLockBadge';
+        vlmBadge.className = 'lock-badge';
+        vlmBadge.style.cssText = 'color: #d97706; font-weight: 600; display: block; margin-top: 4px; font-size: 11px;';
+        const toggleText = $('.multimodal-card .toggle-text');
+        if (toggleText) toggleText.appendChild(vlmBadge);
+      }
+      vlmBadge.textContent = isEn ? '🔒 Teacher Pro Exclusive (Diagrams & Math Formulas)' : '🔒 ⭐ 教師專業版獨享 (圖表與公式解析)';
+      vlmBadge.style.display = 'block';
+    } else {
+      multimodalToggle.disabled = false;
+      if (multimodalCard) multimodalCard.classList.remove('feature-locked');
+      if (vlmBadge) vlmBadge.style.display = 'none';
+    }
+  }
+
+  // 2. Web Search Checkboxes (#deckWebSearch & #qaWebSearch)
+  const deckWebSearch = $('#deckWebSearch');
+  const qaWebSearch = $('#qaWebSearch');
+
+  const updateWebSearchItem = (chk, badgeId) => {
+    if (!chk) return;
+    let badge = $(badgeId);
+    if (!enableWebSearch) {
+      chk.checked = false;
+      chk.disabled = true;
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.id = badgeId.replace('#', '');
+        badge.className = 'lock-badge-inline';
+        badge.style.cssText = 'color: #d97706; font-weight: 600; margin-left: 6px; font-size: 11px;';
+        const parent = chk.closest('label');
+        if (parent) parent.appendChild(badge);
+      }
+      badge.textContent = isEn ? '🔒 Pro Exclusive' : '🔒 ⭐ 專業版獨享';
+      badge.style.display = 'inline';
+    } else {
+      chk.disabled = false;
+      if (badge) badge.style.display = 'none';
+    }
+  };
+
+  updateWebSearchItem(deckWebSearch, '#deckWebSearchLockBadge');
+  updateWebSearchItem(qaWebSearch, '#qaWebSearchLockBadge');
+}
+
 function updateAuthUI(user) {
   state.user = user;
   const container = $('#authHeaderContainer');
@@ -834,6 +905,7 @@ function updateAuthUI(user) {
   }
   updateAdminUI();
   updateAgentDepartmentBadges(user);
+  updateFeaturePermissionsUI(user);
   const profileNavBtn = $('#profileNavBtn');
   if (profileNavBtn) {
     if (state.user) profileNavBtn.classList.remove('hidden');
@@ -988,6 +1060,18 @@ function switchAuthTab(tab) {
 
 // 事件委派：點擊登入按鈕、登出按鈕、語言切換或側邊欄
 document.addEventListener('click', (e) => {
+  const lockedMultimodal = e.target.closest('.multimodal-card.feature-locked');
+  if (lockedMultimodal) {
+    toast(state.lang === 'en' ? '🔒 PDF Reading Mode (VLM) is exclusive to Teacher Pro tier or higher!' : '🔒 📷 「圖表與公式解析」為「⭐ 教師專業版」解鎖功能！');
+    return;
+  }
+
+  const lockedWebSearchLabel = e.target.closest('label:has(#deckWebSearch:disabled), label:has(#qaWebSearch:disabled)');
+  if (lockedWebSearchLabel || (e.target.id === 'deckWebSearch' && e.target.disabled) || (e.target.id === 'qaWebSearch' && e.target.disabled)) {
+    toast(state.lang === 'en' ? '🔒 Web Search is exclusive to Teacher Pro tier or higher!' : '🔒 🌐 「網路補充搜尋」為「⭐ 教師專業版」解鎖功能！');
+    return;
+  }
+
   const langBtn = e.target.closest('.lang-btn');
   if (langBtn) {
     e.preventDefault();

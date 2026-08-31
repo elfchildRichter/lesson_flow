@@ -78,11 +78,62 @@ def get_agent_skills() -> dict:
     return {"skills": [s.to_dict() for s in skills]}
 
 
+def get_user_tier_and_role(current_user: dict) -> tuple[str, str]:
+    user_id = current_user.get("user_id") or current_user.get("id")
+    username = current_user.get("sub") or current_user.get("username")
+    role = current_user.get("role", "user")
+    tier_key = current_user.get("tier", "teacher_trial")
+
+    db_path = os.getenv("AUTH_DB_PATH", "./data/users.db")
+    if os.path.exists(db_path):
+        import sqlite3
+        with sqlite3.connect(db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT tier, role FROM users WHERE id = ? OR username = ?", (user_id, username))
+            row = cursor.fetchone()
+            if row:
+                if row[0]:
+                    tier_key = row[0]
+                if row[1]:
+                    role = row[1]
+    if role == "admin":
+        tier_key = "admin"
+    return tier_key, role
+
+
+def require_dynamic_quota(action: str = "ask"):
+    def dependency(current_user: dict = Depends(get_current_user)) -> dict:
+        tier_key, role = get_user_tier_and_role(current_user)
+        tier_config = get_tier_config(tier_key, role)
+
+        limit = tier_config.get("deck_daily_limit" if action == "deck" else "ask_daily_limit", 10)
+
+        from fastapi_auth_core import check_and_consume_quota
+        user_id = current_user.get("user_id") or current_user.get("id")
+        username = current_user.get("sub") or current_user.get("username")
+
+        allowed, msg, quota_info = check_and_consume_quota(
+            user_id, username, role, action=action, limit=limit
+        )
+        if not allowed:
+            raise HTTPException(
+                status_code=429,
+                detail=msg
+            )
+        current_user["quota"] = quota_info
+        current_user["tier_config"] = tier_config
+        current_user["tier"] = tier_key
+        current_user["role"] = role
+        return current_user
+
+    return dependency
+
+
 @app.post("/api/agent/dispatch")
 def dispatch_agent_task(
     payload: dict,
     request: Request,
-    current_user: dict = Depends(require_quota("ask", 10))
+    current_user: dict = Depends(require_dynamic_quota("ask"))
 ) -> dict:
     query = payload.get("query", "").strip()
     platform = payload.get("platform", "FB / 社群媒體")
@@ -93,9 +144,9 @@ def dispatch_agent_task(
     username = current_user.get("username") or current_user.get("sub", "使用者")
     role = current_user.get("role", "user")
     tier_key = current_user.get("tier", "teacher_trial")
+    tier_config = current_user.get("tier_config") or get_tier_config(tier_key, role)
+    quota = current_user.get("quota") or get_user_quota_info(user_id, username, role)
 
-    quota = get_user_quota_info(user_id, username, role)
-    tier_config = get_tier_config(tier_key, role)
     user_info = {
         "user_id": user_id,
         "username": username,
@@ -123,34 +174,34 @@ def dispatch_agent_task(
 def get_current_user_profile(current_user: dict = Depends(get_current_user)) -> dict:
     user_id = current_user.get("user_id") or current_user.get("id")
     username = current_user.get("sub") or current_user.get("username")
-    role = current_user.get("role", "user")
+    tier_key, role = get_user_tier_and_role(current_user)
 
-    tier_key = "teacher_trial"
     db_path = os.getenv("AUTH_DB_PATH", "./data/users.db")
     if os.path.exists(db_path):
+        import sqlite3
         with sqlite3.connect(db_path) as conn:
             cursor = conn.cursor()
             cursor.execute("UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ? OR username = ?", (user_id, username))
-            cursor.execute("SELECT tier, role FROM users WHERE id = ? OR username = ?", (user_id, username))
-            row = cursor.fetchone()
-            if row:
-                if row[0]:
-                    tier_key = row[0]
-                if row[1]:
-                    role = row[1]
+            conn.commit()
 
-    if role == "admin":
-        tier_key = "admin"
-
-    quota = get_user_quota_info(user_id, username, role)
     tier_config = get_tier_config(tier_key, role)
+    quota = get_user_quota_info(user_id, username, role, action="ask", limit=tier_config["ask_daily_limit"])
+    if role != "admin":
+        deck_limit = tier_config["deck_daily_limit"]
+        ask_limit = tier_config["ask_daily_limit"]
+        if quota.get("deck"):
+            quota["deck"]["daily_limit"] = deck_limit
+            quota["deck"]["remaining"] = max(0, deck_limit - quota["deck"].get("used_count", 0))
+        if quota.get("ask"):
+            quota["ask"]["daily_limit"] = ask_limit
+            quota["ask"]["remaining"] = max(0, ask_limit - quota["ask"].get("used_count", 0))
 
     return {
         "id": user_id,
         "username": username,
         "role": role,
         "tier": tier_key,
-        "tier_info": tier_config.to_dict(),
+        "tier_info": dict(tier_config),
         "quota": quota
     }
 
@@ -195,10 +246,18 @@ async def upload_document(
 ) -> dict:
     if file.content_type != "application/pdf" and not (file.filename or "").lower().endswith(".pdf"):
         raise HTTPException(415, "只支援 PDF 檔案")
+    tier_key, role = get_user_tier_and_role(current_user)
+    tier_config = get_tier_config(tier_key, role)
+
     content = await file.read()
-    max_bytes = int(os.getenv("MAX_UPLOAD_MB", "30")) * 1024 * 1024
+    max_mb = tier_config.get("max_upload_mb", 30)
+    max_bytes = max_mb * 1024 * 1024
     if len(content) > max_bytes:
-        raise HTTPException(413, f"檔案不可超過 {max_bytes // 1024 // 1024} MB")
+        raise HTTPException(413, f"您的會員層級 [{tier_config['name_zh']}] 上傳檔案上限為 {max_mb} MB，請升級帳號或縮小檔案")
+
+    if enable_multimodal and not tier_config.get("enable_vlm", False):
+        enable_multimodal = False
+
     try:
         document = parse_pdf(content, file.filename or "教材.pdf", ai_service=ai, enable_multimodal=enable_multimodal)
         ai.index(document)
@@ -239,14 +298,20 @@ def import_text_document(
 @app.post("/api/ask", response_model=AskResponse)
 def ask(
     request: AskRequest,
-    current_user: dict = Depends(require_quota("ask", 10))
+    current_user: dict = Depends(require_dynamic_quota("ask"))
 ) -> AskResponse:
     try:
         document = store.get(request.document_id)
     except KeyError as exc:
         raise HTTPException(404, "找不到文件，請重新上傳") from exc
+
+    tier_config = current_user.get("tier_config") or get_tier_config(current_user.get("tier"), current_user.get("role"))
+    enable_web_search = request.enable_web_search
+    if enable_web_search and not tier_config.get("enable_web_search", False):
+        enable_web_search = False
+
     try:
-        answer, sources, mode = ai.ask(document, request.question, request.enable_web_search)
+        answer, sources, mode = ai.ask(document, request.question, enable_web_search)
     except Exception as exc:
         raise HTTPException(502, f"AI 暫時無法回答：{exc}") from exc
     return AskResponse(answer=answer, sources=sources, mode=mode)
@@ -255,12 +320,18 @@ def ask(
 @app.post("/api/decks")
 def generate_deck(
     request: GenerateRequest,
-    current_user: dict = Depends(require_quota("deck", 3))
+    current_user: dict = Depends(require_dynamic_quota("deck"))
 ) -> dict:
     try:
         document = store.get(request.document_id)
     except KeyError as exc:
         raise HTTPException(404, "找不到文件，請重新上傳") from exc
+
+    tier_config = current_user.get("tier_config") or get_tier_config(current_user.get("tier"), current_user.get("role"))
+    enable_web_search = request.enable_web_search
+    if enable_web_search and not tier_config.get("enable_web_search", False):
+        enable_web_search = False
+
     try:
         deck = ai.generate_deck(
             document,
@@ -268,7 +339,7 @@ def generate_deck(
             request.tone,
             request.slide_count,
             request.duration,
-            request.enable_web_search,
+            enable_web_search,
             language=request.language,
         )
     except Exception as exc:
@@ -310,7 +381,7 @@ class TextDeckRequest(BaseModel):
 @app.post("/api/deck/generate_from_text")
 def generate_deck_from_text(
     request: TextDeckRequest,
-    current_user: dict = Depends(require_quota("deck", 3))
+    current_user: dict = Depends(require_dynamic_quota("deck"))
 ) -> dict:
     from app.models import Document, Chunk
     import uuid
@@ -476,4 +547,6 @@ def create_user_admin(req: CreateUserAdminRequest, current_user: dict = Depends(
     return {"status": "ok", "message": f"已成功新增 {role_name} 帳號：{username}"}
 
 
+app.router.routes = [r for r in app.router.routes if not (getattr(r, 'path', '') == '/api/user/me' and r.endpoint.__module__ != 'app.main')]
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
+
