@@ -29,13 +29,20 @@ load_dotenv(override=True)
 
 def ensure_user_table_schema():
     db_path = os.getenv("AUTH_DB_PATH", "./data/users.db")
+    Path(db_path).parent.mkdir(parents=True, exist_ok=True)
     if os.path.exists(db_path):
         import sqlite3
         with sqlite3.connect(db_path) as conn:
             cursor = conn.cursor()
-            cols = [r[1] for r in cursor.execute("PRAGMA table_info(users)").fetchall()]
-            if "last_login_at" not in cols:
-                cursor.execute("ALTER TABLE users ADD COLUMN last_login_at DATETIME")
+            tables = [r[0] for r in cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users'").fetchall()]
+            if "users" in tables:
+                cols = [r[1] for r in cursor.execute("PRAGMA table_info(users)").fetchall()]
+                if "last_login_at" not in cols:
+                    cursor.execute("ALTER TABLE users ADD COLUMN last_login_at DATETIME")
+                if "tier" not in cols:
+                    cursor.execute("ALTER TABLE users ADD COLUMN tier TEXT DEFAULT 'teacher_trial'")
+                if "status" not in cols:
+                    cursor.execute("ALTER TABLE users ADD COLUMN status TEXT DEFAULT 'pending'")
                 conn.commit()
 
 @asynccontextmanager

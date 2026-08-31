@@ -71,4 +71,20 @@ def test_deck_non_existent_document_and_download():
     assert script_res.status_code == 404
 
 
+def test_admin_users_list_schema_migration():
+    client = TestClient(app)
+    from fastapi_auth_core import get_current_user
+    from app.main import ensure_user_table_schema
+    ensure_user_table_schema()
+    app.dependency_overrides[get_current_user] = lambda: {"id": 1, "username": "admin", "role": "admin"}
+    try:
+        response = client.get("/api/admin/users/list")
+        assert response.status_code == 200
+        assert response.json()["status"] == "ok"
+        assert "users" in response.json()
+    finally:
+        app.dependency_overrides.clear()
+
+
+
 

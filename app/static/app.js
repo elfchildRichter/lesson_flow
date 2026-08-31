@@ -698,7 +698,15 @@ async function api(path, options = {}) {
   const response = await fetch(path, options);
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
-    const errorMsg = body.detail || '服務暫時無法使用';
+    let errorMsg = body.detail;
+    if (typeof errorMsg === 'object' && errorMsg !== null) {
+      errorMsg = JSON.stringify(errorMsg);
+    }
+    if (!errorMsg) {
+      errorMsg = response.status === 503
+        ? '服務暫時無法使用'
+        : `HTTP Error ${response.status}: ${response.statusText || '系統發生錯誤'}`;
+    }
 
     if (response.status === 401 && token) {
       logoutUser(false);
