@@ -61,6 +61,7 @@ app = FastAPI(
 )
 
 # 掛載認證與管理員介面 (/api/auth/*, /api/admin/*)
+auth_router.routes = [r for r in auth_router.routes if getattr(r, "path", "") != "/api/user/me"]
 app.include_router(auth_router)
 app.include_router(admin_router)
 
@@ -108,10 +109,24 @@ def require_dynamic_quota(action: str = "ask"):
 
         limit = tier_config.get("deck_daily_limit" if action == "deck" else "ask_daily_limit", 10)
 
-        from fastapi_auth_core import check_and_consume_quota
         user_id = current_user.get("user_id") or current_user.get("id")
         username = current_user.get("sub") or current_user.get("username")
 
+        # 同步更新每日額度表 (daily_quotas) 的 daily_limit 以匹配當前最新 tier 限制
+        db_path = os.getenv("AUTH_DB_PATH", "./data/users.db")
+        if os.path.exists(db_path) and user_id:
+            import sqlite3
+            from datetime import date
+            today_str = date.today().isoformat()
+            with sqlite3.connect(db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "UPDATE daily_quotas SET daily_limit = ? WHERE user_id = ? AND action = ? AND usage_date = ?",
+                    (limit, user_id, action, today_str)
+                )
+                conn.commit()
+
+        from fastapi_auth_core import check_and_consume_quota
         allowed, msg, quota_info = check_and_consume_quota(
             user_id, username, role, action=action, limit=limit
         )
@@ -503,10 +518,28 @@ def update_user_tier_admin(req: UpdateTierRequest, current_user: dict = Depends(
     db_path = os.getenv("AUTH_DB_PATH", "./data/users.db")
     with sqlite3.connect(db_path) as conn:
         cursor = conn.cursor()
-        cursor.execute("UPDATE users SET tier = ? WHERE username = ?", (req.tier, req.username))
-        if cursor.rowcount == 0:
+        cursor.execute("SELECT id FROM users WHERE username = ?", (req.username,))
+        row = cursor.fetchone()
+        if not row:
             raise HTTPException(404, "找不到指定的用戶")
+        user_id = row[0]
+
+        cursor.execute("UPDATE users SET tier = ? WHERE id = ?", (req.tier, user_id))
+
+        # 同步更新該使用者今日在 daily_quotas 表中的上限設定，確保立即生效
+        tier_cfg = TIER_CONFIGS[req.tier]
+        from datetime import date
+        today_str = date.today().isoformat()
+        cursor.execute(
+            "UPDATE daily_quotas SET daily_limit = ? WHERE user_id = ? AND action = 'deck' AND usage_date = ?",
+            (tier_cfg["deck_daily_limit"], user_id, today_str)
+        )
+        cursor.execute(
+            "UPDATE daily_quotas SET daily_limit = ? WHERE user_id = ? AND action = 'ask' AND usage_date = ?",
+            (tier_cfg["ask_daily_limit"], user_id, today_str)
+        )
         conn.commit()
+    return {"status": "ok", "message": f"用戶 {req.username} 會員層級已更新為 {req.tier}"}
 class CreateUserAdminRequest(BaseModel):
     username: str
     password: str
@@ -547,6 +580,5 @@ def create_user_admin(req: CreateUserAdminRequest, current_user: dict = Depends(
     return {"status": "ok", "message": f"已成功新增 {role_name} 帳號：{username}"}
 
 
-app.router.routes = [r for r in app.router.routes if not (getattr(r, 'path', '') == '/api/user/me' and r.endpoint.__module__ != 'app.main')]
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
 
