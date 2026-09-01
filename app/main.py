@@ -10,7 +10,7 @@ from fastapi import FastAPI, File, Form, HTTPException, UploadFile, Depends, Req
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 
-from fastapi_auth_core import (
+from fastapi_auth_lite import (
     init_db,
     auth_router,
     admin_router,
@@ -107,7 +107,7 @@ def require_dynamic_quota(action: str = "ask"):
                 )
                 conn.commit()
 
-        from fastapi_auth_core import check_and_consume_quota
+        from fastapi_auth_lite import check_and_consume_quota
         allowed, msg, quota_info = check_and_consume_quota(
             user_id, username, role, action=action, limit=limit
         )

@@ -37,7 +37,7 @@ def test_provider_get_and_post():
 
 def test_upload_invalid_file_type():
     client = TestClient(app)
-    from fastapi_auth_core import get_current_user
+    from fastapi_auth_lite import get_current_user
     app.dependency_overrides[get_current_user] = lambda: {"id": "test_user"}
     try:
         response = client.post(
@@ -73,7 +73,7 @@ def test_deck_non_existent_document_and_download():
 
 def test_admin_users_list_schema_migration():
     client = TestClient(app)
-    from fastapi_auth_core import get_current_user, init_db
+    from fastapi_auth_lite import get_current_user, init_db
     init_db()
     app.dependency_overrides[get_current_user] = lambda: {"id": 1, "username": "admin", "role": "admin"}
     try:

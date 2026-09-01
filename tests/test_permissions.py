@@ -2,7 +2,7 @@ from fastapi.testclient import TestClient
 import pytest
 import os
 import sqlite3
-from fastapi_auth_core import get_current_user
+from fastapi_auth_lite import get_current_user
 from app.main import app, get_user_tier_and_role
 from app.tiers import get_tier_config
 
