@@ -73,9 +73,8 @@ def test_deck_non_existent_document_and_download():
 
 def test_admin_users_list_schema_migration():
     client = TestClient(app)
-    from fastapi_auth_core import get_current_user
-    from app.main import ensure_user_table_schema
-    ensure_user_table_schema()
+    from fastapi_auth_core import get_current_user, init_db
+    init_db()
     app.dependency_overrides[get_current_user] = lambda: {"id": 1, "username": "admin", "role": "admin"}
     try:
         response = client.get("/api/admin/users/list")

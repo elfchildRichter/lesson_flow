@@ -27,31 +27,12 @@ from .tiers import get_tier_config
 
 load_dotenv(override=True)
 
-def ensure_user_table_schema():
-    db_path = os.getenv("AUTH_DB_PATH", "./data/users.db")
-    Path(db_path).parent.mkdir(parents=True, exist_ok=True)
-    if os.path.exists(db_path):
-        import sqlite3
-        with sqlite3.connect(db_path) as conn:
-            cursor = conn.cursor()
-            tables = [r[0] for r in cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users'").fetchall()]
-            if "users" in tables:
-                cols = [r[1] for r in cursor.execute("PRAGMA table_info(users)").fetchall()]
-                if "last_login_at" not in cols:
-                    cursor.execute("ALTER TABLE users ADD COLUMN last_login_at DATETIME")
-                if "tier" not in cols:
-                    cursor.execute("ALTER TABLE users ADD COLUMN tier TEXT DEFAULT 'teacher_trial'")
-                if "status" not in cols:
-                    cursor.execute("ALTER TABLE users ADD COLUMN status TEXT DEFAULT 'pending'")
-                conn.commit()
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     load_dotenv(override=True)
     db_path = os.getenv("AUTH_DB_PATH", "./data/users.db")
     Path(db_path).parent.mkdir(parents=True, exist_ok=True)
     init_db()
-    ensure_user_table_schema()
     yield
 
 app = FastAPI(
@@ -431,154 +412,5 @@ def generate_deck_from_text(
 
 
 from pydantic import BaseModel
-import sqlite3
-
-class UpdateTierRequest(BaseModel):
-    username: str
-    tier: str
-
-
-@app.get("/api/admin/users/list")
-def list_all_users_admin(current_user: dict = Depends(get_current_user)):
-    if current_user.get("role") != "admin":
-        raise HTTPException(403, "僅限管理員權限")
-    ensure_user_table_schema()
-    db_path = os.getenv("AUTH_DB_PATH", "./data/users.db")
-    today_str = datetime.now().strftime("%Y-%m-%d")
-
-    with sqlite3.connect(db_path) as conn:
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        rows = cursor.execute(
-            """
-            SELECT id, username, role, status, created_at, 
-                   COALESCE(tier, 'teacher_trial') as tier,
-                   last_login_at
-            FROM users 
-            ORDER BY 
-                CASE WHEN role = 'admin' THEN 0 ELSE 1 END ASC,
-                CASE WHEN last_login_at IS NULL THEN 1 ELSE 0 END ASC,
-                last_login_at DESC,
-                id ASC
-            """
-        ).fetchall()
-
-        users = []
-        for r in rows:
-            u = dict(r)
-            uid = u["id"]
-            urole = u["role"]
-            utier = u["tier"]
-            tier_config = get_tier_config(utier, urole)
-
-            # 1. 查詢今日使用量 (Daily Quota)
-            daily_rows = cursor.execute(
-                "SELECT action, used_count, daily_limit FROM daily_quotas WHERE user_id = ? AND usage_date = ?",
-                (uid, today_str)
-            ).fetchall()
-            daily_map = {row["action"]: dict(row) for row in daily_rows}
-
-            deck_today = daily_map.get("deck", {}).get("used_count", 0) if daily_map.get("deck") else 0
-            ask_today = daily_map.get("ask", {}).get("used_count", 0) if daily_map.get("ask") else 0
-
-            deck_limit = tier_config.get("deck_daily_limit", 10)
-            ask_limit = tier_config.get("ask_daily_limit", 50)
-
-            # 2. 查詢累計總使用量 (Total Cumulative Usage)
-            total_rows = cursor.execute(
-                "SELECT action, SUM(used_count) as total_used FROM daily_quotas WHERE user_id = ? GROUP BY action",
-                (uid,)
-            ).fetchall()
-            total_map = {row["action"]: (row["total_used"] or 0) for row in total_rows}
-
-            deck_total = total_map.get("deck", 0)
-            ask_total = total_map.get("ask", 0)
-
-            u["quota_summary"] = {
-                "deck_today": deck_today,
-                "deck_limit": deck_limit,
-                "ask_today": ask_today,
-                "ask_limit": ask_limit,
-                "deck_total": deck_total,
-                "ask_total": ask_total,
-                "is_unlimited": urole == "admin" or utier == "admin"
-            }
-            users.append(u)
-
-    return {"status": "ok", "users": users}
-
-
-@app.post("/api/admin/users/tier")
-def update_user_tier_admin(req: UpdateTierRequest, current_user: dict = Depends(get_current_user)):
-    if current_user.get("role") != "admin":
-        raise HTTPException(403, "僅限管理員權限")
-    from .tiers import TIER_CONFIGS
-    if req.tier not in TIER_CONFIGS:
-        raise HTTPException(400, "無效的會員層級標籤")
-    db_path = os.getenv("AUTH_DB_PATH", "./data/users.db")
-    with sqlite3.connect(db_path) as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT id FROM users WHERE username = ?", (req.username,))
-        row = cursor.fetchone()
-        if not row:
-            raise HTTPException(404, "找不到指定的用戶")
-        user_id = row[0]
-
-        cursor.execute("UPDATE users SET tier = ? WHERE id = ?", (req.tier, user_id))
-
-        # 同步更新該使用者今日在 daily_quotas 表中的上限設定，確保立即生效
-        tier_cfg = TIER_CONFIGS[req.tier]
-        from datetime import date
-        today_str = date.today().isoformat()
-        cursor.execute(
-            "UPDATE daily_quotas SET daily_limit = ? WHERE user_id = ? AND action = 'deck' AND usage_date = ?",
-            (tier_cfg["deck_daily_limit"], user_id, today_str)
-        )
-        cursor.execute(
-            "UPDATE daily_quotas SET daily_limit = ? WHERE user_id = ? AND action = 'ask' AND usage_date = ?",
-            (tier_cfg["ask_daily_limit"], user_id, today_str)
-        )
-        conn.commit()
-    return {"status": "ok", "message": f"用戶 {req.username} 會員層級已更新為 {req.tier}"}
-class CreateUserAdminRequest(BaseModel):
-    username: str
-    password: str
-    role: str = "user"
-    tier: str = "teacher_pro"
-
-
-@app.post("/api/admin/users/create")
-def create_user_admin(req: CreateUserAdminRequest, current_user: dict = Depends(get_current_user)):
-    if current_user.get("role") != "admin":
-        raise HTTPException(403, "僅限管理員權限")
-    username = req.username.strip()
-    password = req.password.strip()
-    if not username or not password:
-        raise HTTPException(400, "帳號與密碼不得為空")
-    if req.role not in ["user", "admin"]:
-        raise HTTPException(400, "無效的角色類別 (需為 user 或 admin)")
-    from .tiers import TIER_CONFIGS
-    tier_key = "admin" if req.role == "admin" else req.tier
-    if tier_key not in TIER_CONFIGS:
-        raise HTTPException(400, "無效的會員層級標籤")
-
-    db_path = os.getenv("AUTH_DB_PATH", "./data/users.db")
-    with sqlite3.connect(db_path) as conn:
-        cursor = conn.cursor()
-        existing = cursor.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchone()
-        if existing:
-            raise HTTPException(400, f"帳號 {username} 已存在，請使用其他名稱")
-
-        hashed_pass = hash_password(password)
-        cursor.execute(
-            "INSERT INTO users (username, password_hash, role, status, tier) VALUES (?, ?, ?, 'approved', ?)",
-            (username, hashed_pass, req.role, tier_key)
-        )
-        conn.commit()
-
-    role_name = "👑 系統管理員" if req.role == "admin" else "👤 一般用戶"
-    return {"status": "ok", "message": f"已成功新增 {role_name} 帳號：{username}"}
-
-
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
 

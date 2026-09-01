@@ -53,7 +53,9 @@ def test_user_me_profile_endpoint():
 
 
 def test_web_search_permission_override(monkeypatch):
-    trial_user = {"id": 8808, "username": "trial_user_web_fresh", "role": "user", "tier": "teacher_trial"}
+    import time
+    uid = int(time.time() * 1000) % 1000000 + 8000
+    trial_user = {"id": uid, "username": f"trial_user_web_{uid}", "role": "user", "tier": "teacher_trial"}
     app.dependency_overrides[get_current_user] = lambda: trial_user
 
     from app.main import store, ai
