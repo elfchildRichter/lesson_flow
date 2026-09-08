@@ -228,3 +228,8 @@ LEARNINGS.md
 DEVLOG.md
 AGENTS.md
 GEMINI.md
+
+# macOS system files
+.DS_Store
+**/.DS_Store
+

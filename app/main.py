@@ -379,24 +379,16 @@ def generate_deck_from_text(
     request: TextDeckRequest,
     current_user: dict = Depends(require_dynamic_quota("deck"))
 ) -> dict:
-    from app.models import Document, Chunk
-    import uuid
-    doc_id = f"doc_txt_{uuid.uuid4().hex[:8]}"
-    temp_doc = Document(
-        id=doc_id,
-        name=request.topic or "教學主題",
-        pages=[request.content],
-        chunks=[Chunk(id="c1", text=request.content[:2000], page_number=1)],
-        size_bytes=len(request.content.encode("utf-8"))
-    )
-    store.add(temp_doc)
+    from app.services import parse_text
     try:
+        temp_doc = parse_text(request.content, filename=request.topic or "教學主題.md")
+        store.add(temp_doc)
         deck = ai.generate_deck(
             temp_doc,
             audience="學生",
             tone="專業生動",
-            slide_count=5,
-            duration="45分鐘",
+            slide_count=8,
+            duration=30,
             enable_web_search=False,
             language="zh-TW"
         )

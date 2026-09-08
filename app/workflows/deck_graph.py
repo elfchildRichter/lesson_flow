@@ -188,8 +188,9 @@ def generate_contents_node(state: DeckState) -> DeckState:
         "additionalProperties": False,
     }
 
-    notes_rule = "【講稿品質規範】：每一頁投影片的 speaker_notes 必須是一段完整、連貫且可直接口頭朗讀的教師教學口語講稿（每頁建議 100～250 字），包含觀念引導與案例說明，切勿僅提供簡短摘要或一兩句簡述。"
-    visual_prompt_rule = f"同時，請為每一頁投影片挑選一個符合內容主題的代表性 Icon (icon，如 💡, 🔬, 📊, ⚡, 🔒, 🧠, ⚙️, 🌐)，並設計一個【搭配說明的教學視覺圖表/插圖構想描述】(visual_description)。{notes_rule}"
+    bullets_rule = "【簡報內文重點規範】：每一頁投影片的 bullets 必須包含 3～5 點豐富且具體的內容重點條列（每點建議 20～50 字，詳細包含觀念定義、核心推導或具體實例），切勿僅提供兩三個字的短語標籤。"
+    notes_rule = "【講稿品質規範】：每一頁投影片的 speaker_notes 必須是一段完整、連貫且可直接口頭朗讀的教師教學口語講稿（每頁建議 150～300 字），包含觀念引導與案例說明，切勿僅提供簡短摘要或一兩句簡述。"
+    visual_prompt_rule = f"同時，請為每一頁投影片挑選一個符合內容主題的代表性 Icon (icon，如 💡, 🔬, 📊, ⚡, 🔒, 🧠, ⚙️, 🌐)，並設計一個【搭配說明的教學視覺圖表/插圖構想描述】(visual_description)。{bullets_rule} {notes_rule}"
 
     if web_results:
         system_prompt = (
@@ -208,7 +209,7 @@ def generate_contents_node(state: DeckState) -> DeckState:
     if web_results:
         user_prompt += f"網路補充案例參考：\n{web_results}\n\n"
     if audit_feedback:
-        user_prompt += f"【品質優化要求】：前次生成的講稿未達品質門檻（{audit_feedback}）。請大幅擴充每一頁的 speaker_notes，確保為詳細流暢的教師演講口語稿！\n\n"
+        user_prompt += f"【品質優化要求】：前次生成的內容未達品質門檻（{audit_feedback}）。請大幅充實每一頁的 bullets 條列重點與 speaker_notes 講稿，確保內容極度豐富完整！\n\n"
 
     payload = ai_service._structured_response(system_prompt, user_prompt, schema)
     return {"raw_slides": payload.get("slides", []), "outline": payload}
@@ -222,13 +223,16 @@ def audit_quality_node(state: DeckState) -> DeckState:
         feedback = "未生成任何投影片內容，請重新繪製完整投影片與講稿。"
         return {"is_quality_passed": False, "retry_count": retry_count + 1, "audit_feedback": feedback}
 
-    # 檢測講稿長度品質
+    # 檢測講稿與內文重點品質
     total_notes_len = sum(len(s.get("speaker_notes", "")) for s in raw_slides)
-    avg_len = total_notes_len / len(raw_slides) if raw_slides else 0
+    avg_notes_len = total_notes_len / len(raw_slides) if raw_slides else 0
 
-    if avg_len < 15 and retry_count < 1:
-        feedback = f"講稿平均長度僅有 {int(avg_len)} 字，過於簡略。每一頁 speaker_notes 必須是一篇至少 150～300 字的完整教師朗讀口語稿"
-        logger.info("講稿平均字數低於 15 字，觸發二次精進生成流程...")
+    total_bullets_count = sum(len(s.get("bullets", [])) for s in raw_slides)
+    avg_bullets_count = total_bullets_count / len(raw_slides) if raw_slides else 0
+
+    if (avg_notes_len < 30 or avg_bullets_count < 2.5) and retry_count < 1:
+        feedback = f"內容或講稿字數過少（平均講稿 {int(avg_notes_len)} 字，平均重點 {avg_bullets_count:.1f} 點）。請為每頁提供至少 3～5 點詳細 bullets 內文重點及 150～300 字完整口語講稿！"
+        logger.info("簡報內容不足，觸發二次精進生成流程...")
         return {"is_quality_passed": False, "retry_count": retry_count + 1, "audit_feedback": feedback}
 
     return {"is_quality_passed": True}

@@ -21,10 +21,10 @@ COPY requirements.txt /app/requirements.txt
 # 接受 Railway 或 Docker Build 傳入的 GITHUB_TOKEN (Personal Access Token)
 ARG GITHUB_TOKEN
 
-# 優先使用 GITHUB_TOKEN 私下安裝私有庫 fastapi-auth-core，再安裝其餘套件 (使用 CPU 版 PyTorch 索引以加速建置與防膨脹)
+# 優先使用 GITHUB_TOKEN 私下安裝私有庫 fastapi-auth-lite，再安裝其餘套件 (使用 CPU 版 PyTorch 索引以加速建置與防膨脹)
 RUN pip install --no-cache-dir --upgrade pip && \
     if [ -n "$GITHUB_TOKEN" ]; then \
-        pip install --no-cache-dir "git+https://${GITHUB_TOKEN}@github.com/elfchildRichter/fastapi-auth-core.git" ; \
+        pip install --no-cache-dir "git+https://${GITHUB_TOKEN}@github.com/elfchildRichter/fastapi-auth-lite.git" ; \
     fi && \
     pip install --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
 

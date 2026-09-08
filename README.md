@@ -332,7 +332,7 @@ python3 -m pytest -v
 本專案支援透過 Docker 鏡像檔直接部署至 [Railway](https://railway.app)。
 
 ### 部署重點說明：
-1. **私有模組與 GITHUB_TOKEN**：本專案依賴私有庫 `fastapi-auth-core`。請在 Railway 的 **Variables** 頁面新增 `GITHUB_TOKEN`（填入具備 `fastapi-auth-core` Read-only 權限的 Personal Access Token），Docker 建置時會自動從私有 GitHub 庫下載安裝。
+1. **私有模組與 GITHUB_TOKEN**：本專案依賴私有庫 `fastapi-auth-lite`。請在 Railway 的 **Variables** 頁面新增 `GITHUB_TOKEN`（填入具備 `fastapi-auth-lite` Read-only 權限的 Personal Access Token），Docker 建置時會自動從私有 GitHub 庫下載安裝。
 2. **零 PyTorch 記憶體優化 (RAM < 250MB)**：當 `AI_PROVIDER` 設定為 `gemini`、`openai` 或 `ollama_cloud` 時，服務採用 **Lazy Loading 延遲載入** 機制，不會在伺服器上載入 PyTorch 模型，全站實測記憶體佔用小於 **250MB RAM**，完全符合 Railway 免費或低成本方案需求。
 3. **環境變數設定 (Variables)**：請於 Railway 控制台設定 `GITHUB_TOKEN`、`AI_PROVIDER=gemini`、`GEMINI_API_KEY`、`JWT_SECRET_KEY`、`AUTH_DB_PATH=/app/data/users.db` 等變數。
 4. **資料持久化 (Persistent Volume)**：請於 Railway 新增 Volume 並將掛載路徑設定為 `/app/data`，確保 SQLite 使用者資料庫重啟不遺失。

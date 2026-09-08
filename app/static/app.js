@@ -232,7 +232,7 @@ const translations = {
     'loading.read_multimodal_copy': '正在辨識圖表、表格與理化公式，處理時間稍長請稍候…',
     'loading.read_fast_copy': '正在快速讀取純文字內容與章節結構…',
     'loading.deck_title': '正在規劃教學架構與講稿…',
-    'loading.deck_copy': '運用 LLM 設計教學流程與產生簡報，需時約 1-2 分鐘…',
+    'loading.deck_copy': '運用 LLM 設計教學流程與產生簡報，約需時數分鐘…',
     'loading.ask_title': '正在對照教材內容並生成最佳解答…',
     'loading.ask_copy': '從章節段落精準索引並附上頁碼說明…',
     'toast.logout': '已成功登出',
@@ -459,7 +459,7 @@ const translations = {
     'loading.read_multimodal_copy': 'Analyzing figures, tables & math formulas, this may take a moment...',
     'loading.read_fast_copy': 'Fast reading plain text and section structure...',
     'loading.deck_title': 'Designing Lesson Deck & Scripts...',
-    'loading.deck_copy': 'Using LLM to structure lesson flow & generate slides, takes 1-2 mins...',
+    'loading.deck_copy': 'Using LLM to structure lesson flow & generate slides, takes a few minutes...',
     'loading.ask_title': 'Searching PDF & Generating Answer...',
     'loading.ask_copy': 'Indexing document chunks precisely with page citations...',
     'toast.logout': 'Logged out successfully',
@@ -1880,7 +1880,7 @@ async function fetchAllUsers() {
         : (u.status === 'pending' ? (isEn ? '⏳ Pending' : '⏳ 待審核') : (isEn ? 'Rejected' : '已拒絕'));
 
       const qs = u.quota_summary || { deck_today: 0, deck_limit: 3, ask_today: 0, ask_limit: 10, deck_total: 0, ask_total: 0, is_unlimited: false };
-      
+
       const dailyUsageHtml = `
         <div style="font-size:11px; line-height:1.4;">
           <div>📊 ${isEn ? 'Decks' : '簡報'}: <b>${qs.deck_today}</b> / ${qs.is_unlimited ? '∞' : qs.deck_limit} ${isEn ? 'items' : '份'}</div>

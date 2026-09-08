@@ -264,6 +264,8 @@ class AIService:
         self.set_provider(initial_provider if initial_provider in valid_providers else "gemini")
 
     def set_provider(self, provider: str) -> dict[str, str]:
+        from dotenv import load_dotenv
+        load_dotenv(override=True)
         provider = provider.strip().lower()
         if provider == "ollama":
             base_url = os.getenv("OLLAMA_BASE_URL", "")
@@ -302,7 +304,7 @@ class AIService:
                 raise ValueError(f"未偵測到 Ollama 本機服務，請確認已安裝並啟動 Ollama ({local_url})。") from exc
 
             self.ollama = local_client
-            self.model = os.getenv("OLLAMA_LOCAL_MODEL", os.getenv("OLLAMA_MODEL", "qwen3:4b"))
+            self.model = os.getenv("OLLAMA_LOCAL_MODEL", os.getenv("OLLAMA_MODEL", "qwen2.5:3b"))
             self.embedding_model = os.getenv(
                 "HUGGINGFACE_EMBEDDING_MODEL",
                 "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
@@ -667,48 +669,46 @@ def make_pptx(deck: Deck) -> bytes:
 
         # 左側重點內容欄位
         body = slide.shapes.add_textbox(Inches(0.85), Inches(1.95), Inches(6.6), Inches(4.8))
-        tf = body.text_frame; tf.word_wrap = True
+        tf = body.text_frame
+        tf.word_wrap = True
+        font_size = Pt(15) if len(item.bullets) <= 4 else Pt(14)
         for bullet_index, bullet in enumerate(item.bullets):
             p = tf.paragraphs[0] if bullet_index == 0 else tf.add_paragraph()
             p.text = f"• {bullet}"
             p.font.name = "Noto Sans TC"
-            p.font.size = Pt(18)
+            p.font.size = font_size
             p.font.color.rgb = RGBColor(55, 65, 61)
-            p.space_after = Pt(14)
+            p.space_after = Pt(10)
 
         # 右側觀念圖解視覺卡片
         card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(7.8), Inches(1.95), Inches(4.7), Inches(4.8))
-        card.fill.solid(); card.fill.fore_color.rgb = RGBColor(255, 255, 255)
-        card.line.color.rgb = RGBColor(222, 91, 55); card.line.width = Pt(1.5)
+        card.fill.solid()
+        card.fill.fore_color.rgb = RGBColor(255, 255, 255)
+        card.line.color.rgb = RGBColor(222, 91, 55)
+        card.line.width = Pt(1.5)
 
-        card_title_box = slide.shapes.add_textbox(Inches(7.95), Inches(2.1), Inches(4.4), Inches(0.5))
+        card_title_box = slide.shapes.add_textbox(Inches(7.95), Inches(2.05), Inches(4.4), Inches(0.45))
         p = card_title_box.text_frame.paragraphs[0]
-        p.text = "📐 觀念邏輯架構"
+        p.text = "📐 觀念圖解與視覺構想"
         p.font.name = "Noto Sans TC"
-        p.font.size = Pt(16)
+        p.font.size = Pt(15)
         p.font.bold = True
         p.font.color.rgb = RGBColor(222, 91, 55)
 
-        # 提煉圖解核心步驟 (最多 3 階段)
-        steps = item.bullets[:3] if item.bullets else ["核心觀念說明"]
-        step_y_starts = [2.7, 4.0, 5.3] if len(steps) >= 3 else ([2.7, 4.2] if len(steps) == 2 else [3.2])
-        step_heights = [1.1, 1.1, 1.1] if len(steps) >= 3 else ([1.3, 1.3] if len(steps) == 2 else [2.0])
-
-        step_labels = ["① 觀念起點", "② 核心機制", "③ 應用成果"]
-        for idx, text_item in enumerate(steps):
+        # 提煉核心觀念步驟 (前 2 階段)
+        steps = item.bullets[:2] if item.bullets else ["核心觀念說明"]
+        step_labels = ["① 核心觀念", "② 機制推導"]
+        step_y_starts = [2.55, 3.75]
+        for idx, text_item in enumerate(steps[:2]):
             y_pos = step_y_starts[idx]
-            h_pos = step_heights[idx]
-            step_bg = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(8.0), Inches(y_pos), Inches(4.3), Inches(h_pos))
+            step_bg = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(8.0), Inches(y_pos), Inches(4.3), Inches(1.05))
             step_bg.fill.solid()
             if idx == 0:
                 step_bg.fill.fore_color.rgb = RGBColor(255, 245, 242)
                 step_bg.line.color.rgb = RGBColor(222, 91, 55)
-            elif idx == 1:
+            else:
                 step_bg.fill.fore_color.rgb = RGBColor(237, 242, 247)
                 step_bg.line.color.rgb = RGBColor(74, 85, 104)
-            else:
-                step_bg.fill.fore_color.rgb = RGBColor(235, 248, 255)
-                step_bg.line.color.rgb = RGBColor(43, 108, 176)
             step_bg.line.width = Pt(1.0)
 
             tf_step = step_bg.text_frame
@@ -716,20 +716,45 @@ def make_pptx(deck: Deck) -> bytes:
             p_lbl = tf_step.paragraphs[0]
             p_lbl.text = step_labels[idx] if idx < len(step_labels) else f"重點 {idx+1}"
             p_lbl.font.name = "Noto Sans TC"
-            p_lbl.font.size = Pt(12)
+            p_lbl.font.size = Pt(11)
             p_lbl.font.bold = True
-            p_lbl.font.color.rgb = RGBColor(222, 91, 55) if idx == 0 else (RGBColor(74, 85, 104) if idx == 1 else RGBColor(43, 108, 176))
+            p_lbl.font.color.rgb = RGBColor(222, 91, 55) if idx == 0 else RGBColor(74, 85, 104)
 
             p_txt = tf_step.add_paragraph()
             str_item = str(text_item)
-            p_txt.text = str_item[:45] + ("..." if len(str_item) > 45 else "")
+            p_txt.text = str_item[:50] + ("..." if len(str_item) > 50 else "")
             p_txt.font.name = "Noto Sans TC"
-            p_txt.font.size = Pt(13)
+            p_txt.font.size = Pt(12)
             p_txt.font.color.rgb = RGBColor(45, 55, 72)
+
+        # 底部視覺插圖構想方塊
+        vis_bg = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(8.0), Inches(4.95), Inches(4.3), Inches(1.6))
+        vis_bg.fill.solid()
+        vis_bg.fill.fore_color.rgb = RGBColor(240, 249, 255)
+        vis_bg.line.color.rgb = RGBColor(43, 108, 176)
+        vis_bg.line.width = Pt(1.0)
+
+        tf_vis = vis_bg.text_frame
+        tf_vis.word_wrap = True
+        p_vis_lbl = tf_vis.paragraphs[0]
+        p_vis_lbl.text = "🎨 建議教學圖表構想："
+        p_vis_lbl.font.name = "Noto Sans TC"
+        p_vis_lbl.font.size = Pt(11)
+        p_vis_lbl.font.bold = True
+        p_vis_lbl.font.color.rgb = RGBColor(43, 108, 176)
+
+        p_vis_txt = tf_vis.add_paragraph()
+        vis_desc = getattr(item, "visual_description", "") or "搭配觀念流程圖進行視覺化說明"
+        p_vis_txt.text = vis_desc[:90] + ("..." if len(vis_desc) > 90 else "")
+        p_vis_txt.font.name = "Noto Sans TC"
+        p_vis_txt.font.size = Pt(11)
+        p_vis_txt.font.color.rgb = RGBColor(45, 55, 72)
 
         notes = slide.notes_slide.notes_text_frame
         notes.text = item.speaker_notes + (f"\n\n資料來源頁碼：{', '.join(map(str, item.source_pages))}" if item.source_pages else "")
-    output = io.BytesIO(); prs.save(output); return output.getvalue()
+    output = io.BytesIO()
+    prs.save(output)
+    return output.getvalue()
 
 
 def make_script(deck: Deck) -> str:
