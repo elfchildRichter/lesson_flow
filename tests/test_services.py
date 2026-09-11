@@ -28,7 +28,7 @@ class FakeOllama:
         return SimpleNamespace(message=SimpleNamespace(content="RAG 會先檢索教材，再根據片段回答。（第 2 頁）"))
 
 
-from app.workflows import build_deck_graph, build_qa_graph
+from app.workflows import build_deck_graph, build_qa_graph, build_quiz_graph
 
 
 def ollama_service():
@@ -43,6 +43,7 @@ def ollama_service():
     service._embedder = FakeEmbedder()
     service.qa_graph = build_qa_graph()
     service.deck_graph = build_deck_graph()
+    service.quiz_graph = build_quiz_graph()
     return service
 
 
@@ -323,11 +324,179 @@ def test_parse_pdf_smart_routing(monkeypatch):
     doc = parse_pdf(b"%PDF-test", "test_smart_routing.pdf", ai_service=service)
 
     assert doc.pages == 2
-    # 只有 Page 2 (含公式) 觸發 Vision，Page 1 走純文字 Fast Path
     assert len(vision_calls) == 1
     assert vision_calls[0] == b"img2"
     assert "歷史課本第一章節" in doc.chunks[0].text
     assert "Vision result for img2" in doc.chunks[1].text
+
+
+def test_make_pptx_with_visual_diagram():
+    from app.models import Deck, Slide
+    from app.services import make_pptx
+
+    slide = Slide(
+        title="光電效應機制",
+        bullets=["光子入射金屬表面", "克服功函數 W 逸出電子", "剩餘能量轉為動能 $K_{max}$"],
+        speaker_notes="各位好，我們來看光電效應的核心推導流程。",
+        source_pages=[1, 2],
+        icon="⚡",
+        visual_description="光子能量轉換示意圖",
+        visual_diagram={
+            "diagram_type": "flowchart",
+            "steps": [
+                {"label": "① 光子入射", "text": "單一光子將能量 $hf$ 傳遞給金屬電子"},
+                {"label": "② 逸出與動能", "text": "電子克服功函數後獲得最大動能 $K_{max}$"},
+            ],
+            "takeaway": "核心結論：光電子動能僅取決於入射光頻率，與強度無關。",
+        },
+    )
+    deck = Deck(
+        id="test-deck",
+        document_id="doc-1",
+        title="量子力學入門",
+        subtitle="大學生｜30 分鐘",
+        slides=[slide],
+        duration=30,
+        mode="gemini",
+    )
+    pptx_bytes = make_pptx(deck)
+    assert isinstance(pptx_bytes, bytes)
+    assert len(pptx_bytes) > 1000
+
+
+def test_generate_quiz_service_and_markdown():
+    from app.services import make_quiz_markdown
+
+    service = ollama_service()
+    doc = document()
+
+    def fake_structured_response(system, prompt, schema):
+        if "出題大綱" in system or "出題考點方向" in prompt:
+            return {
+                "title": "RAG 與向量檢索評量",
+                "description": "檢測對 RAG 架構與相似度檢索的掌握度",
+                "focal_topics": ["向量相似度計算", "幻覺校驗機制"],
+            }
+        return {
+            "title": "RAG 與向量檢索評量",
+            "description": "檢測對 RAG 架構與相似度檢索的掌握度",
+            "questions": [
+                {
+                    "type": "single_choice",
+                    "question": "在 RAG 系統中，何者用於衡量文字語意相似度？",
+                    "options": ["A. 餘弦相似度 (Cosine Similarity)", "B. 歐式距離的倒數", "C. 字符長度比較", "D. 雜湊值碰撞率"],
+                    "answer": "A",
+                    "explanation": "餘弦相似度常用於衡量高維向量空間中語意方向的一致性。",
+                    "source_pages": [1, 2],
+                    "difficulty": "easy",
+                },
+                {
+                    "type": "single_choice",
+                    "question": "在 RAG 系統中，何者用於幻覺校驗？",
+                    "options": ["A. 內容比對", "B. 隨機猜測", "C. 長度統計", "D. 忽略檢索"],
+                    "answer": "A",
+                    "explanation": "幻覺校驗比對生成答案與檢索段落。",
+                    "source_pages": [1, 2],
+                    "difficulty": "easy",
+                },
+            ],
+        }
+
+    service._structured_response = fake_structured_response
+
+    quiz = service.generate_quiz(doc, question_count=2, difficulty="easy")
+    assert quiz.title == "RAG 與向量檢索評量"
+    assert len(quiz.questions) == 2
+    assert quiz.questions[0].answer == "A"
+    assert quiz.questions[0].source_pages == [1, 2]
+
+    # 驗證學生版與教師版 Markdown
+    student_md = make_quiz_markdown(quiz, teacher_mode=False)
+    assert "作答區 / 演算草稿" in student_md
+    assert "【標準答案】" not in student_md
+
+    teacher_md = make_quiz_markdown(quiz, teacher_mode=True)
+    assert "【標準答案】" in teacher_md
+    assert "餘弦相似度常用於衡量" in teacher_md
+    assert "教材出處頁碼：第 1, 2 頁" in teacher_md
+
+
+def test_document_store_disk_persistence(tmp_path):
+    from app.models import Chunk, Deck, Document, Handout, HandoutSection, Slide
+    from app.services import DocumentStore
+
+    store_dir = str(tmp_path / "custom_store")
+    store = DocumentStore(base_dir=store_dir)
+
+    doc = Document(
+        id="doc_test_123",
+        name="測試教材.pdf",
+        pages=5,
+        chunks=[Chunk(text="區塊內文 1", page=1, index=0)],
+        size_bytes=1024,
+    )
+    store.add(doc)
+
+    handout = Handout(
+        id="handout_test_123",
+        document_id="doc_test_123",
+        title="持久化測試講義",
+        subtitle="測試副標",
+        overview="課程導讀",
+        sections=[
+            HandoutSection(
+                title="第一章",
+                summary="摘要",
+                key_points=["重點一"],
+                discussion_questions=["問題一"],
+                source_pages=[1],
+            )
+        ],
+        key_takeaways=["核心總結"],
+    )
+    store.handouts[handout.id] = handout
+
+    # 驗證新建立的 store instance 是否能自動從磁碟載入
+    reloaded_store = DocumentStore(base_dir=store_dir)
+    assert "doc_test_123" in reloaded_store.documents
+    assert reloaded_store.get("doc_test_123").name == "測試教材.pdf"
+    assert "handout_test_123" in reloaded_store.handouts
+    assert reloaded_store.handouts["handout_test_123"].title == "持久化測試講義"
+
+
+def test_make_handout_html_katex():
+    from app.models import Handout, HandoutSection
+    from app.services import make_handout_html
+
+    handout = Handout(
+        id="h_1",
+        document_id="d_1",
+        title="物理講義：$\\vec{F}=m\\vec{a}$",
+        subtitle="**公式推導**手冊",
+        overview="牛頓第二定律與 **質能等價** $E=mc^2$",
+        sections=[
+            HandoutSection(
+                title="萬有引力 $F=G\\frac{m_1 m_2}{r^2}$",
+                summary="重力常數 **$G$** 與 `常數定義`",
+                key_points=["加速度 $\\vec{a}$", "**重要結論**：$F_{net} > 0$"],
+                discussion_questions=["如何測量 $G$？"],
+                source_pages=[1, 2],
+            )
+        ],
+        key_takeaways=["能量守恆定律"],
+    )
+
+    html_out = make_handout_html(handout)
+    assert "katex.min.css" in html_out
+    assert "renderMathInElement" in html_out
+    assert "物理講義" in html_out
+    assert "<strong>公式推導</strong>" in html_out
+    assert "<code>常數定義</code>" in html_out
+    assert "$\\vec{F}=m\\vec{a}$" in html_out
+    assert "A4 portrait" in html_out
+
+
+
 
 
 

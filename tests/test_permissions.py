@@ -22,7 +22,7 @@ def test_user_tier_and_role_lookup():
 
 
 def test_upload_document_size_limit():
-    trial_user = {"id": 101, "username": "trial_teacher", "role": "user", "tier": "teacher_trial"}
+    trial_user = {"id": 10199, "username": "trial_teacher_size_limit", "role": "user", "tier": "teacher_trial"}
     app.dependency_overrides[get_current_user] = lambda: trial_user
 
     # Attempt to upload 15MB file (exceeding 10MB limit for teacher_trial)
@@ -45,8 +45,7 @@ def test_user_me_profile_endpoint():
     assert response.status_code == 200
     data = response.json()
     assert data["tier"] == "teacher_pro"
-    assert data["tier_info"]["deck_daily_limit"] == 10
-    assert data["tier_info"]["ask_daily_limit"] == 50
+    assert data["tier_info"]["daily_credits"] == 1000
     assert data["tier_info"]["enable_web_search"] is True
 
     app.dependency_overrides.clear()
@@ -89,8 +88,7 @@ def test_institution_tier_permissions():
     assert response.status_code == 200
     data = response.json()
     assert data["tier"] == "institution"
-    assert data["tier_info"]["deck_daily_limit"] == 100
-    assert data["tier_info"]["ask_daily_limit"] == 500
+    assert data["tier_info"]["daily_credits"] == 10000
     assert data["tier_info"]["max_upload_mb"] == 100
     assert "operations" in data["tier_info"]["allowed_departments"]
     assert "devops" not in data["tier_info"]["allowed_departments"]

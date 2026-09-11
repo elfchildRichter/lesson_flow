@@ -15,22 +15,31 @@ const $$ = (selector) => [...document.querySelectorAll(selector)];
 const translations = {
   'zh-TW': {
     'nav.brand': '課伴<small>LESSONFLOW (Alpha)</small>',
-    'nav.workspace': '教材解析',
-    'nav.deck': '教學簡報',
+    'nav.workspace': '工作台',
+    'nav.deck': '產出預覽',
     'nav.chat': '教材問答',
     'nav.profile': '個人帳號設定',
     'nav.admin': '管理員控制台',
     'nav.agent': 'AI 備課助手',
     'nav.crumb_create': '建立新課程',
-    'nav.crumb_workspace': '教材解析',
-    'nav.crumb_deck': '簡報檢視',
+    'nav.crumb_workspace': '工作台',
+    'nav.crumb_deck': '產出預覽',
     'nav.crumb_chat': '教材問答',
     'nav.crumb_admin': '管理員控制台',
     'nav.crumb_agent': 'AI 備課助手',
     'nav.crumb_profile': '個人帳號設定',
+    'preview.eyebrow': '課程產出與預覽',
+    'preview.title': '教學產出預覽',
+    'preview.subtitle': '在此檢視並匯出已生成的教學簡報、隨堂講義與單元試卷。',
+    'preview.tab_deck': '教學簡報與講稿',
+    'preview.tab_handout': 'A4 隨堂講義',
+    'preview.tab_quiz': '單元試卷評量',
     'agent.eyebrow': '💡 AI 教師備課與任務助手',
     'agent.title': '💡 AI 備課助手',
     'agent.subtitle': '自動為您設計單元教案大綱、生成測驗題庫、撰寫講稿大綱與 FB/Threads 社群教學宣傳貼文。',
+    'agent.toggle_collapse': '收合部門卡片',
+    'agent.toggle_expand': '展開卡片',
+    'agent.current_dept_tag': '🏢 當前諮詢',
     'agent.metric_depts': '4 大專家助手',
     'agent.metric_depts_sub': '教務備課 · 題庫生成 · 行銷推廣 · 限額查詢',
     'agent.metric_skills': '5 個 Skills',
@@ -61,43 +70,59 @@ const translations = {
     'provider.title': '⚡ AI 模型提供者',
     'multimodal.title': '📷 教材解析設定',
     'multimodal.toggle_label': '圖表與理化公式辨識',
-    'multimodal.hint': '適合含圖表或數學符號的講義（開啟時解析時間較長）',
+    'multimodal.hint': '開啟使用 VLM 視覺大模型辨識（消耗 15 點，標準解析 5 點）',
     'quota.title': '每日使用額度',
     'quota.unlogged': '未登入',
     'quota.unlimited': '👑 無限配額',
     'quota.active': '已開通',
     'quota.admin': '👑 管理員',
-    'quota.regular': '一般用戶',
     'quota.deck_label': '教學簡報',
+    'quota.handout_label': '隨堂講義',
+    'quota.quiz_label': '單元試卷',
     'quota.ask_label': '文件提問',
+    'quota.upload_label': '教材上傳',
     'quota.guest': '訪客用戶',
     'quota.login_hint': '點擊登入帳號',
+    'deck.btn_print_handout': '🖨️ A4 講義列印',
+    'deck.btn_deck_to_quiz': '🎯 依簡報出題',
     'topbar.status_ready': '系統就緒',
     'topbar.login_reg': '登入 / 註冊',
     'topbar.logout': '登出',
 
     'hero.eyebrow': 'AI 教學設計工作台',
+    'workspace.title': 'AI 教學設計工作台',
+    'workspace.subtitle': '上傳 PDF 教材，快速完成結構化教學簡報、隨堂講義與單元試卷。',
     'hero.title': '把教材，變成一堂<br><em>真正好懂的課。</em>',
     'hero.copy': '上傳 PDF，幾分鐘內完成課程簡報、逐頁講稿，<br>還能隨時向教材提問。',
-    'steps.01_title': '上傳教材',
-    'steps.01_desc': 'PDF 文件',
-    'steps.02_title': '設定課程',
-    'steps.02_desc': '對象與節奏',
-    'steps.03_title': '生成內容',
-    'steps.03_desc': '簡報與講稿',
+    'hero.toggle_collapse': '收合介紹',
+    'hero.toggle_expand': '展開介紹',
+    'hero.collapsed_title': '把教材，變成一堂真正好懂的課。',
+    'auth_brand.eyebrow': '✦ 課伴 LessonFlow',
+    'auth_brand.title': '把教材，變成一堂<br><em>真正好懂的課。</em>',
+    'auth_brand.copy': '上傳 PDF 教材，快速生成結構化教學簡報、隨堂講義與單元試卷，並享有 AI 備課專家與即時問答支援。',
+    'steps.01_title': '上傳解析',
+    'steps.01_desc': 'PDF / 圖表辨識',
+    'steps.02_title': '教學設計',
+    'steps.02_desc': '簡報·講義·試卷',
+    'steps.03_title': 'AI 助手',
+    'steps.03_desc': '多領域備課·問答',
     'upload.title': '選擇你的教材',
     'upload.secure': '✓ 安全加密',
     'upload.drag': '拖曳 PDF 到這裡',
     'upload.click': '或點擊選擇電腦中的檔案',
     'upload.limit': '最大 30 MB · 支援可選取文字的 PDF',
-    'settings.title': '設計這堂課',
+    'upload.sample_hint': '💡 手邊暫無教材？可與 AI 備課助手討論主題，直接生成完整教案：',
+    'upload.agent_btn': '💡 前往 AI 備課助手討論',
+    'upload.sample_btn': '🚀 載入示範教材 (高中物理)',
+    'preview.editable_hint': '<b>✎ 就地手動編修</b>：點擊下方任何標題、講稿、條列或題目文字均可直接免費修改，系統將自動同步並套用於匯出檔案。',
+    'settings.title': '教學設計工作台',
     'settings.status_wait': '等待教材',
     'settings.audience': '學習對象',
     'settings.tone': '教學語氣',
     'settings.duration': '課程時間',
     'settings.slide_count': '簡報頁數',
-    'settings.language': '簡報輸出語言',
-    'settings.web_search': '開啟網路補充搜尋（延伸最新案例與外部數據）',
+    'settings.language': '輸出語言',
+    'settings.web_search': '開啟網路補充搜尋（延伸案例數據）',
     'settings.generate_btn': '生成教學內容',
     'settings.estimate': '預計需要 1–2 分鐘，可留在此頁等待',
     'value.01_title': '忠於原文',
@@ -105,7 +130,29 @@ const translations = {
     'value.02_title': '教學設計',
     'value.02_desc': '不是單純內容摘要',
     'value.03_title': '即刻匯出',
-    'value.03_desc': 'PPTX 與逐頁講稿',
+    'value.03_desc': 'PPTX、講義與試卷',
+
+    'workspace.common_title': '✦ 共通教學設定 (通用於下方三大產出模組)',
+    'workspace.generate_all': '🚀 一鍵生成全部項目 (簡報+講義+試卷)',
+    'deck.badge': '🎯 模組 1',
+    'deck.title': '教學簡報 (Deck)',
+    'deck.desc': '投影片大綱、視覺圖解與逐頁講稿',
+    'deck.web_search': '開啟網路補充搜尋（延伸案例數據）',
+    'deck.btn': '✦ 生成教學簡報',
+    'handout.badge': '📝 模組 2',
+    'handout.title': '隨堂講義 (Handout)',
+    'handout.desc': 'A4 導讀手冊、核心觀念與研讀建議',
+    'handout.audience': '適用對象',
+    'handout.detail': '詳細程度',
+    'handout.web_search': '開啟網路知識補充（整合時事案例）',
+    'handout.btn': '📝 生成 A4 隨堂講義',
+    'quiz.badge': '📑 模組 3',
+    'quiz.title': '單元試卷 (Quiz)',
+    'quiz.desc': '隨堂測驗評量、誘答選項與觀念詳解',
+    'quiz.count': '出題題數',
+    'quiz.difficulty': '試題難度',
+    'quiz.web_search': '開啟外部題庫檢索（搜尋真實考題）',
+    'quiz.btn': '📑 生成單元試卷',
 
     'opt.audience.college': '大學生',
     'opt.audience.high': '高中生',
@@ -117,6 +164,25 @@ const translations = {
     'opt.tone.lively': '活潑互動',
     'opt.tone.rigorous': '專業嚴謹',
     'opt.tone.story': '故事引導',
+
+    'opt.handout_aud.student': '學生/學習者',
+    'opt.handout_aud.instructor': '授課講師備課用',
+    'opt.handout_aud.pro': '職場專業培訓學員',
+    'opt.handout_aud.self': '自學者筆記',
+
+    'opt.handout_det.concise': '重點摘要型 (精簡)',
+    'opt.handout_det.standard': '標準導讀型 (平衡)',
+    'opt.handout_det.detailed': '深入剖析型 (詳盡)',
+
+    'opt.quiz_cnt.3': '3 題 (課堂速測)',
+    'opt.quiz_cnt.5': '5 題 (標準小考)',
+    'opt.quiz_cnt.8': '8 題 (單元測驗)',
+    'opt.quiz_cnt.10': '10 題 (總結評量)',
+
+    'opt.quiz_diff.all': '混合難度 (循序漸進)',
+    'opt.quiz_diff.easy': '基礎概念題',
+    'opt.quiz_diff.medium': '中等理解題',
+    'opt.quiz_diff.hard': '進階論述與計算題',
 
     'opt.provider.gemini': '✨ Gemini 雲端 (Cloud API)',
     'opt.provider.ollama_cloud': 'Ollama 雲端 (Cloud API)',
@@ -147,6 +213,9 @@ const translations = {
     'deck.empty_slide': '還沒有簡報',
     'deck.stage_empty_b': '尚未產生內容',
     'deck.stage_empty_s': '回到工作台上傳教材並設定課程',
+    'deck.preview_empty_b': '尚未生成教學簡報',
+    'deck.preview_empty_s': '請在工作台點擊「✦ 生成教學簡報」或「🚀 一鍵生成全部項目」',
+    'deck.preview_empty_btn': '← 前往工作台生成',
     'deck.notes_label': '這頁怎麼說',
     'deck.page_ref': '講者備註',
     'deck.speaker_notes_placeholder': '生成後，逐頁講稿會顯示在這裡。',
@@ -238,26 +307,41 @@ const translations = {
     'toast.logout': '已成功登出',
     'toast.pass_changed': '密碼已成功修改',
     'toast.pdf_invalid': '請選擇 PDF 檔案',
-    'toast.pdf_uploaded': '教材已完成解析，可以開始設計課程'
+    'toast.pdf_uploaded': '教材已完成解析，可以開始設計課程',
+
+    'footer.copyright': '© 2026 ArchCet. All rights reserved.',
+    'footer.terms': '服務條款 (Terms)',
+    'footer.privacy': '隱私權政策 (Privacy)',
+    'footer.contact': '聯絡我們'
   },
   'en': {
     'nav.brand': 'LessonFlow<small>(Alpha)</small>',
-    'nav.workspace': 'Material Parsing',
-    'nav.deck': 'Presentation Decks',
+    'nav.workspace': 'Workspace',
+    'nav.deck': 'Outputs & Preview',
     'nav.chat': 'Material Q&A',
     'nav.profile': 'Account Settings',
     'nav.admin': 'Admin Console',
     'nav.agent': 'AI Lesson Assistant',
     'nav.crumb_create': 'Create Course',
-    'nav.crumb_workspace': 'Material Parsing',
-    'nav.crumb_deck': 'Deck View',
+    'nav.crumb_workspace': 'Workspace',
+    'nav.crumb_deck': 'Outputs & Preview',
     'nav.crumb_chat': 'Material Q&A',
     'nav.crumb_admin': 'Admin Console',
     'nav.crumb_agent': 'AI Lesson Assistant',
     'nav.crumb_profile': 'Account Settings',
+    'preview.eyebrow': 'Course Outputs & Preview',
+    'preview.title': 'Outputs & Preview Center',
+    'preview.subtitle': 'Inspect and export generated presentation decks, A4 handouts, and unit quiz sheets.',
+    'preview.tab_deck': 'Slides & Speaker Notes',
+    'preview.tab_handout': 'A4 Handout',
+    'preview.tab_quiz': 'Unit Quiz Sheet',
+    'preview.editable_hint': '<b>✎ Live Inline Editing</b>: Click on any slide title, notes, bullets, or quiz questions below to edit directly for free. Changes will sync to exported files automatically.',
     'agent.eyebrow': '💡 AI Lesson Preparation & Task Assistant',
     'agent.title': '💡 AI Lesson Assistant',
     'agent.subtitle': 'Automatically design lesson plan outlines, generate quiz questions with explanations, and draft social teaching posts.',
+    'agent.toggle_collapse': 'Collapse Cards',
+    'agent.toggle_expand': 'Expand Cards',
+    'agent.current_dept_tag': '🏢 Department',
     'agent.metric_depts': '4 AI Assistants',
     'agent.metric_depts_sub': 'Lesson Plan · Quiz Generator · Social Post · Quota Checker',
     'agent.metric_skills': '5 Skills',
@@ -287,8 +371,8 @@ const translations = {
     'agent.placeholder': 'Enter teaching task (e.g. \'Design a 45-min Physics lesson plan\' or \'Generate 5 quiz questions\')...',
     'provider.title': '⚡ AI Provider',
     'multimodal.title': '📷 PDF Reading Mode',
-    'multimodal.toggle_label': 'Diagrams & Math Formulas',
-    'multimodal.hint': 'Recommended for PDFs with figures or math',
+    'multimodal.toggle_label': 'Formula & Diagram Recognition',
+    'multimodal.hint': 'Enable VLM Vision recognition (Costs 15 credits, Standard parse costs 5 credits)',
     'quota.title': 'Daily Quota',
     'quota.unlogged': 'Not Logged In',
     'quota.unlimited': '👑 Unlimited Quota',
@@ -296,35 +380,51 @@ const translations = {
     'quota.admin': '👑 Admin',
     'quota.regular': 'Regular User',
     'quota.deck_label': 'Decks',
+    'quota.handout_label': 'Handouts',
+    'quota.quiz_label': 'Quizzes',
     'quota.ask_label': 'Q&A',
+    'quota.upload_label': 'Uploads',
     'quota.guest': 'Guest User',
     'quota.login_hint': 'Click to login',
+    'deck.btn_print_handout': '🖨️ A4 Handout Print',
+    'deck.btn_deck_to_quiz': '🎯 Generate Quiz from Deck',
     'topbar.status_ready': 'System Ready',
     'topbar.login_reg': 'Sign In / Register',
     'topbar.logout': 'Log Out',
 
     'hero.eyebrow': 'AI Instructional Design Workspace',
+    'workspace.title': 'AI Instructional Design Workspace',
+    'workspace.subtitle': 'Upload PDF materials to quickly generate structured presentation decks, handouts, and quizzes.',
     'hero.title': 'Transform Materials into<br><em>Truly Engaging Lessons.</em>',
     'hero.copy': 'Upload a PDF to generate presentation decks and speaker scripts in minutes,<br>and ask questions anytime.',
-    'steps.01_title': 'Upload PDF',
-    'steps.01_desc': 'PDF Document',
-    'steps.02_title': 'Setup Course',
-    'steps.02_desc': 'Audience & Pace',
-    'steps.03_title': 'Generate',
-    'steps.03_desc': 'Decks & Scripts',
+    'hero.toggle_collapse': 'Collapse Intro',
+    'hero.toggle_expand': 'Expand Intro',
+    'hero.collapsed_title': 'Turn materials into clear, structured lessons.',
+    'auth_brand.eyebrow': '✦ LessonFlow',
+    'auth_brand.title': 'Transform Materials into<br><em>Engaging Lessons.</em>',
+    'auth_brand.copy': 'Upload PDF material to instantly generate structured slide decks, handouts, and quiz sheets, supported by AI lesson assistants and smart Q&A.',
+    'steps.01_title': 'Upload & Parse',
+    'steps.01_desc': 'PDF / Formula OCR',
+    'steps.02_title': 'Lesson Design',
+    'steps.02_desc': 'Decks · Handouts · Quizzes',
+    'steps.03_title': 'AI Copilot',
+    'steps.03_desc': 'Expert Agents & Q&A',
     'upload.title': 'Select Your Material',
     'upload.secure': '✓ Secure & Encrypted',
     'upload.drag': 'Drag & Drop PDF Here',
     'upload.click': 'or click to browse files',
     'upload.limit': 'Max 30 MB · Selectable text PDF supported',
-    'settings.title': 'Design This Lesson',
+    'upload.sample_hint': '💡 No material at hand? Chat with AI Assistant to draft a complete lesson plan:',
+    'upload.agent_btn': '💡 Consult AI Assistant',
+    'upload.sample_btn': '🚀 Load Sample Lesson (Physics)',
+    'settings.title': 'Instructional Design Workspace',
     'settings.status_wait': 'Awaiting Material',
     'settings.audience': 'Audience',
     'settings.tone': 'Teaching Tone',
     'settings.duration': 'Duration',
     'settings.slide_count': 'Slide Count',
     'settings.language': 'Output Language',
-    'settings.web_search': 'Enable Web Search (Fetch latest cases & external data)',
+    'settings.web_search': 'Enable Web Search (Supplement cases & data)',
     'settings.generate_btn': 'Generate Lesson Content',
     'settings.estimate': 'Takes about 1–2 minutes, feel free to wait here',
     'value.01_title': 'Factually Faithful',
@@ -332,7 +432,29 @@ const translations = {
     'value.02_title': 'Instructional Design',
     'value.02_desc': 'Structured learning, not just summaries',
     'value.03_title': 'Instant Export',
-    'value.03_desc': 'Download PPTX & speaker scripts',
+    'value.03_desc': 'Download PPTX, handouts & quiz',
+
+    'workspace.common_title': '✦ Common Teaching Settings (Applied across all 3 modules)',
+    'workspace.generate_all': '🚀 Generate All 3 Items (Deck + Handout + Quiz)',
+    'deck.badge': '🎯 Module 1',
+    'deck.title': 'Teaching Deck',
+    'deck.desc': 'Slide outlines, visual diagrams & speaker scripts',
+    'deck.web_search': 'Enable Web Search (Supplement cases & data)',
+    'deck.btn': '✦ Generate Slide Deck',
+    'handout.badge': '📝 Module 2',
+    'handout.title': 'Lesson Handout',
+    'handout.desc': 'A4 study guide, core takeaways & review notes',
+    'handout.audience': 'Target Audience',
+    'handout.detail': 'Detail Level',
+    'handout.web_search': 'Enable Web Search (Add current cases)',
+    'handout.btn': '📝 Generate A4 Handout',
+    'quiz.badge': '📑 Module 3',
+    'quiz.title': 'Unit Quiz',
+    'quiz.desc': 'Unit assessment, distractor options & explanations',
+    'quiz.count': 'Question Count',
+    'quiz.difficulty': 'Difficulty',
+    'quiz.web_search': 'Enable Question Search (Real exams & questions)',
+    'quiz.btn': '📑 Generate Unit Quiz',
 
     'opt.audience.college': 'College Students',
     'opt.audience.high': 'High School Students',
@@ -344,6 +466,25 @@ const translations = {
     'opt.tone.lively': 'Lively & Interactive',
     'opt.tone.rigorous': 'Professional & Rigorous',
     'opt.tone.story': 'Story-driven',
+
+    'opt.handout_aud.student': 'Students / Learners',
+    'opt.handout_aud.instructor': 'Instructor Lesson Prep',
+    'opt.handout_aud.pro': 'Professional Trainees',
+    'opt.handout_aud.self': 'Self-Learners',
+
+    'opt.handout_det.concise': 'Concise Summary (Quick)',
+    'opt.handout_det.standard': 'Standard Guide (Balanced)',
+    'opt.handout_det.detailed': 'In-depth Analysis (Detailed)',
+
+    'opt.quiz_cnt.3': '3 Questions (Quick check)',
+    'opt.quiz_cnt.5': '5 Questions (Standard quiz)',
+    'opt.quiz_cnt.8': '8 Questions (Unit test)',
+    'opt.quiz_cnt.10': '10 Questions (Comprehensive)',
+
+    'opt.quiz_diff.all': 'Mixed (Progressive)',
+    'opt.quiz_diff.easy': 'Basic Concepts',
+    'opt.quiz_diff.medium': 'Moderate Understanding',
+    'opt.quiz_diff.hard': 'Advanced & Problem Solving',
 
     'opt.provider.gemini': 'Gemini Cloud API ✨',
     'opt.provider.ollama_cloud': 'Ollama Cloud API',
@@ -374,6 +515,9 @@ const translations = {
     'deck.empty_slide': 'No slides yet',
     'deck.stage_empty_b': 'No Content Generated',
     'deck.stage_empty_s': 'Return to workspace to upload PDF & configure course',
+    'deck.preview_empty_b': 'No Slide Deck Generated Yet',
+    'deck.preview_empty_s': 'Click "✦ Generate Slide Deck" or "🚀 Generate All Items" in Workspace.',
+    'deck.preview_empty_btn': '← Go to Workspace',
     'deck.notes_label': 'Speaker Notes',
     'deck.page_ref': 'Notes',
     'deck.speaker_notes_placeholder': 'Speaker notes for each slide will appear here.',
@@ -465,7 +609,12 @@ const translations = {
     'toast.logout': 'Logged out successfully',
     'toast.pass_changed': 'Password changed successfully',
     'toast.pdf_invalid': 'Please select a valid PDF file',
-    'toast.pdf_uploaded': 'Material parsed successfully! Ready for deck & Q&A.'
+    'toast.pdf_uploaded': 'Material parsed successfully! Ready for deck & Q&A.',
+
+    'footer.copyright': '© 2026 ArchCet. All rights reserved.',
+    'footer.terms': 'Terms of Service',
+    'footer.privacy': 'Privacy Policy',
+    'footer.contact': 'Contact'
   }
 };
 
@@ -590,11 +739,66 @@ function updateSelectOptions() {
   if (targetLangSelect) {
     const selectedVal = targetLangSelect.value;
     const langOpts = [
+      { val: 'auto', key: 'opt.lang.auto' },
       { val: 'zh-TW', key: 'opt.lang.zh_tw' },
-      { val: 'en', key: 'opt.lang.en' },
-      { val: 'auto', key: 'opt.lang.auto' }
+      { val: 'en', key: 'opt.lang.en' }
     ];
     targetLangSelect.innerHTML = langOpts.map(o =>
+      `<option value="${o.val}" ${o.val === selectedVal ? 'selected' : ''}>${t(o.key)}</option>`
+    ).join('');
+  }
+
+  const handoutAudienceSelect = $('#handoutAudience');
+  if (handoutAudienceSelect) {
+    const selectedVal = handoutAudienceSelect.value;
+    const audOpts = [
+      { val: '學生/學習者', key: 'opt.handout_aud.student' },
+      { val: '授課講師備課用', key: 'opt.handout_aud.instructor' },
+      { val: '職場專業培訓學員', key: 'opt.handout_aud.pro' },
+      { val: '自學者筆記', key: 'opt.handout_aud.self' }
+    ];
+    handoutAudienceSelect.innerHTML = audOpts.map(o =>
+      `<option value="${o.val}" ${o.val === selectedVal ? 'selected' : ''}>${t(o.key)}</option>`
+    ).join('');
+  }
+
+  const handoutDetailSelect = $('#handoutDetail');
+  if (handoutDetailSelect) {
+    const selectedVal = handoutDetailSelect.value;
+    const detOpts = [
+      { val: 'concise', key: 'opt.handout_det.concise' },
+      { val: 'standard', key: 'opt.handout_det.standard' },
+      { val: 'detailed', key: 'opt.handout_det.detailed' }
+    ];
+    handoutDetailSelect.innerHTML = detOpts.map(o =>
+      `<option value="${o.val}" ${o.val === selectedVal ? 'selected' : ''}>${t(o.key)}</option>`
+    ).join('');
+  }
+
+  const quizCountSelect = $('#quizCount');
+  if (quizCountSelect) {
+    const selectedVal = quizCountSelect.value;
+    const countOpts = [
+      { val: '3', key: 'opt.quiz_cnt.3' },
+      { val: '5', key: 'opt.quiz_cnt.5' },
+      { val: '8', key: 'opt.quiz_cnt.8' },
+      { val: '10', key: 'opt.quiz_cnt.10' }
+    ];
+    quizCountSelect.innerHTML = countOpts.map(o =>
+      `<option value="${o.val}" ${o.val === selectedVal ? 'selected' : ''}>${t(o.key)}</option>`
+    ).join('');
+  }
+
+  const quizDiffSelect = $('#quizDifficulty');
+  if (quizDiffSelect) {
+    const selectedVal = quizDiffSelect.value;
+    const diffOpts = [
+      { val: 'all', key: 'opt.quiz_diff.all' },
+      { val: 'easy', key: 'opt.quiz_diff.easy' },
+      { val: 'medium', key: 'opt.quiz_diff.medium' },
+      { val: 'hard', key: 'opt.quiz_diff.hard' }
+    ];
+    quizDiffSelect.innerHTML = diffOpts.map(o =>
       `<option value="${o.val}" ${o.val === selectedVal ? 'selected' : ''}>${t(o.key)}</option>`
     ).join('');
   }
@@ -726,7 +930,10 @@ function getTierInfo(user) {
       tierKey: 'teacher_trial',
       badge: isEn ? '🎓 Teacher Free Trial' : '🎓 教師試用版',
       deckLimit: 1,
-      askLimit: 5,
+      handoutLimit: 2,
+      quizLimit: 3,
+      askLimit: 10,
+      uploadLimit: 5,
       maxUploadMb: 10,
       isUnlimited: false
     };
@@ -736,7 +943,10 @@ function getTierInfo(user) {
       tierKey: 'admin',
       badge: isEn ? '👑 Unlimited' : '👑 無限版',
       deckLimit: -1,
+      handoutLimit: -1,
+      quizLimit: -1,
       askLimit: -1,
+      uploadLimit: -1,
       maxUploadMb: 500,
       isUnlimited: true
     };
@@ -752,7 +962,10 @@ function getTierInfo(user) {
       tierKey: 'teacher_trial',
       badge: isEn ? '🎓 Teacher Free Trial' : '🎓 教師試用版',
       deckLimit: 1,
-      askLimit: 5,
+      handoutLimit: 2,
+      quizLimit: 3,
+      askLimit: 10,
+      uploadLimit: 5,
       maxUploadMb: 10,
       isUnlimited: false
     },
@@ -760,7 +973,10 @@ function getTierInfo(user) {
       tierKey: 'teacher_pro',
       badge: isEn ? '⭐ Teacher Pro' : '⭐ 教師專業版',
       deckLimit: 10,
+      handoutLimit: 15,
+      quizLimit: 20,
       askLimit: 50,
+      uploadLimit: 20,
       maxUploadMb: 30,
       isUnlimited: false
     },
@@ -768,7 +984,10 @@ function getTierInfo(user) {
       tierKey: 'institution',
       badge: isEn ? '🏫 Institution / School' : '🏫 機構/學校版',
       deckLimit: 100,
+      handoutLimit: 150,
+      quizLimit: 200,
       askLimit: 500,
+      uploadLimit: 100,
       maxUploadMb: 100,
       isUnlimited: false
     }
@@ -817,19 +1036,23 @@ function updateFeaturePermissionsUI(user) {
     }
   }
 
-  // 2. Web Search Checkboxes (#deckWebSearch & #qaWebSearch)
-  const deckWebSearch = $('#deckWebSearch');
-  const qaWebSearch = $('#qaWebSearch');
+  // 2. Web Search Checkboxes (#deckWebSearch, #handoutWebSearch, #quizWebSearch, #qaWebSearch)
+  const searchCheckboxes = [
+    { el: $('#deckWebSearch'), badgeId: 'deckWebSearchLockBadge' },
+    { el: $('#handoutWebSearch'), badgeId: 'handoutWebSearchLockBadge' },
+    { el: $('#quizWebSearch'), badgeId: 'quizWebSearchLockBadge' },
+    { el: $('#qaWebSearch'), badgeId: 'qaWebSearchLockBadge' }
+  ];
 
-  const updateWebSearchItem = (chk, badgeId) => {
+  searchCheckboxes.forEach(({ el: chk, badgeId }) => {
     if (!chk) return;
-    let badge = $(badgeId);
+    let badge = $(`#${badgeId}`);
     if (!enableWebSearch) {
       chk.checked = false;
       chk.disabled = true;
       if (!badge) {
         badge = document.createElement('span');
-        badge.id = badgeId.replace('#', '');
+        badge.id = badgeId;
         badge.className = 'lock-badge-inline';
         badge.style.cssText = 'color: #d97706; font-weight: 600; margin-left: 6px; font-size: 11px;';
         const parent = chk.closest('label');
@@ -841,10 +1064,7 @@ function updateFeaturePermissionsUI(user) {
       chk.disabled = false;
       if (badge) badge.style.display = 'none';
     }
-  };
-
-  updateWebSearchItem(deckWebSearch, '#deckWebSearchLockBadge');
-  updateWebSearchItem(qaWebSearch, '#qaWebSearchLockBadge');
+  });
 }
 
 function updateAuthUI(user) {
@@ -854,17 +1074,26 @@ function updateAuthUI(user) {
 
   if (user) {
     const q = user.quota || {};
-    const deckLimit = tier.isUnlimited ? -1 : (q.deck?.daily_limit || tier.deckLimit);
-    const askLimit = tier.isUnlimited ? -1 : (q.ask?.daily_limit || tier.askLimit);
-    const deckUsed = q.deck?.used_count || 0;
-    const askUsed = q.ask?.used_count || 0;
     const isUnlimited = tier.isUnlimited;
+
+    const deckLimit = isUnlimited ? -1 : (q.deck?.daily_limit || tier.deckLimit);
+    const handoutLimit = isUnlimited ? -1 : (q.handout?.daily_limit || tier.handoutLimit);
+    const quizLimit = isUnlimited ? -1 : (q.quiz?.daily_limit || tier.quizLimit);
+    const askLimit = isUnlimited ? -1 : (q.ask?.daily_limit || tier.askLimit);
+    const credits = user.credits || {
+      used: q.credits?.used_count || 0,
+      daily_limit: q.credits?.daily_limit || (isUnlimited ? -1 : 100),
+      remaining: q.credits?.remaining || (isUnlimited ? -1 : 100),
+      is_unlimited: isUnlimited
+    };
+    const remCredits = isUnlimited ? -1 : (credits.remaining !== undefined ? credits.remaining : 100);
+    const limCredits = isUnlimited ? -1 : (credits.daily_limit || 100);
 
     const quotaLabel = isUnlimited
       ? tier.badge
       : (state.lang === 'en'
-        ? `${tier.badge} · Decks:${deckUsed}/${deckLimit}`
-        : `${tier.badge} · 教材:${deckUsed}/${deckLimit}份`);
+        ? `${tier.badge} · ${remCredits}/${limCredits} pts`
+        : `${tier.badge} · 剩餘 ${remCredits}/${limCredits} 點`);
 
     if (container) {
       container.innerHTML = `
@@ -876,17 +1105,16 @@ function updateAuthUI(user) {
       `;
     }
 
-    // 更新側邊欄 Profile 卡片
     if ($('#quotaBadge')) $('#quotaBadge').textContent = tier.badge;
-    if ($('#deckQuotaText')) $('#deckQuotaText').textContent = isUnlimited ? (state.lang === 'en' ? 'Unlimited' : '無限') : `${deckUsed} / ${deckLimit} ${state.lang === 'en' ? '' : '份'}`;
-    if ($('#deckQuotaBar')) {
-      $('#deckQuotaBar').style.width = isUnlimited ? '100%' : `${Math.min(100, (deckUsed / deckLimit) * 100)}%`;
-      $('#deckQuotaBar').style.background = isUnlimited ? '#d97706' : 'var(--green)';
+    if ($('#creditBalanceText')) {
+      $('#creditBalanceText').textContent = isUnlimited
+        ? (state.lang === 'en' ? 'Unlimited' : '無限點數')
+        : (state.lang === 'en' ? `${remCredits} / ${limCredits} pts` : `${remCredits} / ${limCredits} 點`);
     }
-    if ($('#askQuotaText')) $('#askQuotaText').textContent = isUnlimited ? (state.lang === 'en' ? 'Unlimited' : '無限') : `${askUsed} / ${askLimit} ${state.lang === 'en' ? '' : '次'}`;
-    if ($('#askQuotaBar')) {
-      $('#askQuotaBar').style.width = isUnlimited ? '100%' : `${Math.min(100, (askUsed / askLimit) * 100)}%`;
-      $('#askQuotaBar').style.background = isUnlimited ? '#d97706' : 'var(--green)';
+    if ($('#creditUsageBar')) {
+      const pct = isUnlimited ? 100 : Math.min(100, Math.max(0, (remCredits / (limCredits || 1)) * 100));
+      $('#creditUsageBar').style.width = `${pct}%`;
+      $('#creditUsageBar').style.background = isUnlimited ? '#d97706' : (remCredits <= 10 ? '#ef4444' : 'linear-gradient(90deg, #10b981, #059669)');
     }
 
     if ($('#userAvatar')) $('#userAvatar').textContent = user.role === 'admin' ? '👑' : user.username.charAt(0).toUpperCase();
@@ -894,12 +1122,10 @@ function updateAuthUI(user) {
   } else {
     if (container) container.innerHTML = `<button class="auth-btn" id="openAuthBtn" type="button" data-i18n="topbar.login_reg">${t('topbar.login_reg')}</button>`;
 
-    // 重置側邊欄 Profile 卡片
     if ($('#quotaBadge')) $('#quotaBadge').textContent = tier.badge;
-    if ($('#deckQuotaText')) $('#deckQuotaText').textContent = state.lang === 'en' ? `- / ${tier.deckLimit}` : `- / ${tier.deckLimit} 份`;
-    if ($('#deckQuotaBar')) $('#deckQuotaBar').style.width = '0%';
-    if ($('#askQuotaText')) $('#askQuotaText').textContent = state.lang === 'en' ? `- / ${tier.askLimit}` : `- / ${tier.askLimit} 次`;
-    if ($('#askQuotaBar')) $('#askQuotaBar').style.width = '0%';
+    if ($('#creditBalanceText')) $('#creditBalanceText').textContent = state.lang === 'en' ? `- / 100 pts` : `- / 100 點`;
+    if ($('#creditUsageBar')) $('#creditUsageBar').style.width = '0%';
+
     if ($('#userAvatar')) $('#userAvatar').textContent = state.lang === 'en' ? 'G' : '客';
     if ($('#userProfileInfo')) $('#userProfileInfo').innerHTML = `${t('quota.guest')}<small>${tier.badge}</small>`;
   }
@@ -950,6 +1176,9 @@ function renderDeptActiveIndicators() {
       }
     }
   });
+  if (typeof updateAgentDeptBar === 'function') {
+    updateAgentDeptBar(activeKey);
+  }
 }
 
 function updateAgentDepartmentBadges(user) {
@@ -1178,20 +1407,92 @@ $('#registerForm').addEventListener('submit', async (e) => {
 
 // --- 教材處理與核心邏輯 ---
 
-function setDocument(doc) {
+function saveWorkspaceStateToStorage() {
+  try {
+    const payload = {
+      document: state.document,
+      deck: state.deck,
+      handout: state.handout,
+      quiz: state.quiz,
+      activeSlide: state.activeSlide || 0,
+    };
+    localStorage.setItem('lessonflow_workspace_cache', JSON.stringify(payload));
+  } catch (err) {
+    console.warn('Failed to save state to localStorage:', err);
+  }
+}
+
+function clearWorkspaceStateStorage() {
+  try {
+    localStorage.removeItem('lessonflow_workspace_cache');
+  } catch (err) {
+    console.warn('Failed to clear state from localStorage:', err);
+  }
+}
+
+function loadWorkspaceStateFromStorage() {
+  try {
+    const raw = localStorage.getItem('lessonflow_workspace_cache');
+    if (!raw) return;
+    const payload = JSON.parse(raw);
+    if (payload.document) {
+      setDocument(payload.document, true);
+    }
+    if (payload.deck) {
+      state.deck = payload.deck;
+      state.activeSlide = payload.activeSlide || 0;
+      updateModuleStatusChip('deckStatusChip', 'done', state.lang === 'en' ? '✓ Deck Generated' : '✓ 簡報已生成', () => {
+        switchView('deck');
+        switchPreviewTab('deck');
+      });
+    }
+    if (payload.handout) {
+      state.handout = payload.handout;
+      updateModuleStatusChip('handoutStatusChip', 'done', state.lang === 'en' ? '✓ Handout Generated' : '✓ 講義已生成', () => {
+        switchView('deck');
+        switchPreviewTab('handout');
+      });
+    }
+    if (payload.quiz) {
+      state.quiz = payload.quiz;
+      updateModuleStatusChip('quizStatusChip', 'done', state.lang === 'en' ? '✓ Quiz Sheet Generated' : '✓ 試卷已生成', () => {
+        switchView('deck');
+        switchPreviewTab('quiz');
+      });
+    }
+    updatePreviewCountBadge();
+    renderPreviewPanels();
+  } catch (err) {
+    console.warn('Failed to load state from localStorage:', err);
+  }
+}
+
+function setDocument(doc, silent = false) {
   state.document = doc;
-  $('#settingsPanel').classList.remove('locked'); $('#fileCard').classList.remove('hidden'); $('#generateBtn').disabled = false;
-  $('#settingStatus').textContent = state.lang === 'en' ? '✓ Parsed' : '✓ 已完成解析'; $('#fileName').textContent = doc.name;
+  $('#settingsPanel').classList.remove('locked');
+  $('#fileCard').classList.remove('hidden');
+  $('#generateBtn').disabled = false;
+  if ($('#generateHandoutBtn')) $('#generateHandoutBtn').disabled = false;
+  if ($('#generateQuizBtn')) $('#generateQuizBtn').disabled = false;
+  if ($('#generateAllBtn')) $('#generateAllBtn').disabled = false;
+  $('#settingStatus').textContent = state.lang === 'en' ? '✓ Parsed' : '✓ 已完成解析';
+  $('#fileName').textContent = doc.name;
   $('#fileMeta').textContent = state.lang === 'en'
     ? `${doc.pages} pages · ${(doc.size_bytes / 1024 / 1024).toFixed(1)} MB · ${doc.chunks} chunks`
     : `${doc.pages} 頁 · ${(doc.size_bytes / 1024 / 1024).toFixed(1)} MB · ${doc.chunks} 個知識片段`;
-  $('#questionInput').disabled = false; $('#sendBtn').disabled = false;
+  $('#questionInput').disabled = false;
+  $('#sendBtn').disabled = false;
   $('#chatDoc').innerHTML = state.lang === 'en'
     ? `<span>PDF</span><div><b>${escapeHtml(doc.name)}</b><small>${doc.pages} pages · Indexed</small></div>`
     : `<span>PDF</span><div><b>${escapeHtml(doc.name)}</b><small>${doc.pages} 頁 · 已建立索引</small></div>`;
-  $('#modeText').textContent = doc.provider_label;
-  const steps = $$('.step'); steps[0].classList.add('done'); steps[1].classList.add('active');
-  toast(t('toast.pdf_uploaded'));
+  $('#modeText').textContent = doc.provider_label || '';
+  const steps = $$('.step');
+  if (steps.length >= 2) {
+    steps[0].classList.add('done');
+    steps[1].classList.add('active');
+  }
+  if (!silent) toast(t('toast.pdf_uploaded'));
+  saveWorkspaceStateToStorage();
 }
 
 async function uploadFile(file) {
@@ -1222,12 +1523,49 @@ $('#removeFile').addEventListener('click', () => {
   $('#settingsPanel').classList.add('locked');
   $('#fileCard').classList.add('hidden');
   $('#generateBtn').disabled = true;
+  if ($('#generateHandoutBtn')) $('#generateHandoutBtn').disabled = true;
+  if ($('#generateQuizBtn')) $('#generateQuizBtn').disabled = true;
+  if ($('#generateAllBtn')) $('#generateAllBtn').disabled = true;
   $('#questionInput').disabled = true;
   $('#sendBtn').disabled = true;
   $('#settingStatus').textContent = t('settings.status_wait');
+  ['deckStatusChip', 'handoutStatusChip', 'quizStatusChip'].forEach(id => {
+    const el = $(`#${id}`);
+    if (el) { el.className = 'module-status-chip'; el.innerHTML = ''; }
+  });
+  state.deck = null;
+  state.handout = null;
+  state.quiz = null;
+  clearWorkspaceStateStorage();
+  updatePreviewCountBadge();
+  renderPreviewPanels();
   $$('.step').forEach((s, i) => { if (i) s.classList.remove('active', 'done'); });
   toast(state.lang === 'en' ? 'Removed material from workspace' : '已從工作台移除教材');
 });
+
+function toggleTopbar(collapse) {
+  const topbar = $('#mainTopbar');
+  const restoreBtn = $('#topbarRestoreBtn');
+  if (!topbar || !restoreBtn) return;
+
+  const willCollapse = collapse !== undefined ? collapse : !topbar.classList.contains('collapsed');
+  if (willCollapse) {
+    topbar.classList.add('collapsed');
+    restoreBtn.classList.remove('hidden');
+    localStorage.setItem('lessonflow_topbar_collapsed', 'true');
+  } else {
+    topbar.classList.remove('collapsed');
+    restoreBtn.classList.add('hidden');
+    localStorage.removeItem('lessonflow_topbar_collapsed');
+  }
+}
+
+$('#topbarCollapseBtn')?.addEventListener('click', () => toggleTopbar(true));
+$('#topbarRestoreBtn')?.addEventListener('click', () => toggleTopbar(false));
+
+if (localStorage.getItem('lessonflow_topbar_collapsed') === 'true') {
+  toggleTopbar(true);
+}
 
 function switchView(name) {
   if (name === 'admin' && (!state.user || state.user.role !== 'admin')) {
@@ -1259,6 +1597,8 @@ function switchView(name) {
     fetchAllUsers();
   } else if (name === 'profile') {
     renderProfileView();
+  } else if (name === 'deck') {
+    renderPreviewPanels();
   }
 }
 
@@ -1271,15 +1611,17 @@ function renderProfileView() {
     $('#profileRoleBadge').className = `role-chip ${state.user.role}`;
   }
   if ($('#profileQuotaText')) {
-    const q = state.user.quota || {};
-    const deckQ = q.deck || { used_count: 0, daily_limit: 3 };
-    const askQ = q.ask || { used_count: 0, daily_limit: 10 };
-    if (state.user.role === 'admin') {
-      $('#profileQuotaText').textContent = state.lang === 'en' ? '👑 Admin: Unlimited Quota' : '👑 管理員：無限額度';
+    const credits = state.user.credits || {};
+    const isUnlimited = state.user.role === 'admin' || credits.is_unlimited;
+    if (isUnlimited) {
+      $('#profileQuotaText').textContent = state.lang === 'en' ? '👑 Admin: Unlimited Credits' : '👑 管理員：無限點數';
     } else {
+      const rem = credits.remaining !== undefined ? credits.remaining : 100;
+      const lim = credits.daily_limit || 100;
+      const used = credits.used || 0;
       $('#profileQuotaText').textContent = state.lang === 'en'
-        ? `Decks: ${deckQ.used_count}/${deckQ.daily_limit} · Q&A: ${askQ.used_count}/${askQ.daily_limit}`
-        : `生成教材：${deckQ.used_count}/${deckQ.daily_limit} 份 · 文件提問：${askQ.used_count}/${askQ.daily_limit} 次`;
+        ? `Remaining: ${rem} / ${lim} pts (Used: ${used} pts)`
+        : `今日剩餘點數：${rem} / ${lim} 點 (已用：${used} 點)`;
     }
   }
 }
@@ -1314,33 +1656,22 @@ if ($('#sidebarOverlay')) {
   $('#sidebarOverlay').addEventListener('click', () => toggleSidebar(false));
 }
 
-$('#generateBtn').addEventListener('click', async () => {
-  if (!state.user) {
-    toast(state.lang === 'en' ? 'Please log in first' : '請先登入帳號', true);
-    openAuthModal('login');
-    return;
-  }
-  if (!state.document) return;
-  loading(true, t('loading.deck_title'), t('loading.deck_copy'));
-  const payload = {
-    document_id: state.document.id,
-    audience: $('#audience').value,
-    tone: $('#tone').value,
-    language: $('#targetLanguage') ? $('#targetLanguage').value : 'zh-TW',
-    duration: +$('#duration').value,
-    slide_count: +$('#slideCount').value,
-    enable_web_search: $('#deckWebSearch') ? $('#deckWebSearch').checked : false,
-  };
-  try {
-    state.deck = await api('/api/decks', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-    renderDeck(); $$('.step')[1].classList.add('done'); $$('.step')[2].classList.add('active', 'done'); $('#deckCount').textContent = '1';
-    await fetchCurrentUser();
-    toast(state.lang === 'en' ? 'Deck and speaker notes are ready!' : '簡報與逐頁講稿已經準備好了'); switchView('deck');
-  } catch (e) { toast(e.message, true); } finally { loading(false); }
-});
+$('#generateBtn')?.addEventListener('click', () => generateDeckAction());
 
 function renderDeck() {
   const d = state.deck;
+  if (!d) {
+    if ($('#deckEmptyState')) $('#deckEmptyState').classList.remove('hidden');
+    if ($('#deckLayout')) $('#deckLayout').classList.add('hidden');
+    if ($('#pptDownload')) $('#pptDownload').classList.add('disabled');
+    if ($('#scriptDownload')) $('#scriptDownload').classList.add('disabled');
+    if ($('#deckPrintHandoutBtn')) $('#deckPrintHandoutBtn').classList.add('disabled');
+    if ($('#deckToQuizBtn')) $('#deckToQuizBtn').classList.add('disabled');
+    return;
+  }
+  if ($('#deckEmptyState')) $('#deckEmptyState').classList.add('hidden');
+  if ($('#deckLayout')) $('#deckLayout').classList.remove('hidden');
+
   const modeLabels = {
     'gemini': state.lang === 'en' ? 'Gemini Cloud' : 'Gemini 雲端生成',
     'openai': state.lang === 'en' ? 'OpenAI Cloud' : 'OpenAI 雲端生成',
@@ -1356,6 +1687,13 @@ function renderDeck() {
   $('#scriptDownload').href = `/api/decks/${d.id}/script`;
   $('#pptDownload').classList.remove('disabled');
   $('#scriptDownload').classList.remove('disabled');
+  if ($('#deckPrintHandoutBtn')) {
+    $('#deckPrintHandoutBtn').href = `/api/decks/${d.id}/handout/print`;
+    $('#deckPrintHandoutBtn').classList.remove('disabled');
+  }
+  if ($('#deckToQuizBtn')) {
+    $('#deckToQuizBtn').classList.remove('disabled');
+  }
   $('#slideList').innerHTML = d.slides.map((s, i) => `<div class="slide-thumb ${i === 0 ? 'active' : ''}" data-index="${i}"><small>${String(i + 1).padStart(2, '0')}</small><div class="mini-slide"><b>${escapeHtml(s.title)}</b>${s.bullets.slice(0, 3).map(() => '<i></i>').join('')}</div></div>`).join('');
   $$('.slide-thumb').forEach(t => t.addEventListener('click', () => showSlide(+t.dataset.index)));
   showSlide(0);
@@ -1394,6 +1732,112 @@ function renderMath(element) {
       console.warn('KaTeX render error:', e);
     }
   }
+}
+
+function renderMarkdownToHtml(mdText) {
+  if (!mdText) return '';
+
+  // 1. Stash Math blocks so Markdown parser does not corrupt math syntax
+  const mathPlaceholders = [];
+  let processed = String(mdText).replace(/(\$\$[\s\S]*?\$\$|\$[^$\n]+?\$|\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\))/g, (match) => {
+    const placeholder = `%%MATHBLOCK${mathPlaceholders.length}%%`;
+    mathPlaceholders.push(match);
+    return placeholder;
+  });
+
+  // 2. Stash Code blocks (```lang ... ```)
+  const codePlaceholders = [];
+  processed = processed.replace(/```([a-zA-Z0-9_\-\+]*)\n([\s\S]*?)```/g, (match, lang, code) => {
+    const placeholder = `%%CODEBLOCK${codePlaceholders.length}%%`;
+    codePlaceholders.push({ lang: lang.trim(), code: code.trim() });
+    return placeholder;
+  });
+
+  // 3. Normalize CRLF
+  processed = processed.replace(/\r\n/g, '\n');
+
+  // 4. Headers (#, ##, ###, ####, #####, ######)
+  processed = processed.replace(/^######\s+(.*)$/gm, '<h6>$1</h6>');
+  processed = processed.replace(/^#####\s+(.*)$/gm, '<h5>$1</h5>');
+  processed = processed.replace(/^####\s+(.*)$/gm, '<h4>$1</h4>');
+  processed = processed.replace(/^###\s+(.*)$/gm, '<h3>$1</h3>');
+  processed = processed.replace(/^##\s+(.*)$/gm, '<h2>$1</h2>');
+  processed = processed.replace(/^#\s+(.*)$/gm, '<h1>$1</h1>');
+
+  // 5. Horizontal rules
+  processed = processed.replace(/^(?:---|\*\*\*|___)\s*$/gm, '<hr>');
+
+  // 6. Blockquotes
+  processed = processed.replace(/^>\s+(.*)$/gm, '<blockquote>$1</blockquote>');
+  processed = processed.replace(/<\/blockquote>\n<blockquote>/g, '<br>');
+
+  // 7. Inline styling (code, bold, italic)
+  processed = processed.replace(/`([^`\n]+)`/g, '<code class="agent-inline-code">$1</code>');
+  processed = processed.replace(/\*\*([^\*\n]+)\*\*/g, '<strong>$1</strong>');
+  processed = processed.replace(/__([^_\n]+)__/g, '<strong>$1</strong>');
+  processed = processed.replace(/\*([^\*\n]+)\*/g, '<em>$1</em>');
+  processed = processed.replace(/_([^_\n]+)_/g, '<em>$1</em>');
+
+  // 8. Lists
+  processed = processed.replace(/^[\*\-\+]\s+(.*)$/gm, '<li>$1</li>');
+  processed = processed.replace(/^\d+\.\s+(.*)$/gm, '<li class="agent-ol-item">$1</li>');
+
+  processed = processed.replace(/(<li class="agent-ol-item">[\s\S]*?<\/li>(\n|$))+/g, match => {
+    return `<ol class="agent-ol">${match.replace(/ class="agent-ol-item"/g, '')}</ol>`;
+  });
+  processed = processed.replace(/(<li>[\s\S]*?<\/li>(\n|$))+/g, '<ul class="agent-ul">$&</ul>');
+
+  // 9. Tables
+  processed = processed.replace(/((?:\|[^\n]+\|\r?\n)+)/g, (tableBlock) => {
+    const rows = tableBlock.trim().split('\n').map(r => r.trim()).filter(Boolean);
+    if (rows.length >= 2 && rows.some(r => /\|[\s\-:]+\|\s*/.test(r))) {
+      let html = '<div class="agent-table-wrapper"><table class="agent-table">';
+      let isHeader = true;
+      for (const row of rows) {
+        if (/^\|[\s\-:|]+\|$/.test(row)) {
+          isHeader = false;
+          continue;
+        }
+        const cells = row.split('|').slice(1, -1).map(c => c.trim());
+        if (cells.length === 0) continue;
+        html += '<tr>';
+        const tag = isHeader ? 'th' : 'td';
+        for (const cell of cells) {
+          html += `<${tag}>${cell}</${tag}>`;
+        }
+        html += '</tr>';
+      }
+      html += '</table></div>';
+      return html;
+    }
+    return tableBlock;
+  });
+
+  // 10. Paragraphs
+  const blocks = processed.split(/\n{2,}/);
+  processed = blocks.map(block => {
+    block = block.trim();
+    if (!block) return '';
+    if (/^<(h[1-6]|ul|ol|table|div|blockquote|hr|pre)/.test(block)) {
+      return block;
+    }
+    return `<p class="agent-p">${block.replace(/\n/g, '<br>')}</p>`;
+  }).join('\n');
+
+  // 11. Restore Code blocks
+  codePlaceholders.forEach((item, idx) => {
+    const escaped = escapeHtml(item.code);
+    const langLabel = escapeHtml(item.lang || 'code');
+    const codeHtml = `<pre class="agent-code-block"><div class="agent-code-header"><span>${langLabel}</span><button type="button" class="agent-code-copy-btn" onclick="navigator.clipboard.writeText(this.closest('.agent-code-block').querySelector('code').innerText); toast('已複製代碼');">複製</button></div><code>${escaped}</code></pre>`;
+    processed = processed.replace(`%%CODEBLOCK${idx}%%`, codeHtml);
+  });
+
+  // 12. Restore Math tokens
+  mathPlaceholders.forEach((math, idx) => {
+    processed = processed.replace(`%%MATHBLOCK${idx}%%`, math);
+  });
+
+  return processed;
 }
 
 function wrapSvgText(text, maxLineChars = 8) {
@@ -1571,6 +2015,75 @@ function formatMarkdown(text) {
   return safe;
 }
 
+let patchDeckTimeout = null;
+function syncDeckEdits(showToast = false) {
+  if (!state.deck) return;
+  saveWorkspaceStateToStorage();
+  const statusEl = $('#notesSyncStatus');
+  if (statusEl) {
+    statusEl.textContent = '💾 儲存中...';
+    statusEl.className = 'edit-sync-indicator saving';
+  }
+  clearTimeout(patchDeckTimeout);
+  patchDeckTimeout = setTimeout(async () => {
+    try {
+      await api(`/api/decks/${state.deck.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: state.deck.title,
+          subtitle: state.deck.subtitle,
+          slides: state.deck.slides
+        })
+      });
+      if (statusEl) {
+        statusEl.textContent = '✓ 已同步儲存';
+        statusEl.className = 'edit-sync-indicator saved';
+      }
+      if (showToast) toast('簡報修改內容已同步');
+    } catch (err) {
+      if (statusEl) {
+        statusEl.textContent = '⚠️ 儲存失敗';
+        statusEl.className = 'edit-sync-indicator';
+      }
+    }
+  }, 500);
+}
+
+async function refineActiveSlideNotes() {
+  if (!state.deck || state.activeSlide === undefined) return;
+  const btn = $('#refineNotesBtn');
+  const spinner = btn ? btn.querySelector('.btn-inline-spinner') : null;
+  const lbl = btn ? btn.querySelector('.btn-lbl') : null;
+  const slideIndex = state.activeSlide;
+
+  if (btn) btn.disabled = true;
+  if (spinner) spinner.classList.remove('hidden');
+  if (lbl) lbl.textContent = '✨ AI 潤飾中...';
+
+  try {
+    const res = await api(`/api/decks/${state.deck.id}/slides/${slideIndex}/refine`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ instruction: '潤飾講稿與要點，使口語表達更自然、生動且具啟發性' })
+    });
+    if (res && res.slide) {
+      state.deck.slides[slideIndex] = res.slide;
+      showSlide(slideIndex);
+      toast('✨ 投影片講稿潤飾完成！(消耗 3 點)');
+      await fetchCurrentUser();
+    }
+  } catch (err) {
+    toast(err.message || '講稿潤飾失敗', true);
+  } finally {
+    if (btn) btn.disabled = false;
+    if (spinner) spinner.classList.add('hidden');
+    if (lbl) lbl.textContent = '✨ AI 講稿潤飾 (3 點)';
+  }
+}
+
+$('#refineNotesBtn')?.addEventListener('click', () => refineActiveSlideNotes());
+
 function showSlide(index) {
   state.activeSlide = index;
   const s = state.deck.slides[index];
@@ -1588,16 +2101,44 @@ function showSlide(index) {
 
   $('#slideStage').innerHTML = `
     <div class="slide-header-wrap">
-      <h2><span class="slide-title-icon">${escapeHtml(iconStr)}</span> ${escapeHtml(s.title)}</h2>
+      <h2><span class="slide-title-icon">${escapeHtml(iconStr)}</span> <span class="slide-title-editable" contenteditable="true" spellcheck="false" title="點擊可直接修改投影片標題">${escapeHtml(s.title)}</span></h2>
     </div>
     <div class="slide-content-grid has-visual">
       <div class="slide-bullets-wrap">
-        <ul>${s.bullets.map(b => `<li>${formatMarkdown(b)}</li>`).join('')}</ul>
+        <ul>${s.bullets.map((b, bIdx) => `<li contenteditable="true" spellcheck="false" data-bullet-idx="${bIdx}" title="點擊可直接修改要點">${escapeHtml(b)}</li>`).join('')}</ul>
       </div>
       ${visualCardHtml}
     </div>
   `;
-  $('#speakerNotes').textContent = s.speaker_notes;
+
+  // 監聽標題與要點的即時手動修改
+  const titleEl = $('#slideStage .slide-title-editable');
+  if (titleEl) {
+    titleEl.addEventListener('input', () => {
+      s.title = titleEl.innerText.trim();
+      const thumbB = $(`.slide-thumb[data-index="${index}"] b`);
+      if (thumbB) thumbB.textContent = s.title;
+      syncDeckEdits();
+    });
+  }
+
+  $$('#slideStage li[data-bullet-idx]').forEach(li => {
+    li.addEventListener('input', () => {
+      const bIdx = parseInt(li.dataset.bulletIdx, 10);
+      s.bullets[bIdx] = li.innerText;
+      syncDeckEdits();
+    });
+  });
+
+  const notesEl = $('#speakerNotes');
+  if (notesEl) {
+    notesEl.textContent = s.speaker_notes;
+    notesEl.oninput = () => {
+      s.speaker_notes = notesEl.innerText;
+      syncDeckEdits();
+    };
+  }
+
   renderMath($('#slideStage'));
   renderMath($('#speakerNotes'));
   if (s.source_pages && s.source_pages.length) {
@@ -1607,14 +2148,43 @@ function showSlide(index) {
   }
 }
 
-function addUserMessage(text) { const el = document.createElement('div'); el.className = 'message user'; el.innerHTML = `<div>${escapeHtml(text)}</div>`; $('#messages').append(el); scrollMessages(); }
+function addUserMessage(text) {
+  const el = document.createElement('div');
+  el.className = 'message user';
+  el.innerHTML = `<div>${escapeHtml(text)}</div>`;
+  $('#messages').append(el);
+  scrollMessages();
+}
+
 function addAssistantMessage(data) {
-  const el = document.createElement('div'); el.className = 'message assistant'; const sources = data.sources.slice(0, 3).map(s => `<div class="source"><b>第 ${s.page} 頁</b><p>${escapeHtml(s.excerpt)}</p></div>`).join('');
-  const providerLabel = data.mode === 'gemini' ? 'Gemini' : (data.mode === 'openai' ? 'OpenAI' : 'Ollama');
-  const formattedAnswer = formatMarkdown(data.answer).replace(/\n/g, '<br>');
-  el.innerHTML = `<span class="bot-avatar">✦</span><div><p>${formattedAnswer}</p><div class="source-list"><span>回答依據 · ${providerLabel} RAG</span>${sources}</div></div>`; $('#messages').append(el); scrollMessages();
+  const el = document.createElement('div');
+  el.className = 'message assistant';
+  const isEn = state.lang === 'en';
+  const sources = data.sources && data.sources.length
+    ? data.sources.slice(0, 3).map(s => `<div class="source"><b>${isEn ? 'Page ' + s.page : '第 ' + s.page + ' 頁'}</b><p>${escapeHtml(s.excerpt)}</p></div>`).join('')
+    : '';
+  const providerLabel = data.mode === 'gemini' ? 'Gemini' : (data.mode === 'openai' ? 'OpenAI' : (data.mode === 'claude' ? 'Claude' : 'AI'));
+  const deptLabel = isEn ? '📖 Material Q&A' : '📖 教材助教';
+
+  el.innerHTML = `
+    <span class="bot-avatar">✦</span>
+    <div>
+      <div class="agent-msg-meta">
+        <span class="agent-dept-chip">${deptLabel}</span>
+        <span class="agent-skill-chip">⚡ ${providerLabel} Self-RAG</span>
+      </div>
+      <div class="agent-output-content">${renderMarkdownToHtml(data.answer)}</div>
+      ${sources ? `<div class="source-list"><span>${isEn ? 'Cited Sources · Page References' : '回答依據 · 教材來源頁碼'}</span>${sources}</div>` : ''}
+      <div class="agent-action-bar" style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+        <button type="button" class="agent-action-btn agent-copy-btn" data-copy="${escapeHtml(data.answer)}">${isEn ? '📋 Copy Answer' : '📋 複製回答'}</button>
+      </div>
+    </div>
+  `;
+  $('#messages').append(el);
+  scrollMessages();
   renderMath(el);
 }
+
 function scrollMessages() { const m = $('#messages'); m.scrollTop = m.scrollHeight }
 function escapeHtml(value) { const d = document.createElement('div'); d.textContent = value; return d.innerHTML }
 
@@ -1625,18 +2195,52 @@ $('#chatForm').addEventListener('submit', async e => {
     openAuthModal('login');
     return;
   }
-  const input = $('#questionInput'); const question = input.value.trim(); if (!question || !state.document) return; addUserMessage(question); input.value = ''; $('#sendBtn').disabled = true;
+  const input = $('#questionInput');
+  const question = input.value.trim();
+  if (!question || !state.document) return;
+  addUserMessage(question);
+  input.value = '';
+  $('#sendBtn').disabled = true;
+
   const enable_web_search = $('#qaWebSearch') ? $('#qaWebSearch').checked : false;
-  const typing = document.createElement('div'); typing.className = 'message assistant'; typing.innerHTML = '<span class="bot-avatar">✦</span><div><p>正在檢索教材與分析中…</p></div>'; $('#messages').append(typing); scrollMessages();
+  const isEn = state.lang === 'en';
+  const typing = document.createElement('div');
+  typing.className = 'message assistant loading-turn';
+  typing.innerHTML = `
+    <span class="bot-avatar">✦</span>
+    <div>
+      <div class="agent-msg-meta">
+        <span class="agent-dept-chip">${isEn ? '📖 Material Q&A' : '📖 教材助教'}</span>
+      </div>
+      <div class="agent-loading-dots">
+        <span></span><span></span><span></span>
+      </div>
+      <p style="font-size: 12px; color: var(--muted); margin: 4px 0 0 0;">${isEn ? 'Searching document chunks & citations...' : '正在檢索教材與精準溯源分析中…'}</p>
+    </div>
+  `;
+  $('#messages').append(typing);
+  scrollMessages();
+
   try {
     const data = await api('/api/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ document_id: state.document.id, question, enable_web_search }) });
     typing.remove();
     addAssistantMessage(data);
     await fetchCurrentUser();
-  } catch (err) { typing.remove(); toast(err.message, true) } finally { $('#sendBtn').disabled = false }
+  } catch (err) {
+    typing.remove();
+    toast(err.message, true);
+  } finally {
+    $('#sendBtn').disabled = false;
+  }
 });
+
 $('#questionInput').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('#chatForm').requestSubmit() } });
-$$('#workspace .suggestions button').forEach(btn => btn.addEventListener('click', () => { if (!state.document) return toast('請先上傳教材', true); $('#questionInput').value = btn.textContent; $('#chatForm').requestSubmit() }));
+$$('#chatView .suggestions button, .chat-sug-btn').forEach(btn => btn.addEventListener('click', () => {
+  if (!state.document) return toast(state.lang === 'en' ? 'Please upload material first' : '請先上傳教材', true);
+  const q = btn.dataset.query || btn.textContent.replace(/^[🎓📝🚀📋💡]\s*/, '').trim();
+  $('#questionInput').value = q;
+  $('#chatForm').requestSubmit();
+}));
 $('#pptDownload').addEventListener('click', () => toast('正在下載 PowerPoint 簡報'));
 $('#scriptDownload').addEventListener('click', () => toast('正在下載逐頁演講稿'));
 
@@ -1687,6 +2291,7 @@ $('#providerSelect')?.addEventListener('change', async (e) => {
 });
 
 fetchCurrentUser();
+loadWorkspaceStateFromStorage();
 
 
 
@@ -2231,6 +2836,45 @@ const DEPT_WELCOME_CONFIGS = {
   }
 };
 
+function updateAgentDeptBar(deptKey) {
+  const isEn = state.lang === 'en';
+  const deptLabels = {
+    academic: isEn ? '🎓 Academic & Teaching (Lesson Flow Tutor)' : '🎓 教務教學部（Lesson Flow 小老師）',
+    marketing: isEn ? '🚀 Marketing & Sales (Marketing Lead)' : '🚀 市場與營銷部（營銷推廣負責人）',
+    operations: isEn ? '🏫 Operations & Admin (Ops Admin)' : '🏫 營運與行政部（教務行政特助）',
+    devops: isEn ? '🛠️ DevOps & Infra (DevOps Engineer)' : '🛠️ 技術維護部（技術維護工程師）'
+  };
+  const titleEl = $('#agentDeptBarTitle');
+  if (titleEl) {
+    titleEl.textContent = deptLabels[deptKey] || (isEn ? '🌐 Omni-Routing Mode' : '🌐 全域智慧導航模式');
+  }
+  $$('.dept-switch-chip').forEach(chip => {
+    chip.classList.toggle('active', chip.dataset.dept === deptKey);
+  });
+}
+
+function toggleAgentDeptDrawer(collapse) {
+  const drawer = $('#agentDeptDrawer');
+  const bar = $('#agentDeptBar');
+  const toggleBtn = $('#agentDeptToggleBtn');
+  const toggleText = $('#agentDeptToggleText');
+  const toggleIcon = toggleBtn?.querySelector('.toggle-icon');
+  if (!drawer || !bar) return;
+
+  const willCollapse = collapse !== undefined ? collapse : !drawer.classList.contains('collapsed');
+  if (willCollapse) {
+    drawer.classList.add('collapsed');
+    bar.classList.remove('hidden');
+    if (toggleText) toggleText.textContent = t('agent.toggle_expand');
+    if (toggleIcon) toggleIcon.textContent = '▼';
+  } else {
+    drawer.classList.remove('collapsed');
+    bar.classList.add('hidden');
+    if (toggleText) toggleText.textContent = t('agent.toggle_collapse');
+    if (toggleIcon) toggleIcon.textContent = '▲';
+  }
+}
+
 function switchAgentDeptWelcome(deptKey) {
   const lang = state.lang || 'zh-TW';
   const container = $('#agentMessages');
@@ -2239,6 +2883,7 @@ function switchAgentDeptWelcome(deptKey) {
   if (state.activeDept === deptKey) {
     state.activeDept = null;
     renderDeptActiveIndicators();
+    updateAgentDeptBar(null);
 
     if (container) {
       const sysMsgEl = document.createElement('div');
@@ -2266,6 +2911,7 @@ function switchAgentDeptWelcome(deptKey) {
   // 否則，鎖定指定部門
   state.activeDept = deptKey;
   renderDeptActiveIndicators();
+  updateAgentDeptBar(deptKey);
   const cfg = DEPT_WELCOME_CONFIGS[deptKey] || DEPT_WELCOME_CONFIGS.academic;
   if (!container) return;
 
@@ -2307,6 +2953,32 @@ document.addEventListener('click', (e) => {
   if (deptBtn && deptBtn.dataset.dept) {
     if (deptBtn.disabled) return;
     switchAgentDeptWelcome(deptBtn.dataset.dept);
+    toggleAgentDeptDrawer(true);
+  }
+
+  const switchChip = e.target.closest('.dept-switch-chip');
+  if (switchChip && switchChip.dataset.dept) {
+    switchAgentDeptWelcome(switchChip.dataset.dept);
+  }
+
+  const deptToggleBtn = e.target.closest('#agentDeptToggleBtn');
+  if (deptToggleBtn) {
+    toggleAgentDeptDrawer();
+  }
+
+  const deptExpandBtn = e.target.closest('#agentDeptExpandBtn');
+  if (deptExpandBtn) {
+    toggleAgentDeptDrawer(false);
+  }
+
+  const topbarCollapse = e.target.closest('#topbarCollapseBtn');
+  if (topbarCollapse) {
+    toggleTopbar(true);
+  }
+
+  const topbarRestore = e.target.closest('#topbarRestoreBtn');
+  if (topbarRestore) {
+    toggleTopbar(false);
   }
 
   const btn = e.target.closest('.agent-sug-btn, .skill-chip-btn');
@@ -2361,6 +3033,9 @@ async function dispatchAgentTask(query) {
     openAuthModal('login');
     return;
   }
+
+  // 進入對話自動收合卡片，釋放最大的垂直視窗空間
+  toggleAgentDeptDrawer(true);
 
   if (!state.agentHistory) state.agentHistory = [];
 
@@ -2425,7 +3100,7 @@ async function dispatchAgentTask(query) {
     };
     const deptLabel = deptLabels[dept] || (isEn ? `🎯 Dept: ${dept}` : `🎯 部門: ${dept}`);
 
-    // 3. Replace Loading with Final Assistant Response Bubble
+    // 3. Replace Loading with Final Assistant Response Bubble (Rendered with Markdown & Math)
     const showPptxBtn = (dept === 'ACADEMIC' || dept === 'GENERAL');
     assistantMsgEl.innerHTML = `
       <span class="bot-avatar">✦</span>
@@ -2434,8 +3109,8 @@ async function dispatchAgentTask(query) {
           <span class="agent-dept-chip">${deptLabel}</span>
           <span class="agent-skill-chip">⚡ Skill: ${skill}</span>
         </div>
-        <p class="agent-output-text" style="white-space: pre-wrap; font-family: inherit;">${escapeHtml(text)}</p>
-        <div class="agent-action-bar" style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
+        <div class="agent-output-content">${renderMarkdownToHtml(text)}</div>
+        <div class="agent-action-bar" style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
           <button type="button" class="agent-action-btn agent-copy-btn" data-copy="${escapeHtml(text)}">${isEn ? '📋 Copy Content' : '📋 複製內容'}</button>
           ${showPptxBtn ? `<button type="button" class="agent-action-btn agent-pptx-btn" data-query="${escapeHtml(query)}">${isEn ? '📄 Import to Material Parsing' : '📄 導入教材解析'}</button>` : ''}
         </div>
@@ -2551,5 +3226,913 @@ document.addEventListener('click', async (e) => {
     return;
   }
 });
+
+// === 3合1 Workspace 並行生成與模組處理邏輯 ===
+
+function setBtnLoading(btn, isLoading, originalHtml) {
+  if (!btn) return;
+  if (isLoading) {
+    btn.dataset.origHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<span class="btn-inline-spinner"></span> ${state.lang === 'en' ? 'Generating...' : '生成中...'}`;
+  } else {
+    btn.disabled = false;
+    btn.innerHTML = btn.dataset.origHtml || originalHtml;
+  }
+}
+
+function updateModuleStatusChip(chipId, status, text, onClick) {
+  const chip = $(`#${chipId}`);
+  if (!chip) return;
+  chip.className = `module-status-chip ${status}`;
+  chip.textContent = text;
+  chip.onclick = onClick || null;
+}
+
+function getHandoutTextForContext() {
+  if (!state.handout) return null;
+  const h = state.handout;
+  let text = `# ${h.title || '教學講義'}\n${h.subtitle || ''}\n\n## 課程總覽\n${h.overview || ''}\n\n`;
+  if (Array.isArray(h.sections)) {
+    h.sections.forEach((s, idx) => {
+      text += `### 第 ${idx + 1} 節：${s.title || ''}\n${s.summary || ''}\n`;
+      if (Array.isArray(s.key_points)) {
+        text += s.key_points.map(kp => `- ${kp}`).join('\n') + '\n';
+      }
+      text += '\n';
+    });
+  }
+  if (Array.isArray(h.key_takeaways)) {
+    text += `## 核心總結\n` + h.key_takeaways.map(t => `- ${t}`).join('\n') + '\n';
+  }
+  return text.trim();
+}
+
+// 1. 教學簡報 (Deck) 生成 Action
+async function generateDeckAction(silent = false) {
+  if (!state.user) {
+    toast(state.lang === 'en' ? 'Please log in first' : '請先登入帳號', true);
+    openAuthModal('login');
+    return false;
+  }
+  if (!state.document) {
+    toast(state.lang === 'en' ? 'Please upload a material first' : '請先上傳教材', true);
+    return false;
+  }
+
+  const btn = $('#generateBtn');
+  setBtnLoading(btn, true);
+  updateModuleStatusChip(
+    'deckStatusChip',
+    'running',
+    state.lang === 'en' ? 'Generating deck...' : '簡報生成中...'
+  );
+
+  const handoutText = getHandoutTextForContext();
+  const payload = {
+    document_id: state.document.id,
+    audience: $('#audience') ? $('#audience').value : '一般大眾/初學者',
+    tone: $('#tone') ? $('#tone').value : '專業嚴謹',
+    language: $('#targetLanguage') ? $('#targetLanguage').value : 'auto',
+    duration: +($('#duration')?.value || 30),
+    slide_count: +($('#slideCount')?.value || 8),
+    enable_web_search: $('#deckWebSearch') ? $('#deckWebSearch').checked : false,
+    handout_text: handoutText || undefined,
+  };
+
+  try {
+    const deck = await api('/api/decks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    state.deck = deck;
+    saveWorkspaceStateToStorage();
+    renderDeck();
+    updatePreviewCountBadge();
+    $$('.step')[1]?.classList.add('done');
+    $$('.step')[2]?.classList.add('active', 'done');
+    await fetchCurrentUser();
+
+    updateModuleStatusChip(
+      'deckStatusChip',
+      'success',
+      state.lang === 'en' ? '✓ Deck Ready (Click to View)' : '✓ 簡報已就緒 (點擊查看)',
+      () => { switchView('deck'); switchPreviewTab('deck'); }
+    );
+
+    if (!silent) {
+      toast(state.lang === 'en' ? 'Deck and speaker notes are ready!' : '簡報與逐頁講稿已經準備好了');
+      switchView('deck');
+      switchPreviewTab('deck');
+    }
+    return true;
+  } catch (err) {
+    updateModuleStatusChip(
+      'deckStatusChip',
+      'error',
+      state.lang === 'en' ? '✗ Deck generation failed' : '✗ 簡報生成失敗'
+    );
+    await fetchCurrentUser();
+    toast(err.message || (state.lang === 'en' ? 'Deck generation failed' : '簡報生成失敗'), true);
+    return false;
+  } finally {
+    setBtnLoading(btn, false);
+  }
+}
+
+// 2. 隨堂講義 (Handout) 生成 Action
+async function generateHandoutAction(silent = false) {
+  if (!state.user) {
+    toast(state.lang === 'en' ? 'Please log in first' : '請先登入帳號', true);
+    openAuthModal('login');
+    return false;
+  }
+  if (!state.document) {
+    toast(state.lang === 'en' ? 'Please upload a material first' : '請先上傳教材', true);
+    return false;
+  }
+
+  const btn = $('#generateHandoutBtn');
+  setBtnLoading(btn, true);
+  updateModuleStatusChip(
+    'handoutStatusChip',
+    'running',
+    state.lang === 'en' ? 'Generating handout...' : '講義生成中...'
+  );
+
+  const audience = $('#audience') ? $('#audience').value : '一般大眾/初學者';
+  const detail_level = $('#handoutDetail') ? $('#handoutDetail').value : 'standard';
+  const enable_web_search = $('#handoutWebSearch') ? $('#handoutWebSearch').checked : false;
+
+  try {
+    const handout = await api('/api/handouts/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        document_id: state.document.id,
+        audience,
+        detail_level,
+        enable_web_search,
+      })
+    });
+    state.handout = handout;
+    saveWorkspaceStateToStorage();
+    updatePreviewCountBadge();
+    await fetchCurrentUser();
+    renderHandoutPreview();
+
+    updateModuleStatusChip(
+      'handoutStatusChip',
+      'success',
+      state.lang === 'en' ? '✓ Handout Ready (Click to View)' : '✓ 講義已就緒 (點擊查看)',
+      () => { switchView('deck'); switchPreviewTab('handout'); }
+    );
+
+    if (!silent) {
+      toast(state.lang === 'en' ? 'A4 Handout generated successfully!' : '隨堂講義已生成完畢！');
+      switchView('deck');
+      switchPreviewTab('handout');
+    }
+    return true;
+  } catch (err) {
+    updateModuleStatusChip(
+      'handoutStatusChip',
+      'error',
+      state.lang === 'en' ? '✗ Handout generation failed' : '✗ 講義生成失敗'
+    );
+    await fetchCurrentUser();
+    toast(err.message || (state.lang === 'en' ? 'Handout generation failed' : '講義生成失敗'), true);
+    return false;
+  } finally {
+    setBtnLoading(btn, false);
+  }
+}
+
+// 3. 單元試卷 (Quiz) 生成 Action
+async function generateQuizAction(silent = false) {
+  if (!state.user) {
+    toast(state.lang === 'en' ? 'Please log in first' : '請先登入帳號', true);
+    openAuthModal('login');
+    return false;
+  }
+  if (!state.document) {
+    toast(state.lang === 'en' ? 'Please upload a material first' : '請先上傳教材', true);
+    return false;
+  }
+
+  const btn = $('#generateQuizBtn');
+  setBtnLoading(btn, true);
+  updateModuleStatusChip(
+    'quizStatusChip',
+    'running',
+    state.lang === 'en' ? 'Generating quiz...' : '試卷生成中...'
+  );
+
+  const question_count = +($('#quizCount')?.value || 5);
+  const difficulty = $('#quizDifficulty')?.value || 'all';
+  const enable_web_search = $('#quizWebSearch') ? $('#quizWebSearch').checked : false;
+  const handoutText = getHandoutTextForContext();
+
+  try {
+    const quiz = await api('/api/quiz/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        document_id: state.document.id,
+        question_count,
+        difficulty,
+        enable_web_search,
+        handout_text: handoutText || undefined,
+      })
+    });
+    state.quiz = quiz;
+    saveWorkspaceStateToStorage();
+    updatePreviewCountBadge();
+    await fetchCurrentUser();
+    renderQuizPreview();
+
+    updateModuleStatusChip(
+      'quizStatusChip',
+      'success',
+      state.lang === 'en' ? '✓ Quiz Ready (Click to View)' : '✓ 試卷已就緒 (點擊查看)',
+      () => { switchView('deck'); switchPreviewTab('quiz'); }
+    );
+
+    if (!silent) {
+      toast(state.lang === 'en' ? 'Unit Quiz generated successfully!' : '單元試卷已出題完畢！');
+      switchView('deck');
+      switchPreviewTab('quiz');
+    }
+    return true;
+  } catch (err) {
+    updateModuleStatusChip(
+      'quizStatusChip',
+      'error',
+      state.lang === 'en' ? '✗ Quiz generation failed' : '✗ 試卷生成失敗'
+    );
+    await fetchCurrentUser();
+    toast(err.message || (state.lang === 'en' ? 'Quiz generation failed' : '試卷生成失敗'), true);
+    return false;
+  } finally {
+    setBtnLoading(btn, false);
+  }
+}
+
+// 4. 一鍵全部生成 (方案 B：以講義為母本，串接簡報與試卷衍生)
+async function generateAllAction() {
+  if (!state.user) {
+    toast(state.lang === 'en' ? 'Please log in first' : '請先登入帳號', true);
+    openAuthModal('login');
+    return;
+  }
+  if (!state.document) {
+    toast(state.lang === 'en' ? 'Please upload a material first' : '請先上傳教材', true);
+    return;
+  }
+
+  const allBtn = $('#generateAllBtn');
+  setBtnLoading(allBtn, true);
+
+  toast(state.lang === 'en' ? 'Generating A4 Handout Master...' : '正在生成 A4 隨堂講義母本...');
+
+  try {
+    // 步驟 1：先生成 A4 隨堂講義作為母本
+    const handoutSuccess = await generateHandoutAction(true);
+
+    toast(state.lang === 'en' ? 'Deriving Deck and Quiz from Handout Master...' : '正在依據講義母本生成教學簡報與單元試卷...');
+
+    // 步驟 2：由講義母本並行衍生簡報與試卷 (雙軌融合，極低 Token 消耗)
+    const results = await Promise.allSettled([
+      generateDeckAction(true),
+      generateQuizAction(true),
+    ]);
+
+    const deckSuccess = results[0].status === 'fulfilled' && results[0].value === true;
+    const quizSuccess = results[1].status === 'fulfilled' && results[1].value === true;
+
+    if (handoutSuccess && deckSuccess && quizSuccess) {
+      toast(state.lang === 'en' ? 'All 3 modules generated successfully! Check in Outputs & Preview.' : '簡報、講義與試卷全套生成完畢！請至產出預覽查看。');
+      switchView('deck');
+      switchPreviewTab('deck');
+    } else {
+      const count = (handoutSuccess ? 1 : 0) + (deckSuccess ? 1 : 0) + (quizSuccess ? 1 : 0);
+      toast(state.lang === 'en' ? `Generated ${count}/3 items. Check module statuses.` : `已完成 ${count}/3 項生成，請查看各模組狀態。`);
+    }
+  } finally {
+    setBtnLoading(allBtn, false);
+  }
+}
+
+// 綁定獨立按鈕與一鍵生成按鈕
+$('#generateHandoutBtn')?.addEventListener('click', () => generateHandoutAction());
+$('#generateQuizBtn')?.addEventListener('click', () => generateQuizAction());
+$('#generateAllBtn')?.addEventListener('click', () => generateAllAction());
+
+// === 產出預覽中心 Sub-tabs 切換與渲染 ===
+function switchPreviewTab(tabName) {
+  const tabs = ['deck', 'handout', 'quiz'];
+  tabs.forEach(t => {
+    const btn = $(`[data-preview-tab="${t}"]`);
+    const panel = $(`#preview${t.charAt(0).toUpperCase() + t.slice(1)}Panel`);
+    const actions = $(`#${t}DownloadActions`);
+    if (btn) btn.classList.toggle('active', t === tabName);
+    if (panel) panel.classList.toggle('hidden', t !== tabName);
+    if (actions) actions.classList.toggle('hidden', t !== tabName);
+  });
+
+  if (tabName === 'deck') renderDeck();
+  if (tabName === 'handout') renderHandoutPreview();
+  if (tabName === 'quiz') renderQuizPreview();
+}
+
+$$('.preview-tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.previewTab;
+    if (tab) switchPreviewTab(tab);
+  });
+});
+
+function updatePreviewCountBadge() {
+  const el = $('#deckCount');
+  if (!el) return;
+  let count = 0;
+  if (state.deck) count++;
+  if (state.handout) count++;
+  if (state.quiz) count++;
+  el.textContent = String(count);
+}
+
+function renderPreviewPanels() {
+  renderDeck();
+  renderHandoutPreview();
+  renderQuizPreview();
+  updatePreviewCountBadge();
+}
+
+let patchHandoutTimeout = null;
+function syncHandoutEdits() {
+  if (!state.handout) return;
+  saveWorkspaceStateToStorage();
+  clearTimeout(patchHandoutTimeout);
+  patchHandoutTimeout = setTimeout(async () => {
+    try {
+      await api(`/api/handouts/${state.handout.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: state.handout.title,
+          subtitle: state.handout.subtitle,
+          overview: state.handout.overview,
+          sections: state.handout.sections,
+          key_takeaways: state.handout.key_takeaways
+        })
+      });
+    } catch (err) {
+      console.warn('Handout sync failed:', err);
+    }
+  }, 500);
+}
+
+let patchQuizTimeout = null;
+function syncQuizEdits() {
+  if (!state.quiz) return;
+  saveWorkspaceStateToStorage();
+  clearTimeout(patchQuizTimeout);
+  patchQuizTimeout = setTimeout(async () => {
+    try {
+      await api(`/api/quiz/${state.quiz.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: state.quiz.title,
+          description: state.quiz.description,
+          questions: state.quiz.questions
+        })
+      });
+    } catch (err) {
+      console.warn('Quiz sync failed:', err);
+    }
+  }, 500);
+}
+
+async function regenerateSingleQuizQuestion(qIndex, targetBtn) {
+  if (!state.quiz || !state.quiz.questions || !state.quiz.questions[qIndex]) return;
+  const isEn = state.lang === 'en';
+  if (targetBtn) {
+    targetBtn.disabled = true;
+    targetBtn.textContent = isEn ? '🔄 Replacing...' : '🔄 換題中...';
+  }
+  try {
+    const res = await api(`/api/quiz/${state.quiz.id}/questions/${qIndex}/regenerate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        instruction: '抽換為同概念但不同情境題型之高品質新試題',
+        current_question: state.quiz.questions[qIndex],
+        quiz: state.quiz,
+        difficulty: state.quiz.questions[qIndex].difficulty || 'medium',
+        language: state.quiz.language || state.lang || 'zh-TW'
+      })
+    });
+    if (res && res.question) {
+      state.quiz.questions[qIndex] = res.question;
+      renderQuizPreview();
+      if ($('#quizModal') && !$('#quizModal').classList.contains('hidden')) {
+        renderQuizModal(state.quiz);
+      }
+      toast(isEn ? '🔄 Question replaced with a fresh new item! (-3 pts)' : '🔄 題目已成功抽換為全新試題！(消耗 3 點)');
+      await fetchCurrentUser();
+    }
+  } catch (err) {
+    toast(err.message || (isEn ? 'Failed to replace question' : '抽換題目失敗'), true);
+  } finally {
+    if (targetBtn) {
+      targetBtn.disabled = false;
+      targetBtn.textContent = isEn ? '🔄 Replace (3 pts)' : '🔄 換這題 (3 點)';
+    }
+  }
+}
+
+function wrapBareLatex(text) {
+  if (!text || typeof text !== 'string' || !text.includes('\\')) return text;
+  const parts = text.split(/(\$\$[\s\S]*?\$\$|\$[^$\n]+?\$|\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\))/g);
+  const cmdPattern = /(\\(?:vec|frac|sqrt|alpha|beta|gamma|delta|Delta|lambda|Lambda|theta|Theta|omega|Omega|sigma|Sigma|pi|Pi|sum|int|partial|infty|times|cdot|approx|pm|le|ge|neq|equiv|rightarrow|leftarrow|mathbf|mathrm|text|left|right|quad)\b[^\n,，。！？；;]*?(?=[,，。！？；;\s]|$))/g;
+  return parts.map((part, idx) => {
+    if (idx % 2 === 1) return part;
+    return part.replace(cmdPattern, (m) => {
+      const s = m.trim();
+      return s.startsWith('$') ? s : `$${s}$`;
+    });
+  }).join('');
+}
+
+function formatInlineMarkdown(text) {
+  if (!text) return '';
+  text = wrapBareLatex(String(text));
+  const mathTokens = [];
+  let processed = text.replace(/(\$\$[\s\S]*?\$\$|\$[^$\n]+?\$|\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\))/g, (m) => {
+    const ph = `%%INLINEMATH${mathTokens.length}%%`;
+    mathTokens.push(m);
+    return ph;
+  });
+  processed = escapeHtml(processed);
+  processed = processed.replace(/\*\*([^\*\n]+?)\*\*/g, '<strong>$1</strong>');
+  processed = processed.replace(/__([^_\n]+?)__/g, '<strong>$1</strong>');
+  processed = processed.replace(/(?<!\*)\*([^\*\n]+?)\*(?!\*)/g, '<em>$1</em>');
+  processed = processed.replace(/`([^`\n]+?)`/g, '<code style="background:rgba(0,0,0,0.06);padding:2px 4px;border-radius:4px;font-family:monospace;">$1</code>');
+  mathTokens.forEach((m, idx) => {
+    processed = processed.replace(`%%INLINEMATH${idx}%%`, m);
+  });
+  return processed;
+}
+
+// 渲染 A4 講義預覽
+function renderHandoutPreview() {
+  const container = $('#previewHandoutContainer');
+  if (!container) return;
+  const isEn = state.lang === 'en';
+
+  if (!state.handout) {
+    container.innerHTML = `
+      <div class="preview-empty-state">
+        <span>📝</span>
+        <b>${isEn ? 'No Handout Generated Yet' : '尚未生成隨堂講義'}</b>
+        <small>${isEn ? 'Click "Generate A4 Handout" in Workspace to create one.' : '請在工作台點擊「📝 生成 A4 隨堂講義」或「🚀 一鍵生成全部項目」'}</small>
+        <button class="secondary-button" type="button" onclick="switchView('workspace')">${isEn ? '← Go to Workspace' : '← 前往工作台生成'}</button>
+      </div>
+    `;
+    if ($('#previewHandoutPrintBtn')) $('#previewHandoutPrintBtn').classList.add('disabled');
+    if ($('#previewHandoutMdBtn')) $('#previewHandoutMdBtn').classList.add('disabled');
+    return;
+  }
+
+  const handout = state.handout;
+  if ($('#previewHandoutPrintBtn')) {
+    $('#previewHandoutPrintBtn').href = `/api/handouts/${handout.id}/html`;
+    $('#previewHandoutPrintBtn').classList.remove('disabled');
+  }
+  if ($('#previewHandoutMdBtn')) {
+    $('#previewHandoutMdBtn').href = `/api/handouts/${handout.id}/markdown`;
+    $('#previewHandoutMdBtn').classList.remove('disabled');
+  }
+
+  let sectionsHtml = '';
+  if (handout.sections && handout.sections.length) {
+    sectionsHtml = handout.sections.map((s, idx) => `
+      <div class="handout-section-card" style="margin-bottom: 20px; padding: 18px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #2563eb; border: 1px solid #e2e8f0; border-left-width: 4px;">
+        <h3 style="font-size: 16px; font-weight: 700; color: #1e3a8a; margin: 0 0 10px 0;">§ ${idx + 1}. <span contenteditable="true" spellcheck="false" data-h-sec-title="${idx}" title="點擊直接修改章節標題">${formatInlineMarkdown(s.title)}</span></h3>
+        <p style="margin: 0 0 8px 0; color: #334155; font-size: 14px;"><b>${isEn ? 'Summary: ' : '✦ 概念摘要：'}</b><span contenteditable="true" spellcheck="false" data-h-sec-sum="${idx}" title="點擊直接修改摘要">${formatInlineMarkdown(s.summary || s.core_concept || '')}</span></p>
+        <p style="margin: 0 0 12px 0; color: #475569; font-size: 13.5px; line-height: 1.7;"><span contenteditable="true" spellcheck="false" data-h-sec-exp="${idx}" title="點擊直接修改說明">${formatInlineMarkdown(s.detailed_explanation || '')}</span></p>
+        ${(s.key_points && s.key_points.length) || (s.key_takeaways && s.key_takeaways.length) ? `
+          <div style="background: #eff6ff; padding: 10px 14px; border-radius: 6px; font-size: 13px; color: #1e40af; border: 1px solid #dbeafe;">
+            <b>${isEn ? 'Key Takeaways:' : '📌 重點整理：'}</b>
+            <ul style="margin: 6px 0 0 18px; padding: 0;">
+              ${(s.key_points || s.key_takeaways || []).map((k, kIdx) => `<li contenteditable="true" spellcheck="false" data-h-sec-kp="${idx}_${kIdx}">${formatInlineMarkdown(k)}</li>`).join('')}
+            </ul>
+          </div>
+        ` : ''}
+        ${s.source_pages && s.source_pages.length ? `<small style="display: block; margin-top: 8px; color: #94a3b8;">${isEn ? 'Source Page: ' : '教材頁碼：'}${s.source_pages.join(', ')}</small>` : ''}
+      </div>
+    `).join('');
+  }
+
+  container.innerHTML = `
+    <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #e2e8f0;">
+      <h2 style="font-size: 22px; font-weight: 800; color: var(--green); margin: 0 0 6px 0;" contenteditable="true" spellcheck="false" id="handoutPreviewTitle" title="點擊直接修改標題">${formatInlineMarkdown(handout.title || (isEn ? 'Lesson Handout' : '隨堂講義'))}</h2>
+      <p style="margin: 0; color: #64748b; font-size: 13px;">${formatInlineMarkdown(handout.subtitle || '')} · ${isEn ? 'Target: ' : '適用對象：'}${escapeHtml(handout.target_audience || '')}</p>
+    </div>
+    ${handout.overview || handout.overall_summary ? `
+      <div style="margin-bottom: 20px; padding: 14px 16px; background: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0; color: #166534;">
+        <b style="font-size: 14px;">${isEn ? 'Course Summary: ' : '📖 課程整體導讀：'}</b>
+        <p style="margin: 6px 0 0 0; font-size: 13.5px; line-height: 1.6;" contenteditable="true" spellcheck="false" id="handoutPreviewOverview" title="點擊直接修改導讀">${formatInlineMarkdown(handout.overview || handout.overall_summary || '')}</p>
+      </div>
+    ` : ''}
+    ${sectionsHtml}
+    ${handout.key_takeaways && handout.key_takeaways.length ? `
+      <div style="margin-top: 20px; padding: 14px 16px; background: #fffbeb; border-radius: 8px; border: 1px solid #fde68a; color: #92400e;">
+        <b style="font-size: 14px;">${isEn ? 'Core Takeaways: ' : '💡 核心總結與復習綱要：'}</b>
+        <ul style="margin: 6px 0 0 18px; padding: 0; font-size: 13.5px; line-height: 1.6;">
+          ${handout.key_takeaways.map((tip, tIdx) => `<li contenteditable="true" spellcheck="false" data-h-takeaway="${tIdx}">${formatInlineMarkdown(tip)}</li>`).join('')}
+        </ul>
+      </div>
+    ` : ''}
+  `;
+
+  // 監聽講義手動即時編輯
+  $('#handoutPreviewTitle')?.addEventListener('input', function() {
+    handout.title = this.innerText.trim();
+    syncHandoutEdits();
+  });
+  $('#handoutPreviewOverview')?.addEventListener('input', function() {
+    handout.overview = this.innerText;
+    syncHandoutEdits();
+  });
+  $$('[data-h-sec-title]').forEach(el => el.addEventListener('input', function() {
+    const sIdx = parseInt(this.dataset.hSecTitle, 10);
+    if (handout.sections[sIdx]) handout.sections[sIdx].title = this.innerText.trim();
+    syncHandoutEdits();
+  }));
+  $$('[data-h-sec-sum]').forEach(el => el.addEventListener('input', function() {
+    const sIdx = parseInt(this.dataset.hSecSum, 10);
+    if (handout.sections[sIdx]) {
+      handout.sections[sIdx].summary = this.innerText;
+      handout.sections[sIdx].core_concept = this.innerText;
+    }
+    syncHandoutEdits();
+  }));
+
+  renderMath(container);
+}
+
+// 渲染單元試卷預覽
+function renderQuizPreview() {
+  const container = $('#previewQuizContainer');
+  if (!container) return;
+  const isEn = state.lang === 'en';
+
+  if (!state.quiz) {
+    container.innerHTML = `
+      <div class="preview-empty-state">
+        <span>📑</span>
+        <b>${isEn ? 'No Quiz Sheet Generated Yet' : '尚未生成單元試卷'}</b>
+        <small>${isEn ? 'Click "Generate Unit Quiz" in Workspace to create one.' : '請在工作台點擊「📑 生成單元試卷」或「🚀 一鍵生成全部項目」'}</small>
+        <button class="secondary-button" type="button" onclick="switchView('workspace')">${isEn ? '← Go to Workspace' : '← 前往工作台生成'}</button>
+      </div>
+    `;
+    if ($('#previewQuizStudentBtn')) $('#previewQuizStudentBtn').classList.add('disabled');
+    if ($('#previewQuizTeacherBtn')) $('#previewQuizTeacherBtn').classList.add('disabled');
+    return;
+  }
+
+  const quiz = state.quiz;
+  if ($('#previewQuizStudentBtn')) {
+    $('#previewQuizStudentBtn').href = `/api/quiz/${quiz.id}/markdown?teacher=false`;
+    $('#previewQuizStudentBtn').classList.remove('disabled');
+  }
+  if ($('#previewQuizTeacherBtn')) {
+    $('#previewQuizTeacherBtn').href = `/api/quiz/${quiz.id}/markdown?teacher=true`;
+    $('#previewQuizTeacherBtn').classList.remove('disabled');
+  }
+
+  const showTeacher = $('#previewQuizTeacherToggle') ? $('#previewQuizTeacherToggle').checked : false;
+  const diffLabels = {
+    'easy': isEn ? 'Basic' : '基礎觀念',
+    'medium': isEn ? 'Moderate' : '中等理解',
+    'hard': isEn ? 'Advanced' : '進階論述'
+  };
+
+  container.innerHTML = `
+    <div style="margin-bottom: 20px; padding-bottom: 14px; border-bottom: 2px solid #e2e8f0;">
+      <h2 style="font-size: 22px; font-weight: 800; color: var(--green); margin: 0 0 6px 0;" contenteditable="true" spellcheck="false" id="quizPreviewTitle" title="點擊直接修改標題">${escapeHtml(quiz.title || (isEn ? 'Unit Quiz' : '單元試卷'))}</h2>
+      <p style="margin: 0; color: #64748b; font-size: 13px;">${escapeHtml(quiz.description || '')} · ${quiz.questions ? quiz.questions.length : 0} ${isEn ? 'Questions' : '題'}</p>
+    </div>
+    ${(quiz.questions || []).map((q, idx) => `
+      <div class="quiz-question-card" style="margin-bottom: 18px; padding: 16px; background: #ffffff; border-radius: 8px; border: 1px solid var(--line); border-left: 4px solid var(--green); box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px;">
+          <h4 style="font-size: 15px; font-weight: 700; color: var(--green); margin: 0; flex: 1;">
+            第 ${idx + 1} 題. <span contenteditable="true" spellcheck="false" data-q-text-idx="${idx}" title="點擊直接修改題目內容">${escapeHtml(q.question)}</span>
+          </h4>
+          <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+            <button type="button" class="btn-regen-question" data-qidx="${idx}" title="消耗 3 點備課點數抽換此題">🔄 換這題 (3 點)</button>
+            <span style="font-size: 11px; padding: 2px 8px; border-radius: 99px; background: #ecefe8; color: var(--green); border: 1px solid #dce1d9; font-weight: 600; white-space: nowrap;">
+              ${diffLabels[q.difficulty] || q.difficulty}
+            </span>
+          </div>
+        </div>
+        <div style="margin: 10px 0 12px 10px; display: grid; grid-template-columns: 1fr; gap: 8px;">
+          ${(q.options || []).map((opt, optIdx) => `
+            <div style="font-size: 13.5px; color: var(--ink); padding: 8px 12px; background: var(--card); border: 1px solid var(--line); border-radius: 6px;" contenteditable="true" spellcheck="false" data-q-opt-idx="${idx}_${optIdx}" title="點擊直接修改選項">
+              ${escapeHtml(opt)}
+            </div>
+          `).join('')}
+        </div>
+        <div class="preview-quiz-ans-block ${showTeacher ? '' : 'hidden'}" style="margin-top: 10px; padding: 12px 14px; background: #f4f7f4; border-radius: 6px; border: 1px solid #d1ded6; font-size: 13px; color: var(--green);">
+          <p style="margin: 0 0 4px 0; font-weight: 700;">${isEn ? 'Answer: ' : '【標準答案】'} <span contenteditable="true" spellcheck="false" data-q-ans-idx="${idx}">${escapeHtml(q.answer)}</span></p>
+          <p style="margin: 0; color: #2d5a4e;"><b>${isEn ? 'Explanation: ' : '【解析】'}</b><span contenteditable="true" spellcheck="false" data-q-exp-idx="${idx}" title="點擊直接修改解析">${escapeHtml(q.explanation)}</span></p>
+          ${q.source_pages && q.source_pages.length ? `<small style="display: block; margin-top: 6px; color: var(--muted);">${isEn ? 'Source Page: ' : '教材依據：第 '}${q.source_pages.join(', ')}${isEn ? '' : ' 頁'}</small>` : ''}
+        </div>
+      </div>
+    `).join('')}
+  `;
+
+  // 綁定抽換題目事件
+  $$('.btn-regen-question').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const qIdx = parseInt(btn.dataset.qidx, 10);
+      regenerateSingleQuizQuestion(qIdx, btn);
+    });
+  });
+
+  // 監聽題目手動即時編輯
+  $('#quizPreviewTitle')?.addEventListener('input', function() {
+    quiz.title = this.innerText.trim();
+    syncQuizEdits();
+  });
+  $$('[data-q-text-idx]').forEach(el => el.addEventListener('input', function() {
+    const qIdx = parseInt(this.dataset.qTextIdx, 10);
+    if (quiz.questions[qIdx]) quiz.questions[qIdx].question = this.innerText.trim();
+    syncQuizEdits();
+  }));
+  $$('[data-q-exp-idx]').forEach(el => el.addEventListener('input', function() {
+    const qIdx = parseInt(this.dataset.qExpIdx, 10);
+    if (quiz.questions[qIdx]) quiz.questions[qIdx].explanation = this.innerText;
+    syncQuizEdits();
+  }));
+
+  renderMath(container);
+}
+
+$('#previewQuizTeacherToggle')?.addEventListener('change', () => {
+  const isChecked = $('#previewQuizTeacherToggle').checked;
+  $$('.preview-quiz-ans-block').forEach(el => el.classList.toggle('hidden', !isChecked));
+});
+
+// 綁定簡報頁面捷徑按鈕
+$('#deckToQuizBtn')?.addEventListener('click', () => {
+  switchPreviewTab('quiz');
+});
+
+// === 隨堂講義 Modal 渲染與關閉 ===
+function renderHandoutModal(handout) {
+  if (!handout) return;
+  const isEn = state.lang === 'en';
+  if ($('#handoutModalTitle')) $('#handoutModalTitle').textContent = handout.title || (isEn ? 'Lesson Handout' : '隨堂講義');
+  if ($('#handoutModalSubtitle')) $('#handoutModalSubtitle').textContent = `${handout.subtitle || ''} · ${isEn ? 'Target: ' : '適用對象：'}${handout.target_audience || ''}`;
+
+  const bodyEl = $('#handoutModalBody');
+  if (bodyEl) {
+    let sectionsHtml = '';
+    if (handout.sections && handout.sections.length) {
+      sectionsHtml = handout.sections.map((s, idx) => `
+        <div class="handout-section-card" style="margin-bottom: 20px; padding: 14px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #2563eb;">
+          <h3 style="font-size: 16px; font-weight: 700; color: #1e3a8a; margin: 0 0 8px 0;">§ ${idx + 1}. ${escapeHtml(s.title)}</h3>
+          <p style="margin: 0 0 6px 0; color: #334155;"><b>${isEn ? 'Core Concept: ' : '✦ 核心概念：'}</b>${escapeHtml(s.core_concept)}</p>
+          <p style="margin: 0 0 10px 0; color: #475569; font-size: 13px; line-height: 1.6;">${escapeHtml(s.detailed_explanation)}</p>
+          ${s.key_takeaways && s.key_takeaways.length ? `
+            <div style="background: #eff6ff; padding: 8px 12px; border-radius: 6px; font-size: 13px; color: #1e40af;">
+              <b>${isEn ? 'Key Takeaways:' : '📌 重點整理：'}</b>
+              <ul style="margin: 4px 0 0 16px; padding: 0;">
+                ${s.key_takeaways.map(k => `<li>${escapeHtml(k)}</li>`).join('')}
+              </ul>
+            </div>
+          ` : ''}
+          ${s.source_pages && s.source_pages.length ? `<small style="display: block; margin-top: 6px; color: #94a3b8;">${isEn ? 'Source Page: ' : '教材頁碼：'}${s.source_pages.join(', ')}</small>` : ''}
+        </div>
+      `).join('');
+    }
+
+    bodyEl.innerHTML = `
+      ${handout.overall_summary ? `
+        <div style="margin-bottom: 16px; padding: 12px; background: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0; color: #166534;">
+          <b>${isEn ? 'Course Summary: ' : '課程整體導讀：'}</b>
+          <p style="margin: 4px 0 0 0; font-size: 13px;">${escapeHtml(handout.overall_summary)}</p>
+        </div>
+      ` : ''}
+      ${sectionsHtml}
+      ${handout.study_tips && handout.study_tips.length ? `
+        <div style="margin-top: 16px; padding: 12px; background: #fffbeb; border-radius: 8px; border: 1px solid #fde68a; color: #92400e;">
+          <b>${isEn ? 'Study Tips: ' : '研讀建議與復習指南：'}</b>
+          <ul style="margin: 4px 0 0 16px; padding: 0; font-size: 13px;">
+            ${handout.study_tips.map(tip => `<li>${escapeHtml(tip)}</li>`).join('')}
+          </ul>
+        </div>
+      ` : ''}
+    `;
+
+    renderMath(bodyEl);
+  }
+
+  // 綁定匯出連結
+  if ($('#handoutPrintBtn')) $('#handoutPrintBtn').href = `/api/handouts/${handout.id}/html`;
+  if ($('#handoutDownloadMdBtn')) $('#handoutDownloadMdBtn').href = `/api/handouts/${handout.id}/markdown`;
+
+  const modal = $('#handoutModal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeHandoutModal() {
+  const modal = $('#handoutModal');
+  if (modal) modal.classList.add('hidden');
+}
+$('#closeHandoutModalBtn')?.addEventListener('click', closeHandoutModal);
+$('#handoutModal')?.addEventListener('click', (e) => {
+  if (e.target === $('#handoutModal')) closeHandoutModal();
+});
+
+// === 單元試卷 Modal 渲染與關閉 ===
+function renderQuizModal(quiz) {
+  quiz = quiz || state.quiz;
+  if (!quiz) return;
+  const isEn = state.lang === 'en';
+  if ($('#quizModalTitle')) $('#quizModalTitle').textContent = quiz.title || (isEn ? 'Unit Quiz' : '單元試卷');
+  if ($('#quizModalSubtitle')) $('#quizModalSubtitle').textContent = `${quiz.description || ''} · ${quiz.questions ? quiz.questions.length : 0} ${isEn ? 'Questions' : '題'}`;
+
+  const bodyEl = $('#quizModalBody');
+  const showTeacher = $('#quizTeacherModeToggle') ? $('#quizTeacherModeToggle').checked : false;
+
+  if (bodyEl && quiz.questions) {
+    const diffLabels = {
+      'easy': isEn ? 'Basic' : '基礎觀念',
+      'medium': isEn ? 'Moderate' : '中等理解',
+      'hard': isEn ? 'Advanced' : '進階論述'
+    };
+
+    bodyEl.innerHTML = quiz.questions.map((q, idx) => `
+      <div class="quiz-question-card" style="margin-bottom: 20px; padding: 16px; background: #ffffff; border-radius: 8px; border: 1px solid var(--line); border-left: 4px solid var(--green);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; gap: 8px;">
+          <h4 style="font-size: 15px; font-weight: 700; color: var(--green); margin: 0; flex: 1;">第 ${idx + 1} 題. ${escapeHtml(q.question)}</h4>
+          <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+            <button type="button" class="btn-regen-question modal-regen-btn" data-qidx="${idx}" title="消耗 3 點備課點數抽換此題">🔄 ${isEn ? 'Replace (3 pts)' : '換這題 (3 點)'}</button>
+            <span style="font-size: 11px; padding: 2px 8px; border-radius: 99px; background: #ecefe8; color: var(--green); border: 1px solid #dce1d9; font-weight: 600; white-space: nowrap;">
+              ${diffLabels[q.difficulty] || q.difficulty}
+            </span>
+          </div>
+        </div>
+        <div style="margin: 8px 0 10px 12px; display: grid; grid-template-columns: 1fr; gap: 6px;">
+          ${(q.options || []).map(opt => `
+            <div style="font-size: 13px; color: var(--ink); padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px;">
+              ${escapeHtml(opt)}
+            </div>
+          `).join('')}
+        </div>
+        <div class="quiz-answer-block ${showTeacher ? '' : 'hidden'}" style="margin-top: 10px; padding: 10px 12px; background: #f4f7f4; border-radius: 6px; border: 1px solid #d1ded6; font-size: 13px; color: var(--green);">
+          <p style="margin: 0 0 4px 0; font-weight: 700;">${isEn ? 'Answer: ' : '【標準答案】'} ${escapeHtml(q.answer)}</p>
+          <p style="margin: 0; color: #2d5a4e;"><b>${isEn ? 'Explanation: ' : '【解析】'}</b>${escapeHtml(q.explanation)}</p>
+          ${q.source_pages && q.source_pages.length ? `<small style="display: block; margin-top: 4px; color: var(--muted);">${isEn ? 'Source Page: ' : '教材依據：第 '}${q.source_pages.join(', ')}${isEn ? '' : ' 頁'}</small>` : ''}
+        </div>
+      </div>
+    `).join('');
+
+    bodyEl.querySelectorAll('.modal-regen-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const qIdx = parseInt(btn.dataset.qidx, 10);
+        regenerateSingleQuizQuestion(qIdx, btn);
+      });
+    });
+
+    renderMath(bodyEl);
+  }
+
+  // 綁定下載按鈕
+  if ($('#quizDownloadStudentBtn')) $('#quizDownloadStudentBtn').href = `/api/quiz/${quiz.id}/markdown?teacher=false`;
+  if ($('#quizDownloadTeacherBtn')) $('#quizDownloadTeacherBtn').href = `/api/quiz/${quiz.id}/markdown?teacher=true`;
+
+  const modal = $('#quizModal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+$('#quizTeacherModeToggle')?.addEventListener('change', () => {
+  const isChecked = $('#quizTeacherModeToggle').checked;
+  $$('.quiz-answer-block').forEach(el => el.classList.toggle('hidden', !isChecked));
+});
+
+function closeQuizModal() {
+  const modal = $('#quizModal');
+  if (modal) modal.classList.add('hidden');
+}
+$('#closeQuizModalBtn')?.addEventListener('click', closeQuizModal);
+$('#quizModal')?.addEventListener('click', (e) => {
+  if (e.target === $('#quizModal')) closeQuizModal();
+});
+
+// 服務條款與隱私權政策 Modal 控制
+function openTermsModal() {
+  const modal = $('#termsModal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeTermsModal() {
+  const modal = $('#termsModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function openPrivacyModal() {
+  const modal = $('#privacyModal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closePrivacyModal() {
+  const modal = $('#privacyModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+$('#openTermsBtn')?.addEventListener('click', openTermsModal);
+$('#closeTermsModalBtn')?.addEventListener('click', closeTermsModal);
+$('#confirmTermsBtn')?.addEventListener('click', closeTermsModal);
+$('#termsModal')?.addEventListener('click', (e) => {
+  if (e.target === $('#termsModal')) closeTermsModal();
+});
+
+$('#openPrivacyBtn')?.addEventListener('click', openPrivacyModal);
+$('#closePrivacyModalBtn')?.addEventListener('click', closePrivacyModal);
+$('#confirmPrivacyBtn')?.addEventListener('click', closePrivacyModal);
+$('#privacyModal')?.addEventListener('click', (e) => {
+  if (e.target === $('#privacyModal')) closePrivacyModal();
+});
+
+// 全域 ESC 鍵快速關閉所有 Modal
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' || e.key === 'Esc') {
+    closeAuthModal();
+    if (typeof closeCreateUserModal === 'function') closeCreateUserModal();
+    if (typeof closeHandoutModal === 'function') closeHandoutModal();
+    if (typeof closeQuizModal === 'function') closeQuizModal();
+    if (typeof closeTermsModal === 'function') closeTermsModal();
+    if (typeof closePrivacyModal === 'function') closePrivacyModal();
+  }
+});
+
+// === 示範教材快速載入處理 (Demo Sample Loader) ===
+const DEMO_SAMPLE_PHYSICS = `# 高中物理：牛頓運動定律與萬有引力定律
+
+## 單元一：牛頓第一運動定律（慣性定律）
+任何物體在不受外力作用，或所受合力為零的狀態下，靜者恆靜，動者恆作等速度直線運動。
+這種維持原有運動狀態的性質稱為「慣性」。物體的質量即為其慣性大小的量度，質量愈大，其運動狀態愈難改變。
+日常實例包括：急煞車時乘客向前傾斜、拍打衣服掃除灰塵等。
+
+## 單元二：牛頓第二運動定律（運動定律）
+當物體受外力作用時，將在力的方向上產生加速度。加速度的大小與作用力成正比，與物體的質量成反比。
+數學表達式為：
+$$ \\vec{F} = m \\vec{a} $$
+其中力以牛頓（N）為單位，質量以公斤（kg）為單位，加速度以公尺每秒平方（m/s²）為單位。
+
+## 單元三：牛頓第三運動定律（作用力與反作用力定律）
+當兩物體相互作用時，施力物所施加的作用力與受力物所施加的反作用力，大小相等、方向相反，且同時發生於同一直線上，但分別作用於不同的物體上，因此不能互相抵消。
+例如火箭推進、游泳划水等。
+
+## 單元四：萬有引力定律
+宇宙間任何兩個質點之間皆存在相互吸引的重力，其大小與兩質點質量的乘積成正比，與兩者距離的平方成反比：
+$$ F_g = G \\frac{m_1 m_2}{r^2} $$
+其中 $G = 6.674 \\times 10^{-11} \\, \\text{N}\\cdot\\text{m}^2/\\text{kg}^2$ 為萬有引力常數。重力為長程力，主導了天體運行與潮汐現象。`;
+
+$('#loadSampleBtn')?.addEventListener('click', async () => {
+  if (!state.user) {
+    toast(state.lang === 'en' ? 'Please log in to use demo lesson' : '請先登入帳號以載入示範教材', true);
+    openAuthModal('login');
+    return;
+  }
+  loading(
+    true,
+    state.lang === 'en' ? 'Loading Sample Lesson...' : '正在載入示範教材…',
+    state.lang === 'en' ? 'Indexing Newton Laws & Gravitation...' : '解析章節結構與建立向量索引…'
+  );
+  try {
+    const doc = await api('/api/documents/import_text', {
+      method: 'POST',
+      body: JSON.stringify({
+        title: state.lang === 'en' ? 'High_School_Physics_Newton_Laws.md' : '高中物理_牛頓運動定律與萬有引力.md',
+        content: DEMO_SAMPLE_PHYSICS
+      })
+    });
+    setDocument(doc);
+    toast(state.lang === 'en' ? 'Sample lesson loaded successfully! Ready to generate.' : '示範教材載入成功！可以開始生成簡報、講義與試卷。');
+  } catch (err) {
+    toast(err.message, true);
+  } finally {
+    loading(false);
+  }
+});
+
 
 

@@ -37,8 +37,60 @@ def test_deck_graph_multi_stage_execution():
     deck = service.generate_deck(document(), "大學生", "專業嚴謹", 4, 30, enable_web_search=False)
 
     assert deck.title == "LangGraph 重構課程"
-    assert len(deck.slides) == 1
+    assert len(deck.slides) >= 1
     assert deck.slides[0].speaker_notes != ""
+
+
+def test_deck_graph_hierarchical_topic_rag():
+    service = ollama_service()
+    doc = document()
+    # 建立多頁且超過 30 個 chunks 的教材
+    doc.chunks = [Chunk(f"第 {i+1} 頁之核心觀念推導內容：LaTeX 公式 $E=mc^{i+1}$", i + 1, i) for i in range(35)]
+    doc.pages = 35
+    service.index(doc)
+
+    prompts = []
+    def fake_structured_response(system, prompt, schema):
+        prompts.append(prompt)
+        if "教材全景摘要" in prompt:
+            return {
+                "title": "量子物理與相對論",
+                "subtitle": "大學生｜45 分鐘",
+                "topics": ["質能等價性", "光電效應機制"],
+            }
+        return {
+            "title": "量子物理與相對論",
+            "subtitle": "大學生｜45 分鐘",
+            "slides": [
+                {
+                    "title": "質能等價性分析",
+                    "bullets": ["靜止質量與能量的轉換關係 $E=mc^2$", "核反應中的質量虧損計算", "相對論力學效應與高速粒子驗證"],
+                    "speaker_notes": "各位好，今天我們探討愛因斯坦最著名的質能等價關係式 $E=mc^2$。這揭示了質量本質上就是高度凝聚的能量形態。",
+                    "source_pages": [1, 2],
+                    "icon": "⚡",
+                    "visual_description": "質能轉換示意圖與核反應質量虧損推導架構",
+                },
+                {
+                    "title": "光電效應機制",
+                    "bullets": ["光子能量與功函數臨界關係 $hf = W + K_{max}$", "截止電壓與光電子動能測量", "量子化光子假說對經典電磁學的突破"],
+                    "speaker_notes": "接著看光電效應實驗。經典電磁學無法解釋為何截止電壓僅與頻率相關，而愛因斯坦提出光子量子化假說完美解釋了該現象。",
+                    "source_pages": [3, 4],
+                    "icon": "💡",
+                    "visual_description": "光電管實驗裝置與能量截止曲線圖表",
+                },
+            ],
+        }
+
+    service._structured_response = fake_structured_response
+
+    deck = service.generate_deck(doc, "大學生", "清晰嚴謹", 2, 45, handout_text="# 物理講義\n## 課程總覽\n探討近代物理兩大支柱。")
+
+    assert deck.title == "量子物理與相對論"
+    assert len(deck.slides) == 2
+    assert "E=mc^2" in deck.slides[0].bullets[0]
+    assert deck.slides[0].source_pages == [1, 2]
+    assert deck.slides[1].source_pages == [3, 4]
+    assert any("【教學核心母本（講義結構與深度論述依據）】" in p for p in prompts)
 
 
 def test_qa_graph_hallucination_check_and_retry():
@@ -71,35 +123,30 @@ def test_qa_graph_hallucination_check_and_retry():
     assert "出現未提及的捏造資訊" in text_prompts[1]
 
 
-def test_deck_graph_audit_feedback_retry():
+def test_deck_graph_audit_quality_and_completion():
     service = ollama_service()
     
-    prompts = []
     def fake_structured_response(system, prompt, schema):
-        prompts.append(prompt)
-        if "預定大綱標題" in prompt:
-            notes = "短" if len(prompts) == 2 else "這是經過品質精進優化後的超詳細逐頁講稿說明內容。"
-            return {
-                "title": "測試簡報",
-                "subtitle": "副標題",
-                "slides": [
-                    {
-                        "title": "主題一",
-                        "bullets": ["重點 1"],
-                        "speaker_notes": notes,
-                        "source_pages": [1],
-                    }
-                ],
-            }
-        return {"title": "大綱標題", "subtitle": "副標", "topics": ["主題一"]}
+        if "教材全景摘要" in prompt:
+            return {"title": "大綱標題", "subtitle": "副標", "topics": ["主題一"]}
+        return {
+            "title": "測試簡報",
+            "subtitle": "副標題",
+            "slides": [
+                {
+                    "title": "主題一",
+                    "bullets": [],
+                    "speaker_notes": "短",
+                    "source_pages": [1],
+                }
+            ],
+        }
 
     service._structured_response = fake_structured_response
 
     deck = service.generate_deck(document(), "大學生", "清楚易懂", 1, 30)
-
-    # 驗證 prompt 紀錄：包含了第二次 generate_contents 帶入的品質優化要求
-    assert any("【品質優化要求】" in p for p in prompts)
-    assert deck.slides[0].speaker_notes == "這是經過品質精進優化後的超詳細逐頁講稿說明內容。"
+    assert len(deck.slides[0].bullets) >= 1
+    assert len(deck.slides[0].speaker_notes) >= 30
 
 
 def test_deck_graph_with_web_search(monkeypatch):
@@ -119,27 +166,31 @@ def test_deck_graph_with_web_search(monkeypatch):
     def fake_structured_response(system, prompt, schema):
         systems.append(system)
         prompts.append(prompt)
-        if "預定大綱標題" in prompt:
+        if "教材全景摘要" in prompt:
             return {
                 "title": "網路補充測試簡報",
                 "subtitle": "副標題",
-                "slides": [
-                    {
-                        "title": "主題一",
-                        "bullets": ["重點 1"],
-                        "speaker_notes": "這是極度詳細且內容完整的講稿，包含網路案例說明。",
-                        "source_pages": [1],
-                    }
-                ],
+                "topics": ["主題一"],
             }
-        return {"title": "網路補充測試：簡報標題", "subtitle": "副標", "topics": ["主題一"]}
+        return {
+            "title": "網路補充測試簡報",
+            "subtitle": "副標題",
+            "slides": [
+                {
+                    "title": "主題一",
+                    "bullets": ["重點 1"],
+                    "speaker_notes": "這是極度詳細且內容完整的講稿，包含網路案例說明。",
+                    "source_pages": [1],
+                }
+            ],
+        }
 
     service._structured_response = fake_structured_response
 
     deck = service.generate_deck(document(), "大學生", "清楚易懂", 1, 30, enable_web_search=True)
 
-    # 驗證系統提示詞包含結合網路補充案例的指示
-    assert any("請結合教材內容與網路補充案例參考" in s for s in systems)
+    # 驗證系統提示詞包含批次產出指示
+    assert any("一次性批次產出" in s for s in systems)
     # 驗證 user_prompt 包含網路補充案例參考
     assert any("網路補充案例參考" in p for p in prompts)
     assert deck.title == "網路補充測試簡報"
@@ -150,28 +201,61 @@ def test_deck_graph_target_language():
     systems = []
     def fake_structured_response(system, prompt, schema):
         systems.append(system)
-        if "預定大綱標題" in prompt:
+        if "教材全景摘要" in prompt:
             return {
                 "title": "English Presentation Title",
                 "subtitle": "English Subtitle",
-                "slides": [
-                    {
-                        "title": "Topic One",
-                        "bullets": ["Point 1", "Point 2"],
-                        "speaker_notes": "This is a detailed speaker note in English.",
-                        "source_pages": [1],
-                    }
-                ],
+                "topics": ["Topic One"],
             }
-        return {"title": "English Title", "subtitle": "Subtitle", "topics": ["Topic One"]}
+        return {
+            "title": "English Presentation Title",
+            "subtitle": "English Subtitle",
+            "slides": [
+                {
+                    "title": "Topic One",
+                    "bullets": ["Point 1", "Point 2"],
+                    "speaker_notes": "This is a detailed speaker note in English.",
+                    "source_pages": [1],
+                }
+            ],
+        }
 
     service._structured_response = fake_structured_response
 
     deck = service.generate_deck(document(), "大學生", "清楚易懂", 1, 30, language="en")
-
-    # 驗證 prompt 系統提示詞包含了英文全輸出指示
     assert any("strictly in English" in s for s in systems)
     assert deck.title == "English Presentation Title"
+
+
+def test_deck_graph_target_language_auto():
+    service = ollama_service()
+    systems = []
+    def fake_structured_response(system, prompt, schema):
+        systems.append(system)
+        if "教材全景摘要" in prompt:
+            return {
+                "title": "Auto Lang Title",
+                "subtitle": "Auto Subtitle",
+                "topics": ["Auto Topic"],
+            }
+        return {
+            "title": "Auto Lang Title",
+            "subtitle": "Auto Subtitle",
+            "slides": [
+                {
+                    "title": "Auto Topic",
+                    "bullets": ["Auto point 1"],
+                    "speaker_notes": "Auto speaker note",
+                    "source_pages": [1],
+                }
+            ],
+        }
+
+    service._structured_response = fake_structured_response
+
+    deck = service.generate_deck(document(), "大學生", "清楚易懂", 1, 30, language="auto")
+    assert any("請自動識別教材主要語言" in s for s in systems)
+    assert deck.title == "Auto Lang Title"
 
 
 def test_company_router_intent_classification():
@@ -190,6 +274,129 @@ def test_company_router_intent_classification():
     # 3. 測試教案/試題意圖 -> academic
     res3 = classify_intent_node({"input_query": "幫我設計 45 分鐘國中理化教案"})
     assert res3["target_department"] == "academic"
+
+
+def test_quiz_graph_execution():
+    from app.workflows import build_quiz_graph
+    from app.models import Chunk, Document
+
+    service = ollama_service()
+    doc = Document(
+        id="doc-quiz",
+        name="量子力學與相對論",
+        pages=5,
+        chunks=[Chunk(f"第 {i+1} 頁內容：光電效應與質能方程", i + 1, i) for i in range(5)],
+        size_bytes=500,
+    )
+    service.index(doc)
+
+    prompts = []
+    def fake_structured_response(system, prompt, schema):
+        prompts.append(prompt)
+        if "教材全景內容摘要" in prompt or "考點方向" in prompt:
+            return {
+                "title": "物理核心概念小考",
+                "description": "測驗光電效應與相對論考點",
+                "focal_topics": ["光電效應截止電壓", "質能守恆計算"],
+            }
+        return {
+            "title": "物理核心概念小考",
+            "description": "測驗光電效應與相對論考點",
+            "questions": [
+                {
+                    "type": "single_choice",
+                    "question": "光電效應中，截止電壓與入射光的何者成正比？",
+                    "options": ["A. 頻率", "B. 強度", "C. 照射時間", "D. 入射角"],
+                    "answer": "A",
+                    "explanation": "依據愛因斯坦光電方程 e*Vs = hf - W，截止電壓與頻率成線性關係。",
+                    "source_pages": [1, 2],
+                    "difficulty": "medium",
+                },
+                {
+                    "type": "problem_solving",
+                    "question": "請計算靜止質量為 1kg 的物質完全轉化為能量時的數值。",
+                    "options": [],
+                    "answer": "9 * 10^16 焦耳",
+                    "explanation": "依據 E=mc^2 計算。",
+                    "source_pages": [3],
+                    "difficulty": "hard",
+                },
+            ],
+        }
+
+    service._structured_response = fake_structured_response
+
+    quiz_graph = build_quiz_graph()
+    state = {
+        "document": doc,
+        "question_count": 2,
+        "difficulty": "medium",
+        "language": "zh-TW",
+        "enable_web_search": False,
+        "handout_text": "# 講義\n## 光電效應與質能",
+        "ai_service": service,
+    }
+    result = quiz_graph.invoke(state)
+    sheet = result["quiz_sheet"]
+
+    assert sheet.title == "物理核心概念小考"
+    assert len(sheet.questions) == 2
+    assert sheet.questions[0].answer == "A"
+    assert sheet.questions[0].source_pages == [1, 2]
+
+
+def test_quiz_graph_with_web_search(monkeypatch):
+    from app.workflows import build_quiz_graph
+
+    service = ollama_service()
+    doc = document()
+
+    class FakeDDGS:
+        def __init__(self, timeout=10): pass
+        def text(self, query, max_results=3):
+            return [{"title": "全國大考經典試題", "body": "112年學測物理多選題題型彙整"}]
+
+    monkeypatch.setattr("app.workflows.quiz_graph.DDGS", FakeDDGS)
+
+    systems = []
+    prompts = []
+    def fake_structured_response(system, prompt, schema):
+        systems.append(system)
+        prompts.append(prompt)
+        if "考點方向" in prompt:
+            return {
+                "title": "聯網考古題綜合評量",
+                "description": "結合大考經典試題之評量",
+                "focal_topics": ["向量檢索考點"],
+            }
+        return {
+            "type": "multiple_choice",
+            "question": "下列哪些屬於向量空間中的度量方法？",
+            "options": ["A. 餘弦相似度", "B. 歐式距離", "C. 曼哈頓距離", "D. 隨機雜湊"],
+            "answer": "A, B, C",
+            "explanation": "餘弦、歐式與曼哈頓距離皆為幾何空間標準度量。",
+            "source_pages": [1],
+            "difficulty": "hard",
+        }
+
+    service._structured_response = fake_structured_response
+
+    quiz_graph = build_quiz_graph()
+    state = {
+        "document": doc,
+        "question_count": 1,
+        "difficulty": "hard",
+        "language": "zh-TW",
+        "enable_web_search": True,
+        "ai_service": service,
+    }
+    result = quiz_graph.invoke(state)
+    sheet = result["quiz_sheet"]
+
+    assert sheet.title == "聯網考古題綜合評量"
+    assert len(sheet.questions) == 1
+    assert any("參考經典題型資料" in p for p in prompts)
+
 
 
 

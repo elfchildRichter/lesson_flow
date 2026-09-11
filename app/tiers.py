@@ -7,8 +7,7 @@ class TierLimits(TypedDict):
     tier_key: str
     name_zh: str
     name_en: str
-    deck_daily_limit: int
-    ask_daily_limit: int
+    daily_credits: int
     enable_web_search: bool
     enable_vlm: bool
     max_upload_mb: int
@@ -16,13 +15,24 @@ class TierLimits(TypedDict):
     is_unlimited: bool
 
 
+ACTION_CREDIT_COSTS: Dict[str, int] = {
+    "deck": 50,          # 生成教學簡報 (大綱+內容+逐頁講稿)
+    "handout": 30,       # 生成 A4 隨堂講義
+    "quiz": 20,          # 生成單元試卷評量 (5 題含詳解)
+    "vlm_parse": 15,     # VLM 視覺多模態教材解析 (含圖表與數學公式)
+    "parse": 5,          # 標準教材解析 (純文字與章節向量索引)
+    "refine": 3,         # AI 局部小修 (單頁講稿潤飾 / 單題重新出題)
+    "ask": 1,            # 文件問答 / AI 助教提問
+    "upload": 0,         # 上傳檔案基礎校驗
+}
+
+
 TIER_CONFIGS: Dict[str, TierLimits] = {
     "teacher_trial": {
         "tier_key": "teacher_trial",
         "name_zh": "教師試用版",
         "name_en": "Teacher Free Trial",
-        "deck_daily_limit": 1,
-        "ask_daily_limit": 5,
+        "daily_credits": 100,
         "enable_web_search": False,
         "enable_vlm": False,
         "max_upload_mb": 10,
@@ -33,8 +43,7 @@ TIER_CONFIGS: Dict[str, TierLimits] = {
         "tier_key": "teacher_pro",
         "name_zh": "教師專業版",
         "name_en": "Teacher Pro",
-        "deck_daily_limit": 10,
-        "ask_daily_limit": 50,
+        "daily_credits": 1000,
         "enable_web_search": True,
         "enable_vlm": True,
         "max_upload_mb": 30,
@@ -45,8 +54,7 @@ TIER_CONFIGS: Dict[str, TierLimits] = {
         "tier_key": "institution",
         "name_zh": "機構/學校版",
         "name_en": "Institution / School",
-        "deck_daily_limit": 100,
-        "ask_daily_limit": 500,
+        "daily_credits": 10000,
         "enable_web_search": True,
         "enable_vlm": True,
         "max_upload_mb": 100,
@@ -57,8 +65,7 @@ TIER_CONFIGS: Dict[str, TierLimits] = {
         "tier_key": "admin",
         "name_zh": "管理員無限版",
         "name_en": "Admin Unlimited",
-        "deck_daily_limit": -1,
-        "ask_daily_limit": -1,
+        "daily_credits": -1,
         "enable_web_search": True,
         "enable_vlm": True,
         "max_upload_mb": 500,
@@ -76,3 +83,4 @@ def get_tier_config(tier_key: str | None = None, role: str | None = None) -> Tie
         return TIER_CONFIGS[tier_key]
     # Default fallback for regular users and guests is teacher_trial
     return TIER_CONFIGS["teacher_trial"]
+

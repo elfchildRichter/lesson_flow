@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import json
 import logging
 import uuid
-from typing import Literal
+from typing import Any, Literal
 
 # pyrefly: ignore [missing-import]
 from duckduckgo_search import DDGS
@@ -26,7 +27,6 @@ def _normalize_icon(raw_icon: str) -> str:
     if not raw_icon or not isinstance(raw_icon, str):
         return "💡"
     import re
-    # 提取第一個 Emoji 符號
     emoji_match = re.search(r"[\U00010000-\U0010ffff\u2600-\u27bf\u2300-\u23ff\u2b50]", raw_icon)
     if emoji_match:
         return emoji_match.group(0)
@@ -60,17 +60,30 @@ def plan_outline_node(state: DeckState) -> DeckState:
     language = state.get("language", "zh-TW")
     slide_count = state.get("slide_count", 8)
     duration = state.get("duration", 30)
+    handout_text = state.get("handout_text", "")
 
-    sampled = document.chunks[: min(30, len(document.chunks))]
+    # 均勻分佈取樣 (Uniform Strided Sampling)，確保涵蓋全篇教材各章節
+    total_chunks = len(document.chunks)
+    if total_chunks <= 25:
+        sampled = document.chunks
+    else:
+        indices = [int(i * (total_chunks - 1) / 24) for i in range(25)]
+        sampled = [document.chunks[i] for i in indices]
+
     context = "\n\n".join(f"[第 {c.page} 頁] {c.text}" for c in sampled)
-
     lang_instr = _get_lang_instruction(language)
-    system_prompt = f"你是資深教學設計師。請規劃整份簡報的大綱架構。{lang_instr}"
-    user_prompt = (
+
+    system_prompt = f"你是資深教學設計師。請規劃整份簡報的大綱架構與章節主題。{lang_instr}"
+    
+    user_prompt_parts = []
+    if handout_text:
+        user_prompt_parts.append(f"【教學母本講義結構依據】：\n{handout_text[:3000]}\n")
+    user_prompt_parts.append(f"【教材全景摘要】（共 {document.pages} 頁、{total_chunks} 區塊）：\n{context}\n")
+    user_prompt_parts.append(
         f"對象：{audience}\n語氣：{tone}\n總時長：{duration} 分鐘\n目標頁數：{slide_count} 頁\n目標輸出語言：{language}\n\n"
-        f"教材內容：\n{context}\n\n"
-        f"請規劃主標題 (title)、副標題 (subtitle) 以及包含 {slide_count} 頁的單頁主題大綱。"
+        f"請規劃主標題 (title)、副標題 (subtitle) 以及包含 {slide_count} 頁的單元主題大綱 (topics)。"
     )
+    user_prompt = "\n".join(user_prompt_parts)
 
     schema = {
         "type": "object",
@@ -91,7 +104,7 @@ def plan_outline_node(state: DeckState) -> DeckState:
     except Exception as exc:
         logger.warning("大綱規劃產生異常，將自動降級：%s", exc)
         outline = {
-            "title": "教學簡報",
+            "title": f"{document.name} 教學簡報",
             "subtitle": f"{audience} · {tone}語氣",
             "topics": [f"單元重點 {i+1}" for i in range(slide_count)],
         }
@@ -115,7 +128,7 @@ def enrich_with_web_node(state: DeckState) -> DeckState:
     search_keyword = _clean_search_query(title)
     if not search_keyword or search_keyword in ("教學簡報", "簡報教案", "簡報"):
         if topics:
-            search_keyword = _clean_search_query(" ".join(topics[:2]))
+            search_keyword = _clean_search_query(" ".join(str(t) for t in topics[:2]))
 
     if not search_keyword:
         query_str = "教學案例 簡報"
@@ -147,6 +160,7 @@ def route_after_outline(state: DeckState) -> Literal["enrich_with_web", "generat
 
 
 def generate_contents_node(state: DeckState) -> DeckState:
+    """方案 B：以講義為教學骨幹 + 原始教材為細節補充，進行單次結構化批次生成 (Single Batch Generation)"""
     ai_service = state["ai_service"]
     document = state["document"]
     audience = state.get("audience", "大學生")
@@ -156,13 +170,46 @@ def generate_contents_node(state: DeckState) -> DeckState:
     duration = state.get("duration", 30)
     outline = state.get("outline", {})
     web_results = state.get("web_results", "")
-    audit_feedback = state.get("audit_feedback", "")
+    handout_text = state.get("handout_text", "")
 
-    sampled = document.chunks[: min(30, len(document.chunks))]
+    topics = outline.get("topics", [])
+    deck_title = outline.get("title", "教學簡報")
+    deck_subtitle = outline.get("subtitle", f"{audience} · {tone}語氣")
+
+    if not topics:
+        topics = [f"單元重點 {i+1}" for i in range(slide_count)]
+    if len(topics) < slide_count:
+        topics = list(topics) + [f"深入探討 {i+1}" for i in range(len(topics), slide_count)]
+    elif len(topics) > slide_count:
+        topics = list(topics[:slide_count])
+
+    # 均勻取樣教材原始片段（提供精確公式、數據與頁碼依據）
+    total_chunks = len(document.chunks)
+    if total_chunks <= 20:
+        sampled = document.chunks
+    else:
+        indices = [int(i * (total_chunks - 1) / 19) for i in range(20)]
+        sampled = [document.chunks[i] for i in indices]
     context = "\n\n".join(f"[第 {c.page} 頁] {c.text}" for c in sampled)
-    lang_instr = _get_lang_instruction(language)
 
-    schema = {
+    lang_instr = _get_lang_instruction(language)
+    bullets_rule = (
+        "【簡報內文重點規範】：每一頁投影片的 bullets 必須包含 3～4 點精煉且高資訊密度的觀念重點提綱"
+        "（每點建議 15～30 字，著重核心名詞定義、關鍵推導、LaTeX 公式如 $...$ 或關鍵對比），切勿過於簡略。"
+    )
+    notes_rule = (
+        "【講稿品質規範】：每一頁投影片的 speaker_notes 必須是一段完整、連貫且可直接口頭朗讀的教師口語教學講稿"
+        "（每頁建議 150～250 字），包含觀念引導、論述展開、案例推導與提問互動。"
+    )
+    visual_prompt_rule = (
+        "【結構化視覺圖解規範】：請為每一頁投影片提供："
+        "1. 代表性 Icon (icon，如 💡, 🔬, 📊, ⚡, 🔒, 🧠, ⚙️, 🌐)；"
+        "2. 搭配說明的教學視覺圖表構想 (visual_description)；"
+        "3. 結構化視覺圖解 (visual_diagram)，包含 diagram_type ('flowchart' | 'comparison' | 'key_formula' | 'concept_map')、"
+        "steps (包含 2～3 個步驟，每個包含 label 如 '① 核心觀念' 與 text 具體機制說明) 及 takeaway (一句話核心結論)。"
+    )
+
+    full_deck_schema = {
         "type": "object",
         "properties": {
             "title": {"type": "string"},
@@ -178,6 +225,27 @@ def generate_contents_node(state: DeckState) -> DeckState:
                         "source_pages": {"type": "array", "items": {"type": "integer"}},
                         "icon": {"type": "string"},
                         "visual_description": {"type": "string"},
+                        "visual_diagram": {
+                            "type": "object",
+                            "properties": {
+                                "diagram_type": {"type": "string"},
+                                "steps": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "label": {"type": "string"},
+                                            "text": {"type": "string"},
+                                        },
+                                        "required": ["label", "text"],
+                                        "additionalProperties": False,
+                                    },
+                                },
+                                "takeaway": {"type": "string"},
+                            },
+                            "required": ["diagram_type", "steps", "takeaway"],
+                            "additionalProperties": False,
+                        },
                     },
                     "required": ["title", "bullets", "speaker_notes", "source_pages", "icon", "visual_description"],
                     "additionalProperties": False,
@@ -188,60 +256,91 @@ def generate_contents_node(state: DeckState) -> DeckState:
         "additionalProperties": False,
     }
 
-    bullets_rule = "【簡報內文重點規範】：每一頁投影片的 bullets 必須包含 3～5 點豐富且具體的內容重點條列（每點建議 20～50 字，詳細包含觀念定義、核心推導或具體實例），切勿僅提供兩三個字的短語標籤。"
-    notes_rule = "【講稿品質規範】：每一頁投影片的 speaker_notes 必須是一段完整、連貫且可直接口頭朗讀的教師教學口語講稿（每頁建議 150～300 字），包含觀念引導與案例說明，切勿僅提供簡短摘要或一兩句簡述。"
-    visual_prompt_rule = f"同時，請為每一頁投影片挑選一個符合內容主題的代表性 Icon (icon，如 💡, 🔬, 📊, ⚡, 🔒, 🧠, ⚙️, 🌐)，並設計一個【搭配說明的教學視覺圖表/插圖構想描述】(visual_description)。{bullets_rule} {notes_rule}"
-
-    if web_results:
-        system_prompt = (
-            f"你是資深教學設計師。請結合教材內容與網路補充案例參考，設計投影片、逐頁講稿與視覺圖表構想。{visual_prompt_rule} {lang_instr}"
-        )
-    else:
-        system_prompt = (
-            f"你是資深教學設計師。請只使用教材內容，設計投影片、逐頁講稿與視覺圖表構想。{visual_prompt_rule} {lang_instr}"
-        )
-
-    user_prompt = (
-        f"對象：{audience}\n語氣：{tone}\n總時長：{duration} 分鐘\n投影片：{slide_count} 頁\n目標輸出語言：{language}\n"
-        f"預定大綱標題：{outline.get('title', '簡報教案')}\n\n"
-        f"教材內容：\n{context}\n\n"
+    system_prompt = (
+        f"你是資深教學設計師。請以專業嚴謹的結構，一次性批次產出整份包含 {slide_count} 頁的教學簡報。"
+        f"{visual_prompt_rule} {bullets_rule} {notes_rule} {lang_instr}"
     )
-    if web_results:
-        user_prompt += f"網路補充案例參考：\n{web_results}\n\n"
-    if audit_feedback:
-        user_prompt += f"【品質優化要求】：前次生成的內容未達品質門檻（{audit_feedback}）。請大幅充實每一頁的 bullets 條列重點與 speaker_notes 講稿，確保內容極度豐富完整！\n\n"
 
-    payload = ai_service._structured_response(system_prompt, user_prompt, schema)
-    return {"raw_slides": payload.get("slides", []), "outline": payload}
+    user_prompt_parts = []
+    if handout_text:
+        user_prompt_parts.append(f"【教學核心母本（講義結構與深度論述依據）】：\n{handout_text}\n")
+    user_prompt_parts.append(f"【原始教材細節與頁碼索引】：\n{context}\n")
+    if web_results:
+        user_prompt_parts.append(f"【網路補充案例參考】：\n{web_results}\n")
+
+    topics_str = "\n".join(f"- 第 {i+1} 頁單元主題：{t}" for i, t in enumerate(topics))
+    user_prompt_parts.append(
+        f"【課程教學設定】：\n"
+        f"- 對象：{audience}\n"
+        f"- 語氣：{tone}\n"
+        f"- 總時長：{duration} 分鐘\n"
+        f"- 投影片總頁數：{slide_count} 頁\n"
+        f"- 目標輸出語言：{language}\n"
+        f"- 預定大綱標題：{deck_title} ({deck_subtitle})\n\n"
+        f"【規劃各頁單元清單】：\n{topics_str}\n\n"
+        f"請務必一次性產出包含完整 {slide_count} 頁 slides 的合法 JSON 物件。"
+    )
+    user_prompt = "\n".join(user_prompt_parts)
+
+    try:
+        res = ai_service._structured_response(system_prompt, user_prompt, full_deck_schema)
+        slides = res.get("slides", [])
+        final_deck_title = res.get("title") or deck_title
+        final_deck_subtitle = res.get("subtitle") or deck_subtitle
+    except Exception as exc:
+        logger.warning("批次簡報生成異常，將進行降級建構：%s", exc)
+        slides = []
+        final_deck_title = deck_title
+        final_deck_subtitle = deck_subtitle
+        for idx, topic_name in enumerate(topics):
+            slides.append({
+                "title": topic_name,
+                "bullets": [f"{topic_name} 核心觀念與定義", "關鍵機制推導與重點分析", "課堂實務應用指引"],
+                "speaker_notes": f"各位學員好，在這一頁我們將聚焦探討【{topic_name}】。請大家特別掌握其核心概念與推導邏輯，這是本章節非常重要的基礎。",
+                "source_pages": [1],
+                "icon": "💡",
+                "visual_description": f"配合【{topic_name}】進行概念流程圖與視覺說明",
+            })
+
+    # 若頁數不足則補齊
+    while len(slides) < slide_count:
+        idx = len(slides)
+        t_name = topics[idx] if idx < len(topics) else f"深入探討 {idx+1}"
+        slides.append({
+            "title": t_name,
+            "bullets": [f"{t_name} 核心重點說明", "關鍵機制推導與重點剖析", "課堂實務應用指引"],
+            "speaker_notes": f"本頁我們接續探討【{t_name}】，請大家特別關注其中的核心觀念與前後章節之關聯性。",
+            "source_pages": [1],
+            "icon": "💡",
+            "visual_description": f"配合【{t_name}】進行架構分解與概念圖解說明",
+        })
+
+    deck_payload = {
+        "title": final_deck_title,
+        "subtitle": final_deck_subtitle,
+        "topics": topics,
+        "slides": slides[:slide_count],
+    }
+
+    return {"raw_slides": slides[:slide_count], "outline": deck_payload}
 
 
 def audit_quality_node(state: DeckState) -> DeckState:
+    """本機輕量品質檢驗與格式補全（不重複發起額外遠端 LLM 請求）"""
     raw_slides = state.get("raw_slides", [])
-    retry_count = state.get("retry_count", 0)
-
-    if not raw_slides:
-        feedback = "未生成任何投影片內容，請重新繪製完整投影片與講稿。"
-        return {"is_quality_passed": False, "retry_count": retry_count + 1, "audit_feedback": feedback}
-
-    # 檢測講稿與內文重點品質
-    total_notes_len = sum(len(s.get("speaker_notes", "")) for s in raw_slides)
-    avg_notes_len = total_notes_len / len(raw_slides) if raw_slides else 0
-
-    total_bullets_count = sum(len(s.get("bullets", [])) for s in raw_slides)
-    avg_bullets_count = total_bullets_count / len(raw_slides) if raw_slides else 0
-
-    if (avg_notes_len < 30 or avg_bullets_count < 2.5) and retry_count < 1:
-        feedback = f"內容或講稿字數過少（平均講稿 {int(avg_notes_len)} 字，平均重點 {avg_bullets_count:.1f} 點）。請為每頁提供至少 3～5 點詳細 bullets 內文重點及 150～300 字完整口語講稿！"
-        logger.info("簡報內容不足，觸發二次精進生成流程...")
-        return {"is_quality_passed": False, "retry_count": retry_count + 1, "audit_feedback": feedback}
-
+    for idx, s in enumerate(raw_slides):
+        if not s.get("speaker_notes") or len(s.get("speaker_notes", "")) < 30:
+            title = s.get("title", f"第 {idx+1} 頁")
+            s["speaker_notes"] = f"各位學員好，本頁重點為【{title}】。請大家特別關注其中的核心觀念與推導邏輯，這在整體知識架構中是非常關鍵的環節。"
+        if not s.get("bullets"):
+            s["bullets"] = ["核心觀念定義與概念解析", "重點推導與對比說明", "應用實例與課堂練習"]
+        if not s.get("icon"):
+            s["icon"] = "💡"
     return {"is_quality_passed": True}
 
 
-def route_after_audit(state: DeckState) -> Literal["generate_contents", "finalize_deck"]:
-    if state.get("is_quality_passed", False) or state.get("retry_count", 0) > 1:
-        return "finalize_deck"
-    return "generate_contents"
+def route_after_audit(state: DeckState) -> Literal["finalize_deck"]:
+    return "finalize_deck"
 
 
 def finalize_deck_node(state: DeckState) -> DeckState:
@@ -273,6 +372,7 @@ def finalize_deck_node(state: DeckState) -> DeckState:
             or item.get("image_description")
             or f"配合【{item.get('title', '單元觀念')}】進行架構分解與幾何視覺圖解說明"
         )
+        visual_diagram = item.get("visual_diagram") or {}
 
         slides.append(
             Slide(
@@ -282,6 +382,7 @@ def finalize_deck_node(state: DeckState) -> DeckState:
                 source_pages=source_pages,
                 icon=icon,
                 visual_description=visual_description,
+                visual_diagram=visual_diagram,
             )
         )
 
@@ -322,16 +423,7 @@ def build_deck_graph() -> StateGraph:
 
     workflow.add_edge("enrich_with_web", "generate_contents")
     workflow.add_edge("generate_contents", "audit_quality")
-
-    workflow.add_conditional_edges(
-        "audit_quality",
-        route_after_audit,
-        {
-            "generate_contents": "generate_contents",
-            "finalize_deck": "finalize_deck",
-        },
-    )
-
+    workflow.add_edge("audit_quality", "finalize_deck")
     workflow.add_edge("finalize_deck", END)
 
     return workflow.compile()

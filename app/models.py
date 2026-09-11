@@ -56,6 +56,7 @@ class GenerateRequest(BaseModel):
     slide_count: int = Field(default=8, ge=4, le=20)
     duration: int = Field(default=30, ge=10, le=180)
     enable_web_search: bool = Field(default=False)
+    handout_text: Optional[str] = Field(default=None, description="可選之講義母本文本，作為生成教學骨幹依據")
 
 
 class Slide(BaseModel):
@@ -65,6 +66,7 @@ class Slide(BaseModel):
     source_pages: list[int] = Field(default_factory=list)
     icon: str = Field(default="💡")
     visual_description: str = Field(default="")
+    visual_diagram: Optional[dict] = Field(default_factory=dict)
 
 
 class Deck(BaseModel):
@@ -75,4 +77,61 @@ class Deck(BaseModel):
     slides: list[Slide]
     duration: int
     mode: str
+
+
+class QuizQuestion(BaseModel):
+    id: str
+    type: Literal["single_choice", "multiple_choice", "problem_solving"] = "single_choice"
+    question: str
+    options: list[str] = Field(default_factory=list)
+    answer: str
+    explanation: str
+    source_pages: list[int] = Field(default_factory=list)
+    difficulty: Literal["easy", "medium", "hard"] = "medium"
+
+
+class QuizSheet(BaseModel):
+    id: str
+    document_id: str
+    title: str
+    description: str
+    questions: list[QuizQuestion]
+    duration_minutes: int = 15
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class QuizGenerateRequest(BaseModel):
+    document_id: str
+    question_count: int = Field(default=5, ge=1, le=20)
+    difficulty: Literal["easy", "medium", "hard", "all"] = Field(default="all")
+    enable_web_search: bool = Field(default=False)
+    language: Literal["zh-TW", "en", "auto"] = Field(default="zh-TW")
+    handout_text: Optional[str] = Field(default=None, description="可選之講義母本文本，作為出題考點依據")
+
+
+class HandoutSection(BaseModel):
+    title: str
+    summary: str
+    key_points: list[str] = Field(default_factory=list)
+    discussion_questions: list[str] = Field(default_factory=list)
+    source_pages: list[int] = Field(default_factory=list)
+
+
+class Handout(BaseModel):
+    id: str
+    document_id: str
+    title: str
+    subtitle: str
+    overview: str
+    sections: list[HandoutSection]
+    key_takeaways: list[str] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class HandoutGenerateRequest(BaseModel):
+    document_id: str
+    target_audience: str = Field(default="學生/學習者", max_length=50)
+    detail_level: Literal["concise", "standard", "detailed"] = Field(default="standard")
+    language: Literal["zh-TW", "en", "auto"] = Field(default="zh-TW")
+    enable_web_search: bool = Field(default=False)
 

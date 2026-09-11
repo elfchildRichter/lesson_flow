@@ -34,6 +34,7 @@ class DeckState(TypedDict, total=False):
     is_quality_passed: bool
     retry_count: int
     audit_feedback: str
+    handout_text: Optional[str]
     deck: Optional[Deck]
 
 

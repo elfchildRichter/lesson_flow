@@ -38,7 +38,7 @@ def test_provider_get_and_post():
 def test_upload_invalid_file_type():
     client = TestClient(app)
     from fastapi_auth_lite import get_current_user
-    app.dependency_overrides[get_current_user] = lambda: {"id": "test_user"}
+    app.dependency_overrides[get_current_user] = lambda: {"id": "test_upload_admin", "username": "admin", "role": "admin", "tier": "teacher_pro"}
     try:
         response = client.post(
             "/api/documents",
@@ -71,6 +71,109 @@ def test_deck_non_existent_document_and_download():
     assert script_res.status_code == 404
 
 
+def test_quiz_endpoints():
+    client = TestClient(app)
+    from fastapi_auth_lite import get_current_user
+    from app.main import store
+    from app.models import Chunk, Document
+
+    doc = Document(id="doc-quiz-test", name="測試教材.pdf", pages=1, chunks=[Chunk("量子力學基礎", 1, 0)], size_bytes=100)
+    store.add(doc)
+
+    app.dependency_overrides[get_current_user] = lambda: {"id": "quiz_tester_999", "username": "tester", "role": "admin", "tier": "teacher_pro"}
+    try:
+        # 測試找不到文件
+        res_404 = client.post("/api/quiz/generate", json={"document_id": "not-found", "question_count": 3})
+        assert res_404.status_code == 404
+
+        # 測試成功產生與下載
+        from app.main import ai
+        ai._structured_response = lambda sys, prompt, schema: {
+            "title": "量子力學小考",
+            "description": "單元測驗",
+            "focal_topics": ["波粒二象性"],
+            "type": "single_choice",
+            "question": "光子能量為何？",
+            "options": ["A. E=hf", "B. E=mc", "C. E=1/2mv^2", "D. E=0"],
+            "answer": "A",
+            "explanation": "依據普朗克-愛因斯坦關係式，E=hf。",
+            "source_pages": [1],
+            "difficulty": "easy",
+        }
+        res_gen = client.post("/api/quiz/generate", json={"document_id": "doc-quiz-test", "question_count": 1})
+        assert res_gen.status_code == 200
+        quiz_id = res_gen.json()["id"]
+        assert len(res_gen.json()["questions"]) >= 1
+
+        # 測試取得題目卷
+        res_get = client.get(f"/api/quiz/{quiz_id}")
+        assert res_get.status_code == 200
+        assert res_get.json()["title"] == "量子力學小考"
+
+        # 測試下載學生版與教師版 Markdown
+        res_std = client.get(f"/api/quiz/{quiz_id}/markdown?teacher=false")
+        assert res_std.status_code == 200
+        assert "作答區" in res_std.text
+
+        res_tch = client.get(f"/api/quiz/{quiz_id}/markdown?teacher=true")
+        assert res_tch.status_code == 200
+        assert "【標準答案】" in res_tch.text
+    finally:
+        app.dependency_overrides.clear()
+
+
+def test_handout_endpoints():
+    client = TestClient(app)
+    from fastapi_auth_lite import get_current_user
+    from app.main import store, ai
+    from app.models import Chunk, Document
+
+    doc = Document(id="doc-handout-test", name="物理手冊.pdf", pages=2, chunks=[Chunk("牛頓第一運動定律", 1, 0), Chunk("牛頓第二運動定律", 2, 1)], size_bytes=200)
+    store.add(doc)
+
+    app.dependency_overrides[get_current_user] = lambda: {"id": "handout_tester_999", "username": "tester", "role": "admin", "tier": "teacher_pro"}
+    try:
+        # Mock handout structured response
+        ai._structured_response = lambda sys, prompt, schema: {
+            "title": "力學基礎隨堂講義",
+            "subtitle": "高中物理核心概念導讀",
+            "target_audience": "高中生",
+            "sections": [
+                {
+                    "title": "慣性與力學基礎",
+                    "core_concept": "物體在不受外力時保持靜止或等速直線運動。",
+                    "detailed_explanation": "牛頓第一定律又稱為慣性定律。",
+                    "key_takeaways": ["慣性是物體抗拒運動狀態改變的性質"],
+                    "source_pages": [1],
+                }
+            ],
+            "overall_summary": "力學是物理學的基石。",
+            "study_tips": ["理解公式物理意義而非死記"],
+        }
+
+        res_gen = client.post("/api/handouts/generate", json={"document_id": "doc-handout-test", "detail_level": "standard"})
+        assert res_gen.status_code == 200
+        handout_id = res_gen.json()["id"]
+        assert handout_id in store.handouts
+
+        # 測試取得講義
+        res_get = client.get(f"/api/handouts/{handout_id}")
+        assert res_get.status_code == 200
+        assert res_get.json()["title"] == "力學基礎隨堂講義"
+
+        # 測試 Markdown 匯出
+        res_md = client.get(f"/api/handouts/{handout_id}/markdown")
+        assert res_md.status_code == 200
+        assert "力學基礎隨堂講義" in res_md.text
+
+        # 測試 HTML A4 列印視圖
+        res_html = client.get(f"/api/handouts/{handout_id}/html")
+        assert res_html.status_code == 200
+        assert "@page" in res_html.text
+    finally:
+        app.dependency_overrides.clear()
+
+
 def test_admin_users_list_schema_migration():
     client = TestClient(app)
     from fastapi_auth_lite import get_current_user, init_db
@@ -83,6 +186,156 @@ def test_admin_users_list_schema_migration():
         assert "users" in response.json()
     finally:
         app.dependency_overrides.clear()
+
+
+def test_deck_refine_and_patch():
+    client = TestClient(app)
+    from fastapi_auth_lite import get_current_user
+    from app.main import store, ai
+    from app.models import Deck, Slide
+
+    deck = Deck(
+        id="deck-refine-test",
+        document_id="doc-refine-test",
+        title="原始投影片標題",
+        subtitle="副標題",
+        slides=[
+            Slide(
+                title="第一頁",
+                bullets=["重點一", "重點二"],
+                speaker_notes="原始逐頁講稿",
+                source_pages=[1],
+            )
+        ],
+        duration=15,
+        mode="test",
+    )
+    store.decks[deck.id] = deck
+
+    app.dependency_overrides[get_current_user] = lambda: {"id": "refine_tester_1", "username": "tester", "role": "admin", "tier": "teacher_pro"}
+    try:
+        # Mock structured response for refine
+        ai._structured_response = lambda sys, prompt, schema: {
+            "bullets": ["優化要點一", "優化要點二"],
+            "speaker_notes": "優化後的口語講稿",
+        }
+
+        # 1. Refine slide
+        res_refine = client.post(
+            f"/api/decks/{deck.id}/slides/0/refine",
+            json={"instruction": "更生動"},
+        )
+        assert res_refine.status_code == 200
+        assert res_refine.json()["slide"]["speaker_notes"] == "優化後的口語講稿"
+        assert store.decks[deck.id].slides[0].speaker_notes == "優化後的口語講稿"
+
+        # 2. PATCH manual edits (free 0 credits)
+        res_patch = client.patch(
+            f"/api/decks/{deck.id}",
+            json={"title": "教師手動修改後的標題"},
+        )
+        assert res_patch.status_code == 200
+        assert store.decks[deck.id].title == "教師手動修改後的標題"
+    finally:
+        app.dependency_overrides.clear()
+
+
+def test_quiz_regenerate_and_patch():
+    client = TestClient(app)
+    from fastapi_auth_lite import get_current_user
+    from app.main import store, ai
+    from app.models import QuizQuestion, QuizSheet
+
+    sheet = QuizSheet(
+        id="quiz-regen-test",
+        document_id="doc-regen-test",
+        title="原始試卷",
+        description="說明",
+        questions=[
+            QuizQuestion(
+                id="q1",
+                type="single_choice",
+                question="1+1=?",
+                options=["A. 1", "B. 2"],
+                answer="B",
+                explanation="1+1=2",
+                source_pages=[1],
+                difficulty="easy",
+            )
+        ],
+    )
+    store.quizzes[sheet.id] = sheet
+
+    app.dependency_overrides[get_current_user] = lambda: {"id": "regen_tester_1", "username": "tester", "role": "admin", "tier": "teacher_pro"}
+    try:
+        ai._structured_response = lambda sys, prompt, schema: {
+            "type": "single_choice",
+            "question": "2+2=?",
+            "options": ["A. 3", "B. 4"],
+            "answer": "B",
+            "explanation": "2+2=4",
+            "source_pages": [1],
+            "difficulty": "medium",
+        }
+
+        # 1. Regenerate single question
+        res_regen = client.post(
+            f"/api/quiz/{sheet.id}/questions/0/regenerate",
+            json={"instruction": "換更難的題目"},
+        )
+        assert res_regen.status_code == 200
+        assert res_regen.json()["question"]["question"] == "2+2=?"
+        assert store.quizzes[sheet.id].questions[0].question == "2+2=?"
+
+        # 2. PATCH manual edits
+        res_patch = client.patch(
+            f"/api/quiz/{sheet.id}",
+            json={"title": "手動修改試卷標題"},
+        )
+        assert res_patch.status_code == 200
+        assert store.quizzes[sheet.id].title == "手動修改試卷標題"
+    finally:
+        app.dependency_overrides.clear()
+
+
+def test_handout_patch():
+    client = TestClient(app)
+    from fastapi_auth_lite import get_current_user
+    from app.main import store
+    from app.models import Handout, HandoutSection
+
+    handout = Handout(
+        id="handout-patch-test",
+        document_id="doc-patch-test",
+        title="原始講義",
+        subtitle="副標題",
+        overview="總覽",
+        sections=[
+            HandoutSection(
+                title="第一章",
+                summary="摘要",
+                key_points=["要點1"],
+                discussion_questions=["問題1"],
+                source_pages=[1],
+            )
+        ],
+        key_takeaways=["重點"],
+    )
+    store.handouts[handout.id] = handout
+
+    app.dependency_overrides[get_current_user] = lambda: {"id": "handout_patch_tester", "username": "tester", "role": "admin", "tier": "teacher_pro"}
+    try:
+        res_patch = client.patch(
+            f"/api/handouts/{handout.id}",
+            json={"title": "手動修改後的講義標題", "overview": "手動修改總覽"},
+        )
+        assert res_patch.status_code == 200
+        assert store.handouts[handout.id].title == "手動修改後的講義標題"
+        assert store.handouts[handout.id].overview == "手動修改總覽"
+    finally:
+        app.dependency_overrides.clear()
+
+
 
 
 
