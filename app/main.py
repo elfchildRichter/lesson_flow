@@ -633,6 +633,8 @@ def generate_quiz(
             document,
             question_count=request.question_count,
             difficulty=request.difficulty,
+            audience=request.audience,
+            tone=request.tone,
             enable_web_search=enable_web_search,
             language=request.language,
             handout_text=request.handout_text,
@@ -783,9 +785,11 @@ def generate_handout_endpoint(
         enable_web_search = False
 
     try:
+        aud = request.audience or request.target_audience or "大學生"
         handout = ai.generate_handout(
             document,
-            target_audience=request.target_audience,
+            target_audience=aud,
+            tone=request.tone,
             detail_level=request.detail_level,
             language=request.language,
             enable_web_search=enable_web_search,

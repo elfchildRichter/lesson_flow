@@ -100,7 +100,16 @@ def test_quiz_endpoints():
             "source_pages": [1],
             "difficulty": "easy",
         }
-        res_gen = client.post("/api/quiz/generate", json={"document_id": "doc-quiz-test", "question_count": 1})
+        res_gen = client.post(
+            "/api/quiz/generate",
+            json={
+                "document_id": "doc-quiz-test",
+                "question_count": 1,
+                "audience": "高中生",
+                "tone": "活潑互動",
+                "language": "zh-TW",
+            },
+        )
         assert res_gen.status_code == 200
         quiz_id = res_gen.json()["id"]
         assert len(res_gen.json()["questions"]) >= 1
@@ -151,7 +160,16 @@ def test_handout_endpoints():
             "study_tips": ["理解公式物理意義而非死記"],
         }
 
-        res_gen = client.post("/api/handouts/generate", json={"document_id": "doc-handout-test", "detail_level": "standard"})
+        res_gen = client.post(
+            "/api/handouts/generate",
+            json={
+                "document_id": "doc-handout-test",
+                "audience": "高中生",
+                "tone": "活潑互動",
+                "language": "zh-TW",
+                "detail_level": "standard",
+            },
+        )
         assert res_gen.status_code == 200
         handout_id = res_gen.json()["id"]
         assert handout_id in store.handouts

@@ -104,6 +104,8 @@ class QuizGenerateRequest(BaseModel):
     document_id: str
     question_count: int = Field(default=5, ge=1, le=20)
     difficulty: Literal["easy", "medium", "hard", "all"] = Field(default="all")
+    audience: str = Field(default="大學生", max_length=50)
+    tone: str = Field(default="清楚易懂", max_length=50)
     enable_web_search: bool = Field(default=False)
     language: Literal["zh-TW", "en", "auto"] = Field(default="zh-TW")
     handout_text: Optional[str] = Field(default=None, description="可選之講義母本文本，作為出題考點依據")
@@ -130,7 +132,9 @@ class Handout(BaseModel):
 
 class HandoutGenerateRequest(BaseModel):
     document_id: str
-    target_audience: str = Field(default="學生/學習者", max_length=50)
+    target_audience: str = Field(default="大學生", max_length=50)
+    audience: Optional[str] = Field(default=None, max_length=50)
+    tone: str = Field(default="清楚易懂", max_length=50)
     detail_level: Literal["concise", "standard", "detailed"] = Field(default="standard")
     language: Literal["zh-TW", "en", "auto"] = Field(default="zh-TW")
     enable_web_search: bool = Field(default=False)

@@ -18,6 +18,8 @@ class QuizState(TypedDict, total=False):
     document: Document
     question_count: int
     difficulty: str
+    audience: str
+    tone: str
     language: str
     enable_web_search: bool
     ai_service: Any
@@ -43,11 +45,43 @@ def _clean_search_query(text: str) -> str:
     return cleaned[:35]
 
 
+def _get_quiz_tone_guidance(tone: str = "清楚易懂", audience: str = "一般大眾/初學者") -> str:
+    parts = [f"【學習對象命題規範：{audience}】"]
+    if any(k in audience for k in ["國中", "國小", "初學", "入門", "基礎"]):
+        parts.append("- 題幹文字清晰易懂，避免冗長咬文嚼字，情境題應貼近生活經驗與直觀現象。")
+    elif any(k in audience for k in ["高中", "升學"]):
+        parts.append("- 著重觀念整合、因果辨析與實驗數據圖表判讀。")
+    else:
+        parts.append("- 著重學術精準度與深入原理分析。")
+
+    parts.append(f"\n【教學語氣風格貫徹：{tone}】")
+    if "故事" in tone:
+        parts.append(
+            "- 【情境故事化命題】：題幹請盡量設計為「生活情境偵探」、「日常現象解謎」或「生活實驗挑戰」（例如：小明在廚房觀察到...、太空人在月球丟球...），使題目富有趣味與臨場感。\n"
+            "- 【解析故事化引導】：explanation 解析時，請用生動的生活比喻與一步步情境推理，引導學生理解為什麼該選項正確或錯誤，而非單純背誦定義。"
+        )
+    elif "活潑" in tone or "互動" in tone:
+        parts.append(
+            "- 【活潑互動與引導思考】：題幹生動，詳解中多使用啟發性引導語句與動手思考步驟。"
+        )
+    elif "專業" in tone or "嚴謹" in tone:
+        parts.append(
+            "- 【專業嚴謹與標準題型】：標準學術題幹，定義清晰無歧義，解析講求嚴密數理步驟。"
+        )
+    else:
+        parts.append(
+            "- 【清楚易懂】：題目問法直觀明確，解析條理清晰、易於自學理解。"
+        )
+    return "\n".join(parts)
+
+
 def plan_quiz_node(state: QuizState) -> QuizState:
     ai_service = state["ai_service"]
     document = state["document"]
     question_count = state.get("question_count", 5)
     difficulty = state.get("difficulty", "all")
+    audience = state.get("audience", "大學生")
+    tone = state.get("tone", "清楚易懂")
     language = state.get("language", "zh-TW")
     handout_text = state.get("handout_text", "")
 
@@ -60,15 +94,16 @@ def plan_quiz_node(state: QuizState) -> QuizState:
 
     context = "\n\n".join(f"[第 {c.page} 頁] {c.text}" for c in sampled)
     lang_instr = _get_lang_instruction(language)
+    tone_guidance = _get_quiz_tone_guidance(tone=tone, audience=audience)
 
-    system_prompt = f"你是資深教務出題與評量專家。請分析教材內容並規劃一份包含核心觀念、易錯陷阱與推導應用的題目卷大綱。{lang_instr}"
+    system_prompt = f"你是資深教務出題與評量專家。請針對學習對象【{audience}】、以【{tone}】的教學語氣，分析教材內容並規劃一份包含核心觀念、易錯陷阱與推導應用的題目卷大綱。\n\n{tone_guidance}\n\n{lang_instr}"
     
     user_prompt_parts = []
     if handout_text:
         user_prompt_parts.append(f"【教學母本講義結構依據】：\n{handout_text[:3000]}\n")
     user_prompt_parts.append(f"【教材全景內容摘要】（共 {document.pages} 頁、{total_chunks} 區塊）：\n{context}\n")
     user_prompt_parts.append(
-        f"題數：{question_count} 題\n難度傾向：{difficulty}\n目標語言：{language}\n\n"
+        f"學習對象：{audience}\n教學語氣：{tone}\n題數：{question_count} 題\n難度傾向：{difficulty}\n目標語言：{language}\n\n"
         f"請規劃測驗卷標題 (title)、測驗指引說明 (description) 以及 {question_count} 個出題考點方向 (focal_topics)。"
     )
     user_prompt = "\n".join(user_prompt_parts)
@@ -146,6 +181,8 @@ def generate_questions_node(state: QuizState) -> QuizState:
     document = state["document"]
     question_count = state.get("question_count", 5)
     difficulty = state.get("difficulty", "all")
+    audience = state.get("audience", "大學生")
+    tone = state.get("tone", "清楚易懂")
     language = state.get("language", "zh-TW")
     outline = state.get("quiz_outline", {})
     web_results = state.get("web_results", "")
@@ -206,8 +243,10 @@ def generate_questions_node(state: QuizState) -> QuizState:
         "additionalProperties": False,
     }
 
+    tone_guidance = _get_quiz_tone_guidance(tone=tone, audience=audience)
     system_prompt = (
-        f"你是資深命題與評量專家。請為本教材一次性批次設計包含 {question_count} 道高品質測驗試題與詳解的完整試卷。"
+        f"你是資深命題與評量專家。請針對學習對象【{audience}】以【{tone}】的教學風格，為本教材一次性批次設計包含 {question_count} 道高品質測驗試題與詳解的完整試卷。\n\n"
+        f"{tone_guidance}\n\n"
         f"{rule} {lang_instr}"
     )
 

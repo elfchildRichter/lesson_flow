@@ -76,14 +76,13 @@
     <div class="plan-card">
       <div class="plan-head"><span data-i18n="quota.title">每日備課點數</span><b id="quotaBadge">未登入</b></div>
       <div class="credit-summary" style="margin-top: 8px;">
-        <div class="credit-label" style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">
-          <span>今日剩餘點數</span>
-          <strong id="creditBalanceText" style="color: var(--green); font-weight: 700;">- / 100 點</strong>
+        <div class="credit-label" style="display: flex; justify-content: space-between; font-size: 12px; color: #d1fae5; margin-bottom: 5px;">
+          <span data-i18n="quota.daily_remaining">今日剩餘點數</span>
+          <strong id="creditBalanceText" style="color: #34d399; font-weight: 700;">- / 100 點</strong>
         </div>
-        <div class="usage-bar"><i id="creditUsageBar" style="width: 0%; background: linear-gradient(90deg, #10b981, #059669);"></i></div>
-        <div class="credit-hints" style="margin-top: 8px; font-size: 11px; color: #64748b; line-height: 1.45;">
-          <span>簡報 50 · 講義 30 · 試卷 20 點</span><br>
-          <span style="color: #059669; font-weight: 600;">✨ VLM 15 · 解析 5 · 微調 3 點</span>
+        <div class="usage-bar"><i id="creditUsageBar" style="width: 0%; background: linear-gradient(90deg, #34d399, #10b981);"></i></div>
+        <div class="credit-hints" style="margin-top: 8px; font-size: 11px; color: #cbd5e1; line-height: 1.45;">
+          <span data-i18n="quota.hint_main">簡報 50 · 講義 30 · 試卷 20 · 微調 3 點</span>
         </div>
       </div>
     </div>
@@ -157,13 +156,14 @@
           <div class="file-card hidden" id="fileCard">
             <span class="pdf-icon">PDF</span>
             <div class="file-card-info">
-              <div class="file-card-title-row">
-                <b id="fileName">教材.pdf</b>
-                <span class="file-parsed-tag" id="fileParsedBadge">✓ 已完成解析</span>
-              </div>
+              <b id="fileName" title="教材檔案名稱">教材.pdf</b>
               <small id="fileMeta">—</small>
             </div>
             <button id="removeFile" aria-label="移除檔案" title="移除教材">×</button>
+          </div>
+          <div class="file-parsed-status-row hidden" id="fileParsedStatusRow">
+            <span class="file-parsed-tag" id="fileParsedBadge">✓ 已完成解析</span>
+            <small class="file-parsed-hint" id="fileParsedHint" data-i18n="upload.parsed_ready">教材已建立索引，可開始教學設計</small>
           </div>
         </section>
 
@@ -180,7 +180,7 @@
             <div class="common-settings-head">
               <span class="common-settings-title" data-i18n="workspace.common_title">✦ 共通教學設定 (通用於下方三大產出模組)</span>
               <button type="button" class="btn-generate-all" id="generateAllBtn" disabled>
-                <span data-i18n="workspace.generate_all">🚀 一鍵生成全部項目 (簡報+講義+試卷)</span>
+                <span data-i18n="workspace.generate_all">🚀 一鍵生成全套教案 (講義+簡報+試卷)</span>
               </button>
             </div>
             <div class="common-settings-form-grid">
@@ -206,15 +206,50 @@
             </div>
           </div>
 
-          <!-- 3合1 同頁面平行生成卡片群 (3-in-1 Workspace Matrix) -->
+          <!-- 3合1 同頁面平行生成卡片群 (3-in-1 Workspace Matrix - Handout First) -->
           <div class="workspace-modules-grid">
             
-            <!-- 模組 1：教學簡報卡片 -->
+            <!-- 模組 1：隨堂講義卡片 (知識核心母本) -->
+            <div class="module-card handout-module-card">
+              <div class="module-card-header">
+                <div class="module-title-wrap">
+                  <span class="module-badge handout-badge" data-i18n="handout.badge">📝 模組 1</span>
+                  <h3 data-i18n="handout.title">隨堂講義 (Handout)</h3>
+                </div>
+                <small class="module-desc" data-i18n="handout.desc">A4 導讀手冊、核心觀念與研讀建議</small>
+              </div>
+              <div class="module-form-body">
+                <label><span data-i18n="handout.audience">適用對象</span><select id="handoutAudience">
+                    <option>學生/學習者</option>
+                    <option>授課講師備課用</option>
+                    <option>職場專業培訓學員</option>
+                    <option>自學者筆記</option>
+                  </select></label>
+                <label><span data-i18n="handout.detail">詳細程度</span><select id="handoutDetail">
+                    <option value="concise">重點摘要型 (精簡)</option>
+                    <option value="standard" selected>標準導讀型 (平衡)</option>
+                    <option value="detailed">深入剖析型 (詳盡)</option>
+                  </select></label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="handoutWebSearch">
+                  <span data-i18n="handout.web_search">開啟網路知識補充（整合時事案例）</span>
+                </label>
+              </div>
+              <div class="module-card-footer">
+                <button type="button" class="module-action-btn handout-btn" id="generateHandoutBtn" disabled>
+                  <span class="btn-inline-spinner hidden"></span>
+                  <span class="btn-lbl" data-i18n="handout.btn">📝 生成 A4 隨堂講義</span>
+                </button>
+                <div class="module-status-chip" id="handoutStatusChip"></div>
+              </div>
+            </div>
+
+            <!-- 模組 2：教學簡報卡片 -->
             <div class="module-card deck-module-card">
               <div class="module-card-header">
                 <div class="module-title-wrap">
-                  <span class="module-badge deck-badge" data-i18n="deck.badge">🎯 模組 1</span>
-                  <h3 data-i18n="deck.title">教學簡報 (Deck)</h3>
+                  <span class="module-badge deck-badge" data-i18n="deck.badge">🎯 模組 2</span>
+                  <h3 data-i18n="deck.title">教學簡報</h3>
                 </div>
                 <small class="module-desc" data-i18n="deck.desc">投影片大綱、視覺圖解與逐頁講稿</small>
               </div>
@@ -244,41 +279,6 @@
                   <span class="btn-lbl" data-i18n="deck.btn">✦ 生成教學簡報</span>
                 </button>
                 <div class="module-status-chip" id="deckStatusChip"></div>
-              </div>
-            </div>
-
-            <!-- 模組 2：隨堂講義卡片 -->
-            <div class="module-card handout-module-card">
-              <div class="module-card-header">
-                <div class="module-title-wrap">
-                  <span class="module-badge handout-badge" data-i18n="handout.badge">📝 模組 2</span>
-                  <h3 data-i18n="handout.title">隨堂講義 (Handout)</h3>
-                </div>
-                <small class="module-desc" data-i18n="handout.desc">A4 導讀手冊、核心觀念與研讀建議</small>
-              </div>
-              <div class="module-form-body">
-                <label><span data-i18n="handout.audience">適用對象</span><select id="handoutAudience">
-                    <option>學生/學習者</option>
-                    <option>授課講師備課用</option>
-                    <option>職場專業培訓學員</option>
-                    <option>自學者筆記</option>
-                  </select></label>
-                <label><span data-i18n="handout.detail">詳細程度</span><select id="handoutDetail">
-                    <option value="concise">重點摘要型 (精簡)</option>
-                    <option value="standard" selected>標準導讀型 (平衡)</option>
-                    <option value="detailed">深入剖析型 (詳盡)</option>
-                  </select></label>
-                <label class="checkbox-label">
-                  <input type="checkbox" id="handoutWebSearch">
-                  <span data-i18n="handout.web_search">開啟網路知識補充（整合時事案例）</span>
-                </label>
-              </div>
-              <div class="module-card-footer">
-                <button type="button" class="module-action-btn handout-btn" id="generateHandoutBtn" disabled>
-                  <span class="btn-inline-spinner hidden"></span>
-                  <span class="btn-lbl" data-i18n="handout.btn">📝 生成 A4 隨堂講義</span>
-                </button>
-                <div class="module-status-chip" id="handoutStatusChip"></div>
               </div>
             </div>
 
@@ -325,13 +325,13 @@
 
       <div class="value-strip">
         <div><span>01</span>
-          <p><b data-i18n="value.01_title">忠於原文</b><small data-i18n="value.01_desc">回答附上教材頁碼</small></p>
+          <p><b data-i18n="value.01_title">知識母本</b><small data-i18n="value.01_desc">A4 講義完整脈絡與頁碼標註</small></p>
         </div>
         <div><span>02</span>
-          <p><b data-i18n="value.02_title">教學設計</b><small data-i18n="value.02_desc">不是單純內容摘要</small></p>
+          <p><b data-i18n="value.02_title">教學設計</b><small data-i18n="value.02_desc">精簡投影片與逐頁講稿</small></p>
         </div>
         <div><span>03</span>
-          <p><b data-i18n="value.03_title">即刻匯出</b><small data-i18n="value.03_desc">PPTX、講義與試卷</small></p>
+          <p><b data-i18n="value.03_title">即刻匯出</b><small data-i18n="value.03_desc">講義列印、PPTX 與試卷</small></p>
         </div>
       </div>
     </section>
@@ -341,35 +341,37 @@
         <div>
           <p class="eyebrow"><span></span> <span data-i18n="preview.eyebrow">課程產出與預覽</span></p>
           <h1 id="deckTitle" data-i18n="preview.title">教學產出預覽</h1>
-          <p id="deckSubtitle" data-i18n="preview.subtitle">在此檢視並匯出已生成的教學簡報、隨堂講義與單元試卷。</p>
+          <p id="deckSubtitle" data-i18n="preview.subtitle">在此檢視並匯出已生成的隨堂講義、教學簡報與單元試卷。</p>
         </div>
       </div>
 
       <div class="preview-subtabs-bar">
         <div class="preview-tabs">
-          <button type="button" class="preview-tab-btn active" data-preview-tab="deck">
-            <span>🎯</span> <span data-i18n="preview.tab_deck">教學簡報與講稿</span>
-          </button>
-          <button type="button" class="preview-tab-btn" data-preview-tab="handout">
+          <button type="button" class="preview-tab-btn active" data-preview-tab="handout">
             <span>📝</span> <span data-i18n="preview.tab_handout">A4 隨堂講義</span>
+          </button>
+          <button type="button" class="preview-tab-btn" data-preview-tab="deck">
+            <span>🎯</span> <span data-i18n="preview.tab_deck">教學簡報與講稿</span>
           </button>
           <button type="button" class="preview-tab-btn" data-preview-tab="quiz">
             <span>📑</span> <span data-i18n="preview.tab_quiz">單元試卷評量</span>
           </button>
         </div>
 
+        <!-- 講義專屬操作列 (預設顯示) -->
+        <div class="download-actions" id="handoutDownloadActions">
+          <button class="secondary-button disabled" id="handoutToDeckBtn" type="button" data-i18n="handout.btn_to_deck">🎯 依講義生成簡報</button>
+          <button class="secondary-button disabled" id="handoutToQuizBtn" type="button" data-i18n="handout.btn_to_quiz">📑 依講義出題</button>
+          <a class="secondary-button disabled" id="previewHandoutPrintBtn" target="_blank" data-i18n="handout.btn_print">🖨️ A4 排版列印</a>
+          <a class="primary-button disabled" id="previewHandoutMdBtn" data-i18n="handout.btn_download_md">↓ 下載講義 (.md)</a>
+        </div>
+
         <!-- 簡報專屬操作列 -->
-        <div class="download-actions" id="deckDownloadActions">
+        <div class="download-actions hidden" id="deckDownloadActions">
           <a class="secondary-button disabled" id="deckPrintHandoutBtn" target="_blank" data-i18n="deck.btn_print_handout">🖨️ A4 講義列印</a>
           <button class="secondary-button disabled" id="deckToQuizBtn" type="button" data-i18n="deck.btn_deck_to_quiz">🎯 依簡報出題</button>
           <a class="secondary-button disabled" id="scriptDownload" data-i18n="deck.btn_script">↓ 下載講稿</a>
           <a class="primary-button disabled" id="pptDownload" data-i18n="deck.btn_pptx">↓ 匯出 PPTX</a>
-        </div>
-
-        <!-- 講義專屬操作列 -->
-        <div class="download-actions hidden" id="handoutDownloadActions">
-          <a class="secondary-button disabled" id="previewHandoutPrintBtn" target="_blank">🖨️ A4 排版列印</a>
-          <a class="primary-button disabled" id="previewHandoutMdBtn">↓ 下載講義 (.md)</a>
         </div>
 
         <!-- 試卷專屬操作列 -->
@@ -389,12 +391,24 @@
         <span class="edit-sync-indicator" id="globalEditSyncIndicator" style="font-size: 11px;">✓ 隨時自動同步</span>
       </div>
 
-      <!-- 1. 簡報預覽面板 -->
-      <div class="preview-content-panel" id="previewDeckPanel">
+      <!-- 1. 講義預覽面板 (預設顯示) -->
+      <div class="preview-content-panel" id="previewHandoutPanel">
+        <div id="previewHandoutContainer" class="preview-handout-layout">
+          <div class="preview-empty-state">
+            <span>📝</span>
+            <b>尚未生成隨堂講義</b>
+            <small>請在工作台點擊「📝 生成 A4 隨堂講義」或「🚀 一鍵生成全套教案」</small>
+            <button class="secondary-button" type="button" onclick="switchView('workspace')">← 前往工作台生成</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. 簡報預覽面板 -->
+      <div class="preview-content-panel hidden" id="previewDeckPanel">
         <div class="preview-empty-state" id="deckEmptyState">
           <span>🎯</span>
           <b data-i18n="deck.preview_empty_b">尚未生成教學簡報</b>
-          <small data-i18n="deck.preview_empty_s">請在工作台點擊「✦ 生成教學簡報」或「🚀 一鍵生成全部項目」</small>
+          <small data-i18n="deck.preview_empty_s">請在工作台點擊「✦ 生成教學簡報」或「🚀 一鍵生成全套教案」</small>
           <button class="secondary-button" type="button" onclick="switchView('workspace')" data-i18n="deck.preview_empty_btn">← 前往工作台生成</button>
         </div>
         <div class="deck-layout hidden" id="deckLayout">
@@ -428,25 +442,13 @@
         </div>
       </div>
 
-      <!-- 2. 講義預覽面板 -->
-      <div class="preview-content-panel hidden" id="previewHandoutPanel">
-        <div id="previewHandoutContainer" class="preview-handout-layout">
-          <div class="preview-empty-state">
-            <span>📝</span>
-            <b>尚未生成隨堂講義</b>
-            <small>請在工作台點擊「📝 生成 A4 隨堂講義」或「🚀 一鍵生成全部項目」</small>
-            <button class="secondary-button" type="button" onclick="switchView('workspace')">← 前往工作台生成</button>
-          </div>
-        </div>
-      </div>
-
       <!-- 3. 試卷預覽面板 -->
       <div class="preview-content-panel hidden" id="previewQuizPanel">
         <div id="previewQuizContainer" class="preview-quiz-layout">
           <div class="preview-empty-state">
             <span>📑</span>
             <b>尚未生成單元試卷</b>
-            <small>請在工作台點擊「📑 生成單元試卷」或「🚀 一鍵生成全部項目」</small>
+            <small>請在工作台點擊「📑 生成單元試卷」或「🚀 一鍵生成全套教案」</small>
             <button class="secondary-button" type="button" onclick="switchView('workspace')">← 前往工作台生成</button>
           </div>
         </div>

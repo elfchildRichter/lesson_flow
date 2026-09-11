@@ -322,7 +322,49 @@ def _search_web_for_context(query_str: str) -> str:
             return "\n\n".join(formatted)
     except Exception as exc:
         logging.getLogger(__name__).warning("DuckDuckGo 網路搜尋補充失敗：%s", exc)
-    return ""
+def _get_tone_and_audience_guidance(tone: str = "清楚易懂", target_audience: str = "一般大眾/初學者") -> str:
+    parts = [
+        f"【學習對象客製規範（目標：{target_audience}）】",
+    ]
+    if any(k in target_audience for k in ["國中", "國小", "初學", "入門", "基礎"]):
+        parts.append(
+            "- 針對初學/國中/基礎對象：必須深入淺出、連結日常生活經驗，嚴禁直接堆砌艱澀冷僻的術語或無解釋的公式。遇到公式時，務必提供生活化的直觀概念與物理意義。"
+        )
+    elif any(k in target_audience for k in ["高中", "升學"]):
+        parts.append(
+            "- 針對高中/升學對象：重在概念本質與因果邏輯推導，兼顧考試重點觀念辨析與生活現象應用。"
+        )
+    elif any(k in target_audience for k in ["大學", "專業", "工程", "研究"]):
+        parts.append(
+            "- 針對大學/專業對象：強調學術嚴謹度、系統性架構推導、邊界條件與進階原理探討。"
+        )
+    else:
+        parts.append(
+            "- 兼顧易讀性與知識深度，邏輯清晰、循序漸進。"
+        )
+
+    parts.append(f"\n【教學語氣風格貫徹規範（風格：{tone}）】")
+    if "故事" in tone:
+        parts.append(
+            "- 【故事引導與情境破題】：每個章節的摘要 (summary) 或開場，請務必採用引人入勝的生活情境謎題、科學史探索歷程、科學家發現故事、生活冒險或日常困境破題（例如：牛頓為什麼坐在蘋果樹下？太空人在無重力下推購物車會發生什麼事？切開的蘋果為什麼會變褐色？鐵達尼號為何會沉沒？），激發強烈好奇心與沉浸感。\n"
+            "- 【生活化比喻（Metaphor）化解抽象公式】：凡涉及理化公式、定律或抽象概念（如 F=ma、氧化還原、密度、浮力、能量守恆等），嚴禁單純冰冷條列定義，必須搭配鮮活的生活化比喻（例如用推購物車比喻加速度、用男女舞伴配對比喻置換反應、用游泳圈比喻浮力），將公式轉化為生動的情境推演。\n"
+            "- 【情境式探究思考題】：思考與討論題 (discussion_questions) 請以「情境偵探/小小科學家探究」視角設計，引導學生融入情境思考。"
+        )
+    elif "活潑" in tone or "互動" in tone:
+        parts.append(
+            "- 【活潑互動與探究問答】：語氣熱情親切，多運用啟發式問句（如「你有沒有想過...？」、「如果是你，你會怎麼解開這個謎題？」）。\n"
+            "- 穿插生活動手小挑戰、趣味小實驗或日常生活現象觀察，引導學員主動參與。"
+        )
+    elif "專業" in tone or "嚴謹" in tone:
+        parts.append(
+            "- 【專業嚴謹與精確演繹】：術語精確、邏輯嚴密，著重定律定義的邊界條件、數理邏輯推導與系統化架構整理。"
+        )
+    else:  # 清楚易懂
+        parts.append(
+            "- 【清楚易懂與化繁為簡】：使用平實白話文，步驟拆解分明，將複雜觀念拆解為直觀好吸收的重點清單與複習架構。"
+        )
+
+    return "\n".join(parts)
 
 
 class AIService:
@@ -776,6 +818,8 @@ class AIService:
         document: Document,
         question_count: int = 5,
         difficulty: str = "all",
+        audience: str = "大學生",
+        tone: str = "清楚易懂",
         enable_web_search: bool = False,
         language: str = "zh-TW",
         handout_text: Optional[str] = None,
@@ -784,6 +828,8 @@ class AIService:
             "document": document,
             "question_count": question_count,
             "difficulty": difficulty,
+            "audience": audience,
+            "tone": tone,
             "language": language,
             "enable_web_search": enable_web_search,
             "handout_text": handout_text,
@@ -798,7 +844,8 @@ class AIService:
     def generate_handout(
         self,
         document: Document,
-        target_audience: str = "學生/學習者",
+        target_audience: str = "大學生",
+        tone: str = "清楚易懂",
         detail_level: str = "standard",
         language: str = "zh-TW",
         enable_web_search: bool = False,
@@ -816,12 +863,15 @@ class AIService:
             if web_results:
                 web_context = f"\n\n【連網補充題材與資料】\n{web_results}"
 
+        tone_guidance = _get_tone_and_audience_guidance(tone=tone, target_audience=target_audience)
+
         system = (
             "你是一位頂級資深教育名師與課程講義設計專家。"
-            "請根據所提供的教材內容，為學生/學習者設計一份條理分明、重點突出、易於複習的【A4 隨堂講義與學習手冊】。\n\n"
+            f"請根據所提供的教材內容，為學習對象【{target_audience}】以【{tone}】的教學語氣，設計一份條理分明、重點突出、引人入勝且易於複習的【A4 隨堂講義與學習手冊】。\n\n"
+            f"{tone_guidance}\n\n"
             "【排版與數學公式規範】\n"
             "1. 數學與理化公式：教材中凡涉及任何數學公式、物理定律、化學式、變數或計算式，請務必一律使用標準 LaTeX 格式包裹（行內公式與變數使用 $...$ 例如 `$F=ma$` 或 `$\\vec{F}=m\\vec{a}$`；獨立核心公式使用 $$...$$ 例如 `$$F = G\\frac{m_1 m_2}{r^2}$$` 或 `$$E = mc^2$$`）。切勿使用純文字 ASCII 拼湊排版（例如切勿寫成 F=ma 或 m1m2/r^2）。\n"
-            "2. 講義內容結構應扎實：摘要應簡明扼要，核心要點 (key_points) 請條列分明並標記重點，思考題 (discussion_questions) 具啟發性。\n"
+            "2. 講義內容結構應扎實：摘要應生動扣題，核心要點 (key_points) 請條列分明並標記重點，思考題 (discussion_questions) 具啟發性。\n"
             "3. 講義架構應包含：\n"
             "   - 課程總覽 (overview)\n"
             "   - 3~6 個核心章節 (sections)，每章節包含摘要 (summary)、核心要點 (key_points)、思考與討論題 (discussion_questions)，以及出處頁碼 (source_pages)\n"
@@ -856,7 +906,8 @@ class AIService:
 
         prompt = (
             f"教材名稱：{document.name}\n"
-            f"目標對象：{target_audience}\n"
+            f"學習對象：{target_audience}\n"
+            f"教學語氣：{tone}\n"
             f"詳細程度：{detail_level}\n"
             f"輸出語言：{language}\n\n"
             f"【教材內容摘要段落】\n{context}"

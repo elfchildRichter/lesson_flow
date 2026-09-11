@@ -70,8 +70,10 @@ const translations = {
     'provider.title': '⚡ AI 模型提供者',
     'multimodal.title': '📷 教材解析設定',
     'multimodal.toggle_label': '圖表與理化公式辨識',
-    'multimodal.hint': '開啟使用 VLM 視覺大模型辨識（消耗 15 點，標準解析 5 點）',
-    'quota.title': '每日使用額度',
+    'multimodal.hint': '開啟使用圖表與公式解析（消耗 30 點，標準解析為 5 點）',
+    'quota.title': '每日備課點數',
+    'quota.daily_remaining': '今日剩餘點數',
+    'quota.hint_main': '簡報 50 · 講義 30 · 試卷 20 · 微調 3 點',
     'quota.unlogged': '未登入',
     'quota.unlimited': '👑 無限配額',
     'quota.active': '已開通',
@@ -114,6 +116,7 @@ const translations = {
     'upload.sample_hint': '💡 手邊暫無教材？可與 AI 備課助手討論主題，直接生成完整教案：',
     'upload.agent_btn': '💡 前往 AI 備課助手討論',
     'upload.sample_btn': '🚀 載入示範教材 (高中物理)',
+    'upload.parsed_ready': '教材已建立索引，可開始教學設計',
     'preview.editable_hint': '<b>✎ 就地手動編修</b>：點擊下方任何標題、講稿、條列或題目文字均可直接免費修改，系統將自動同步並套用於匯出檔案。',
     'settings.title': '教學設計工作台',
     'settings.status_wait': '等待教材',
@@ -133,19 +136,23 @@ const translations = {
     'value.03_desc': 'PPTX、講義與試卷',
 
     'workspace.common_title': '✦ 共通教學設定 (通用於下方三大產出模組)',
-    'workspace.generate_all': '🚀 一鍵生成全部項目 (簡報+講義+試卷)',
-    'deck.badge': '🎯 模組 1',
-    'deck.title': '教學簡報 (Deck)',
-    'deck.desc': '投影片大綱、視覺圖解與逐頁講稿',
-    'deck.web_search': '開啟網路補充搜尋（延伸案例數據）',
-    'deck.btn': '✦ 生成教學簡報',
-    'handout.badge': '📝 模組 2',
+    'workspace.generate_all': '🚀 一鍵生成全套教案 (講義+簡報+試卷)',
+    'handout.badge': '📝 模組 1',
     'handout.title': '隨堂講義 (Handout)',
     'handout.desc': 'A4 導讀手冊、核心觀念與研讀建議',
     'handout.audience': '適用對象',
     'handout.detail': '詳細程度',
     'handout.web_search': '開啟網路知識補充（整合時事案例）',
     'handout.btn': '📝 生成 A4 隨堂講義',
+    'handout.btn_to_deck': '🎯 依講義生成簡報',
+    'handout.btn_to_quiz': '📑 依講義出題',
+    'handout.btn_print': '🖨️ A4 排版列印',
+    'handout.btn_download_md': '↓ 下載講義 (.md)',
+    'deck.badge': '🎯 模組 2',
+    'deck.title': '教學簡報',
+    'deck.desc': '投影片大綱、視覺圖解與逐頁講稿',
+    'deck.web_search': '開啟網路補充搜尋（延伸案例數據）',
+    'deck.btn': '✦ 生成教學簡報',
     'quiz.badge': '📑 模組 3',
     'quiz.title': '單元試卷 (Quiz)',
     'quiz.desc': '隨堂測驗評量、誘答選項與觀念詳解',
@@ -206,7 +213,7 @@ const translations = {
     'opt.lang.auto': '🤖 與教材同語系 (Auto)',
 
     'deck.eyebrow': '教學內容已就緒',
-    'deck.title': '你的教學簡報',
+    'deck.title': '教學簡報',
     'deck.subtitle': '上傳教材後開始生成。',
     'deck.btn_script': '↓ 下載講稿',
     'deck.btn_pptx': '↓ 匯出 PPTX',
@@ -214,7 +221,7 @@ const translations = {
     'deck.stage_empty_b': '尚未產生內容',
     'deck.stage_empty_s': '回到工作台上傳教材並設定課程',
     'deck.preview_empty_b': '尚未生成教學簡報',
-    'deck.preview_empty_s': '請在工作台點擊「✦ 生成教學簡報」或「🚀 一鍵生成全部項目」',
+    'deck.preview_empty_s': '請在工作台點擊「✦ 生成教學簡報」或「🚀 一鍵生成全套教案」',
     'deck.preview_empty_btn': '← 前往工作台生成',
     'deck.notes_label': '這頁怎麼說',
     'deck.page_ref': '講者備註',
@@ -260,9 +267,9 @@ const translations = {
     'admin.create_btn_submit': '確認建立帳號',
     'admin.opt_role_user': '👤 一般用戶 (user)',
     'admin.opt_role_admin': '👑 系統管理員 (admin)',
-    'admin.opt_tier_trial': '🎓 教師試用版 (1簡報/5提問)',
-    'admin.opt_tier_pro': '⭐ 教師專業版 (10簡報/50提問+VLM)',
-    'admin.opt_tier_inst': '🏫 機構/學校版 (100簡報/500提問)',
+    'admin.opt_tier_trial': '🎓 教師試用版 (100 點/日)',
+    'admin.opt_tier_pro': '⭐ 教師專業版 (1,000 點/日)',
+    'admin.opt_tier_inst': '🏫 機構/學校版 (10,000 點/日)',
 
     'profile.eyebrow': '個人帳號與安全性設定',
     'profile.title': '⚙️ 個人帳號設定',
@@ -372,8 +379,10 @@ const translations = {
     'provider.title': '⚡ AI Provider',
     'multimodal.title': '📷 PDF Reading Mode',
     'multimodal.toggle_label': 'Formula & Diagram Recognition',
-    'multimodal.hint': 'Enable VLM Vision recognition (Costs 15 credits, Standard parse costs 5 credits)',
-    'quota.title': 'Daily Quota',
+    'multimodal.hint': 'Enable formula & diagram parsing (Costs 30 credits, Standard parsing is 5 credits)',
+    'quota.title': 'Daily Credits',
+    'quota.daily_remaining': 'Remaining Credits',
+    'quota.hint_main': 'Deck 50 · Handout 30 · Quiz 20 · Refine 3 pts',
     'quota.unlogged': 'Not Logged In',
     'quota.unlimited': '👑 Unlimited Quota',
     'quota.active': 'Active',
@@ -417,6 +426,7 @@ const translations = {
     'upload.sample_hint': '💡 No material at hand? Chat with AI Assistant to draft a complete lesson plan:',
     'upload.agent_btn': '💡 Consult AI Assistant',
     'upload.sample_btn': '🚀 Load Sample Lesson (Physics)',
+    'upload.parsed_ready': 'Material indexed, ready for lesson design',
     'settings.title': 'Instructional Design Workspace',
     'settings.status_wait': 'Awaiting Material',
     'settings.audience': 'Audience',
@@ -435,19 +445,23 @@ const translations = {
     'value.03_desc': 'Download PPTX, handouts & quiz',
 
     'workspace.common_title': '✦ Common Teaching Settings (Applied across all 3 modules)',
-    'workspace.generate_all': '🚀 Generate All 3 Items (Deck + Handout + Quiz)',
-    'deck.badge': '🎯 Module 1',
-    'deck.title': 'Teaching Deck',
-    'deck.desc': 'Slide outlines, visual diagrams & speaker scripts',
-    'deck.web_search': 'Enable Web Search (Supplement cases & data)',
-    'deck.btn': '✦ Generate Slide Deck',
-    'handout.badge': '📝 Module 2',
+    'workspace.generate_all': '🚀 Generate Complete Package (Handout + Deck + Quiz)',
+    'handout.badge': '📝 Module 1',
     'handout.title': 'Lesson Handout',
     'handout.desc': 'A4 study guide, core takeaways & review notes',
     'handout.audience': 'Target Audience',
     'handout.detail': 'Detail Level',
     'handout.web_search': 'Enable Web Search (Add current cases)',
     'handout.btn': '📝 Generate A4 Handout',
+    'handout.btn_to_deck': '🎯 Generate Deck from Handout',
+    'handout.btn_to_quiz': '📑 Generate Quiz from Handout',
+    'handout.btn_print': '🖨️ A4 Print Layout',
+    'handout.btn_download_md': '↓ Download Handout (.md)',
+    'deck.badge': '🎯 Module 2',
+    'deck.title': 'Teaching Deck',
+    'deck.desc': 'Slide outlines, visual diagrams & speaker scripts',
+    'deck.web_search': 'Enable Web Search (Supplement cases & data)',
+    'deck.btn': '✦ Generate Slide Deck',
     'quiz.badge': '📑 Module 3',
     'quiz.title': 'Unit Quiz',
     'quiz.desc': 'Unit assessment, distractor options & explanations',
@@ -508,7 +522,7 @@ const translations = {
     'opt.lang.auto': '🤖 Auto (Match Material)',
 
     'deck.eyebrow': 'Lesson Content Ready',
-    'deck.title': 'Your Lesson Deck',
+    'deck.title': 'Teaching Deck',
     'deck.subtitle': 'Upload materials to start generating.',
     'deck.btn_script': '↓ Download Script',
     'deck.btn_pptx': '↓ Export PPTX',
@@ -562,9 +576,9 @@ const translations = {
     'admin.create_btn_submit': 'Confirm Create Account',
     'admin.opt_role_user': '👤 Regular User',
     'admin.opt_role_admin': '👑 System Admin',
-    'admin.opt_tier_trial': '🎓 Teacher Free Trial (1 deck/5 ask)',
-    'admin.opt_tier_pro': '⭐ Teacher Pro (10 deck/50 ask + VLM)',
-    'admin.opt_tier_inst': '🏫 Institution / School (100 deck/500 ask)',
+    'admin.opt_tier_trial': '🎓 Teacher Free Trial (100 pts/day)',
+    'admin.opt_tier_pro': '⭐ Teacher Pro (1,000 pts/day)',
+    'admin.opt_tier_inst': '🏫 Institution / School (10,000 pts/day)',
 
     'profile.eyebrow': 'Account & Security Settings',
     'profile.title': '⚙️ Account Settings',
@@ -881,10 +895,30 @@ function toast(message, error = false) {
   el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 3200);
 }
 
-function loading(show, title, copy) {
+let loadingTimer = null;
+function loading(show, title, copy, progressSteps = []) {
+  if (loadingTimer) {
+    clearInterval(loadingTimer);
+    loadingTimer = null;
+  }
   title = title || t('loading.read_title');
   copy = copy || t('loading.read_copy');
-  $('#loadingTitle').textContent = title; $('#loadingCopy').textContent = copy; $('#loadingOverlay').classList.toggle('hidden', !show);
+  const titleEl = $('#loadingTitle');
+  const copyEl = $('#loadingCopy');
+  const overlayEl = $('#loadingOverlay');
+  if (titleEl) titleEl.textContent = title;
+  if (copyEl) copyEl.textContent = copy;
+  if (overlayEl) overlayEl.classList.toggle('hidden', !show);
+
+  if (show && progressSteps && progressSteps.length > 0) {
+    let stepIdx = 0;
+    loadingTimer = setInterval(() => {
+      stepIdx = (stepIdx + 1) % progressSteps.length;
+      if (copyEl) {
+        copyEl.textContent = progressSteps[stepIdx];
+      }
+    }, 2800);
+  }
 }
 
 // 支援 Bearer Token 的 Fetch 封裝
@@ -1471,15 +1505,17 @@ function setDocument(doc, silent = false) {
   state.document = doc;
   $('#settingsPanel').classList.remove('locked');
   $('#fileCard').classList.remove('hidden');
+  $('#fileParsedStatusRow')?.classList.remove('hidden');
   $('#generateBtn').disabled = false;
   if ($('#generateHandoutBtn')) $('#generateHandoutBtn').disabled = false;
   if ($('#generateQuizBtn')) $('#generateQuizBtn').disabled = false;
   if ($('#generateAllBtn')) $('#generateAllBtn').disabled = false;
   $('#settingStatus').textContent = state.lang === 'en' ? '✓ Parsed' : '✓ 已完成解析';
   $('#fileName').textContent = doc.name;
+  $('#fileName').title = doc.name;
   $('#fileMeta').textContent = state.lang === 'en'
-    ? `${doc.pages} pages · ${(doc.size_bytes / 1024 / 1024).toFixed(1)} MB · ${doc.chunks} chunks`
-    : `${doc.pages} 頁 · ${(doc.size_bytes / 1024 / 1024).toFixed(1)} MB · ${doc.chunks} 個知識片段`;
+    ? `${doc.pages} p · ${(doc.size_bytes / 1024 / 1024).toFixed(1)} MB · ${doc.chunks} chunks`
+    : `${doc.pages} 頁 · ${(doc.size_bytes / 1024 / 1024).toFixed(1)} MB · ${doc.chunks} 個片段`;
   $('#questionInput').disabled = false;
   $('#sendBtn').disabled = false;
   $('#chatDoc').innerHTML = state.lang === 'en'
@@ -1522,6 +1558,7 @@ $('#removeFile').addEventListener('click', () => {
   state.document = null;
   $('#settingsPanel').classList.add('locked');
   $('#fileCard').classList.add('hidden');
+  $('#fileParsedStatusRow')?.classList.add('hidden');
   $('#generateBtn').disabled = true;
   if ($('#generateHandoutBtn')) $('#generateHandoutBtn').disabled = true;
   if ($('#generateQuizBtn')) $('#generateQuizBtn').disabled = true;
@@ -3112,7 +3149,7 @@ async function dispatchAgentTask(query) {
         <div class="agent-output-content">${renderMarkdownToHtml(text)}</div>
         <div class="agent-action-bar" style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
           <button type="button" class="agent-action-btn agent-copy-btn" data-copy="${escapeHtml(text)}">${isEn ? '📋 Copy Content' : '📋 複製內容'}</button>
-          ${showPptxBtn ? `<button type="button" class="agent-action-btn agent-pptx-btn" data-query="${escapeHtml(query)}">${isEn ? '📄 Import to Material Parsing' : '📄 導入教材解析'}</button>` : ''}
+          ${showPptxBtn ? `<button type="button" class="agent-action-btn agent-pptx-btn" data-query="${escapeHtml(query)}" data-copy="${escapeHtml(text)}">${isEn ? '📄 Import to Material Parsing' : '📄 導入教材解析'}</button>` : ''}
         </div>
       </div>
     `;
@@ -3181,7 +3218,8 @@ document.addEventListener('click', async (e) => {
     const isEn = state.lang === 'en';
     const topic = pptxBtn.getAttribute('data-query') || 'AI_備課教案';
     const msgBox = pptxBtn.closest('.message');
-    const content = msgBox ? msgBox.querySelector('.agent-output-text')?.textContent || '' : '';
+    const copyBtn = msgBox ? msgBox.querySelector('.agent-copy-btn') : null;
+    const content = pptxBtn.getAttribute('data-copy') || copyBtn?.getAttribute('data-copy') || msgBox?.querySelector('.agent-output-content')?.innerText || '';
 
     if (!content) {
       switchView('workspace');
@@ -3269,7 +3307,7 @@ function getHandoutTextForContext() {
 }
 
 // 1. 教學簡報 (Deck) 生成 Action
-async function generateDeckAction(silent = false) {
+async function generateDeckAction(silent = false, showOverlay = true) {
   if (!state.user) {
     toast(state.lang === 'en' ? 'Please log in first' : '請先登入帳號', true);
     openAuthModal('login');
@@ -3288,15 +3326,42 @@ async function generateDeckAction(silent = false) {
     state.lang === 'en' ? 'Generating deck...' : '簡報生成中...'
   );
 
+  const audience = $('#audience') ? $('#audience').value : '一般大眾/初學者';
+  const tone = $('#tone') ? $('#tone').value : '清楚易懂';
+  const language = $('#targetLanguage') ? $('#targetLanguage').value : 'auto';
+  const duration = +($('#duration')?.value || 30);
+  const slide_count = +($('#slideCount')?.value || 8);
+  const enable_web_search = $('#deckWebSearch') ? $('#deckWebSearch').checked : false;
   const handoutText = getHandoutTextForContext();
+
+  if (showOverlay) {
+    const isEn = state.lang === 'en';
+    loading(
+      true,
+      isEn ? 'Generating Teaching Deck & Script...' : '正在生成教學簡報與逐頁講稿…',
+      isEn ? 'Planning slide outline and pedagogical structure…' : `正在以【${tone}】風格規劃簡報大綱與架構…`,
+      isEn ? [
+        `Tailoring content for ${audience}…`,
+        `Writing speaker notes with ${tone} tone…`,
+        'Verifying hallucination guardrails & KaTeX math…',
+        'Finalizing slides, icons, and visual layout…'
+      ] : [
+        `針對【${audience}】精準調校教學內容深度…`,
+        `以【${tone}】風格撰寫逐頁演講稿與導讀…`,
+        '進行數學與理化公式 LaTeX 格式校驗…',
+        '即將完成教學簡報，準備呈現…'
+      ]
+    );
+  }
+
   const payload = {
     document_id: state.document.id,
-    audience: $('#audience') ? $('#audience').value : '一般大眾/初學者',
-    tone: $('#tone') ? $('#tone').value : '專業嚴謹',
-    language: $('#targetLanguage') ? $('#targetLanguage').value : 'auto',
-    duration: +($('#duration')?.value || 30),
-    slide_count: +($('#slideCount')?.value || 8),
-    enable_web_search: $('#deckWebSearch') ? $('#deckWebSearch').checked : false,
+    audience,
+    tone,
+    language,
+    duration,
+    slide_count,
+    enable_web_search,
     handout_text: handoutText || undefined,
   };
 
@@ -3338,11 +3403,12 @@ async function generateDeckAction(silent = false) {
     return false;
   } finally {
     setBtnLoading(btn, false);
+    if (showOverlay) loading(false);
   }
 }
 
 // 2. 隨堂講義 (Handout) 生成 Action
-async function generateHandoutAction(silent = false) {
+async function generateHandoutAction(silent = false, showOverlay = true) {
   if (!state.user) {
     toast(state.lang === 'en' ? 'Please log in first' : '請先登入帳號', true);
     openAuthModal('login');
@@ -3362,8 +3428,32 @@ async function generateHandoutAction(silent = false) {
   );
 
   const audience = $('#audience') ? $('#audience').value : '一般大眾/初學者';
+  const tone = $('#tone') ? $('#tone').value : '清楚易懂';
+  const language = $('#targetLanguage') ? $('#targetLanguage').value : 'auto';
   const detail_level = $('#handoutDetail') ? $('#handoutDetail').value : 'standard';
   const enable_web_search = $('#handoutWebSearch') ? $('#handoutWebSearch').checked : false;
+
+  if (showOverlay) {
+    const isEn = state.lang === 'en';
+    loading(
+      true,
+      isEn ? 'Generating A4 Study Handout...' : '正在生成 A4 隨堂講義與導讀…',
+      isEn ? 'Analyzing textbook and structuring core concepts…' : `正在以【${tone}】風格分析教材並規劃導讀章節…`,
+      isEn ? [
+        `Customizing narrative for ${audience}…`,
+        `Applying ${tone} storytelling & vivid metaphors…`,
+        'Formatting formulas with standard LaTeX…',
+        'Designing scenario-based inquiry questions…',
+        'Finalizing printable A4 layout…'
+      ] : [
+        `為【${audience}】量身打造章節導讀與複習重點…`,
+        `貫徹【${tone}】風格與生活化比喻…`,
+        '精確排版理化與數理 LaTeX 公式…',
+        '設計情境探究式思考與討論題…',
+        '即將完成 A4 隨堂講義排版…'
+      ]
+    );
+  }
 
   try {
     const handout = await api('/api/handouts/generate', {
@@ -3371,7 +3461,10 @@ async function generateHandoutAction(silent = false) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         document_id: state.document.id,
+        target_audience: audience,
         audience,
+        tone,
+        language,
         detail_level,
         enable_web_search,
       })
@@ -3406,11 +3499,12 @@ async function generateHandoutAction(silent = false) {
     return false;
   } finally {
     setBtnLoading(btn, false);
+    if (showOverlay) loading(false);
   }
 }
 
 // 3. 單元試卷 (Quiz) 生成 Action
-async function generateQuizAction(silent = false) {
+async function generateQuizAction(silent = false, showOverlay = true) {
   if (!state.user) {
     toast(state.lang === 'en' ? 'Please log in first' : '請先登入帳號', true);
     openAuthModal('login');
@@ -3429,10 +3523,35 @@ async function generateQuizAction(silent = false) {
     state.lang === 'en' ? 'Generating quiz...' : '試卷生成中...'
   );
 
+  const audience = $('#audience') ? $('#audience').value : '一般大眾/初學者';
+  const tone = $('#tone') ? $('#tone').value : '清楚易懂';
+  const language = $('#targetLanguage') ? $('#targetLanguage').value : 'auto';
   const question_count = +($('#quizCount')?.value || 5);
   const difficulty = $('#quizDifficulty')?.value || 'all';
   const enable_web_search = $('#quizWebSearch') ? $('#quizWebSearch').checked : false;
   const handoutText = getHandoutTextForContext();
+
+  if (showOverlay) {
+    const isEn = state.lang === 'en';
+    loading(
+      true,
+      isEn ? 'Generating Unit Assessment & Quiz Sheet...' : '正在生成單元試卷評量…',
+      isEn ? 'Planning question distribution and key concepts…' : `正在依據教材與【${tone}】風格規劃命題考點…`,
+      isEn ? [
+        `Setting question difficulty for ${audience}…`,
+        `Crafting scenario questions with ${tone} style…`,
+        'Formulating answer keys and distractor analyses…',
+        'Writing step-by-step mathematical & physical solutions…',
+        'Finalizing printable assessment sheet…'
+      ] : [
+        `針對【${audience}】調配題目難度與知識陷阱…`,
+        `以【${tone}】設計生活情境與探究式題幹…`,
+        '編撰標準答案與深入誘答項解析…',
+        '撰寫詳細推導步驟與 LaTeX 數學算式…',
+        '即將完成單元試卷評量…'
+      ]
+    );
+  }
 
   try {
     const quiz = await api('/api/quiz/generate', {
@@ -3440,6 +3559,9 @@ async function generateQuizAction(silent = false) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         document_id: state.document.id,
+        audience,
+        tone,
+        language,
         question_count,
         difficulty,
         enable_web_search,
@@ -3476,6 +3598,7 @@ async function generateQuizAction(silent = false) {
     return false;
   } finally {
     setBtnLoading(btn, false);
+    if (showOverlay) loading(false);
   }
 }
 
@@ -3494,44 +3617,75 @@ async function generateAllAction() {
   const allBtn = $('#generateAllBtn');
   setBtnLoading(allBtn, true);
 
-  toast(state.lang === 'en' ? 'Generating A4 Handout Master...' : '正在生成 A4 隨堂講義母本...');
+  const tone = $('#tone') ? $('#tone').value : '清楚易懂';
+  const audience = $('#audience') ? $('#audience').value : '一般大眾/初學者';
+  const isEn = state.lang === 'en';
+
+  loading(
+    true,
+    isEn ? 'Generating Complete Lesson Package...' : '正在一鍵生成全套教案…',
+    isEn ? 'Step 1/2: Generating A4 Handout Master…' : '步驟 1/2：正在生成 A4 隨堂講義母本…',
+    isEn ? [
+      `Step 1/2: Crafting A4 Handout with ${tone} style for ${audience}…`,
+      'Step 2/2: Deriving Slide Deck and Quiz in parallel…',
+      'Writing speaker notes and comprehensive quiz explanations…',
+      'Finalizing all 3 teaching materials in parallel…'
+    ] : [
+      `步驟 1/2：以【${tone}】風格為【${audience}】編撰 A4 隨堂講義母本…`,
+      '步驟 2/2：依據講義母本並行生成教學簡報與單元試卷…',
+      '撰寫逐頁演講稿與試卷詳細解析…',
+      '即將完成講義、簡報、試卷全套教案…'
+    ]
+  );
 
   try {
-    // 步驟 1：先生成 A4 隨堂講義作為母本
-    const handoutSuccess = await generateHandoutAction(true);
-
-    toast(state.lang === 'en' ? 'Deriving Deck and Quiz from Handout Master...' : '正在依據講義母本生成教學簡報與單元試卷...');
+    // 步驟 1：先生成 A4 隨堂講義作為母本 (showOverlay = false 由父層統一管理)
+    const handoutSuccess = await generateHandoutAction(true, false);
 
     // 步驟 2：由講義母本並行衍生簡報與試卷 (雙軌融合，極低 Token 消耗)
     const results = await Promise.allSettled([
-      generateDeckAction(true),
-      generateQuizAction(true),
+      generateDeckAction(true, false),
+      generateQuizAction(true, false),
     ]);
 
     const deckSuccess = results[0].status === 'fulfilled' && results[0].value === true;
     const quizSuccess = results[1].status === 'fulfilled' && results[1].value === true;
 
     if (handoutSuccess && deckSuccess && quizSuccess) {
-      toast(state.lang === 'en' ? 'All 3 modules generated successfully! Check in Outputs & Preview.' : '簡報、講義與試卷全套生成完畢！請至產出預覽查看。');
+      toast(state.lang === 'en' ? 'All 3 modules generated successfully! Check in Outputs & Preview.' : '講義、簡報與試卷全套生成完畢！請至產出預覽查看。');
       switchView('deck');
-      switchPreviewTab('deck');
+      switchPreviewTab('handout');
     } else {
       const count = (handoutSuccess ? 1 : 0) + (deckSuccess ? 1 : 0) + (quizSuccess ? 1 : 0);
       toast(state.lang === 'en' ? `Generated ${count}/3 items. Check module statuses.` : `已完成 ${count}/3 項生成，請查看各模組狀態。`);
     }
   } finally {
     setBtnLoading(allBtn, false);
+    loading(false);
   }
 }
 
 // 綁定獨立按鈕與一鍵生成按鈕
 $('#generateHandoutBtn')?.addEventListener('click', () => generateHandoutAction());
+$('#generateBtn')?.addEventListener('click', () => generateDeckAction());
 $('#generateQuizBtn')?.addEventListener('click', () => generateQuizAction());
 $('#generateAllBtn')?.addEventListener('click', () => generateAllAction());
 
+// 綁定講義預覽連鎖觸發按鈕
+$('#handoutToDeckBtn')?.addEventListener('click', () => {
+  switchView('workspace');
+  toast(state.lang === 'en' ? 'Starting slide deck generation from Handout...' : '正在依據講義母本生成教學簡報...');
+  generateDeckAction();
+});
+$('#handoutToQuizBtn')?.addEventListener('click', () => {
+  switchView('workspace');
+  toast(state.lang === 'en' ? 'Starting quiz generation from Handout...' : '正在依據講義母本生成單元試卷...');
+  generateQuizAction();
+});
+
 // === 產出預覽中心 Sub-tabs 切換與渲染 ===
-function switchPreviewTab(tabName) {
-  const tabs = ['deck', 'handout', 'quiz'];
+function switchPreviewTab(tabName = 'handout') {
+  const tabs = ['handout', 'deck', 'quiz'];
   tabs.forEach(t => {
     const btn = $(`[data-preview-tab="${t}"]`);
     const panel = $(`#preview${t.charAt(0).toUpperCase() + t.slice(1)}Panel`);
@@ -3687,7 +3841,7 @@ function formatInlineMarkdown(text) {
   return processed;
 }
 
-// 渲染 A4 講義預覽
+// 渲染 A4 講義預覽 (自然多色塊功能分區排版)
 function renderHandoutPreview() {
   const container = $('#previewHandoutContainer');
   if (!container) return;
@@ -3698,16 +3852,20 @@ function renderHandoutPreview() {
       <div class="preview-empty-state">
         <span>📝</span>
         <b>${isEn ? 'No Handout Generated Yet' : '尚未生成隨堂講義'}</b>
-        <small>${isEn ? 'Click "Generate A4 Handout" in Workspace to create one.' : '請在工作台點擊「📝 生成 A4 隨堂講義」或「🚀 一鍵生成全部項目」'}</small>
+        <small>${isEn ? 'Click "Generate A4 Handout" in Workspace to create one.' : '請在工作台點擊「📝 生成 A4 隨堂講義」或「🚀 一鍵生成全套教案」'}</small>
         <button class="secondary-button" type="button" onclick="switchView('workspace')">${isEn ? '← Go to Workspace' : '← 前往工作台生成'}</button>
       </div>
     `;
+    if ($('#handoutToDeckBtn')) $('#handoutToDeckBtn').classList.add('disabled');
+    if ($('#handoutToQuizBtn')) $('#handoutToQuizBtn').classList.add('disabled');
     if ($('#previewHandoutPrintBtn')) $('#previewHandoutPrintBtn').classList.add('disabled');
     if ($('#previewHandoutMdBtn')) $('#previewHandoutMdBtn').classList.add('disabled');
     return;
   }
 
   const handout = state.handout;
+  if ($('#handoutToDeckBtn')) $('#handoutToDeckBtn').classList.remove('disabled');
+  if ($('#handoutToQuizBtn')) $('#handoutToQuizBtn').classList.remove('disabled');
   if ($('#previewHandoutPrintBtn')) {
     $('#previewHandoutPrintBtn').href = `/api/handouts/${handout.id}/html`;
     $('#previewHandoutPrintBtn').classList.remove('disabled');
@@ -3720,39 +3878,47 @@ function renderHandoutPreview() {
   let sectionsHtml = '';
   if (handout.sections && handout.sections.length) {
     sectionsHtml = handout.sections.map((s, idx) => `
-      <div class="handout-section-card" style="margin-bottom: 20px; padding: 18px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #2563eb; border: 1px solid #e2e8f0; border-left-width: 4px;">
-        <h3 style="font-size: 16px; font-weight: 700; color: #1e3a8a; margin: 0 0 10px 0;">§ ${idx + 1}. <span contenteditable="true" spellcheck="false" data-h-sec-title="${idx}" title="點擊直接修改章節標題">${formatInlineMarkdown(s.title)}</span></h3>
-        <p style="margin: 0 0 8px 0; color: #334155; font-size: 14px;"><b>${isEn ? 'Summary: ' : '✦ 概念摘要：'}</b><span contenteditable="true" spellcheck="false" data-h-sec-sum="${idx}" title="點擊直接修改摘要">${formatInlineMarkdown(s.summary || s.core_concept || '')}</span></p>
-        <p style="margin: 0 0 12px 0; color: #475569; font-size: 13.5px; line-height: 1.7;"><span contenteditable="true" spellcheck="false" data-h-sec-exp="${idx}" title="點擊直接修改說明">${formatInlineMarkdown(s.detailed_explanation || '')}</span></p>
+      <div class="handout-section-card">
+        <h3>§ ${idx + 1}. <span contenteditable="true" spellcheck="false" data-h-sec-title="${idx}" title="點擊直接修改章節標題">${formatInlineMarkdown(s.title)}</span></h3>
+        <p class="sec-summary"><span contenteditable="true" spellcheck="false" data-h-sec-sum="${idx}" title="點擊直接修改導讀摘要">${formatInlineMarkdown(s.summary || s.core_concept || '')}</span></p>
+        ${s.detailed_explanation ? `<p style="margin: 0 0 12px 0; color: #475569; font-size: 13.5px; line-height: 1.7;"><span contenteditable="true" spellcheck="false" data-h-sec-exp="${idx}" title="點擊直接修改說明">${formatInlineMarkdown(s.detailed_explanation)}</span></p>` : ''}
         ${(s.key_points && s.key_points.length) || (s.key_takeaways && s.key_takeaways.length) ? `
-          <div style="background: #eff6ff; padding: 10px 14px; border-radius: 6px; font-size: 13px; color: #1e40af; border: 1px solid #dbeafe;">
-            <b>${isEn ? 'Key Takeaways:' : '📌 重點整理：'}</b>
-            <ul style="margin: 6px 0 0 18px; padding: 0;">
+          <div class="handout-key-points-box">
+            <b>${isEn ? '📌 Key Points:' : '📌 核心要點'}</b>
+            <ul>
               ${(s.key_points || s.key_takeaways || []).map((k, kIdx) => `<li contenteditable="true" spellcheck="false" data-h-sec-kp="${idx}_${kIdx}">${formatInlineMarkdown(k)}</li>`).join('')}
             </ul>
           </div>
         ` : ''}
-        ${s.source_pages && s.source_pages.length ? `<small style="display: block; margin-top: 8px; color: #94a3b8;">${isEn ? 'Source Page: ' : '教材頁碼：'}${s.source_pages.join(', ')}</small>` : ''}
+        ${s.discussion_questions && s.discussion_questions.length ? `
+          <div class="handout-questions-box">
+            <b>${isEn ? '💬 Practice & Discussion:' : '💬 隨堂思考與練習'}</b>
+            <ol>
+              ${s.discussion_questions.map((dq, dqIdx) => `<li contenteditable="true" spellcheck="false" data-h-sec-dq="${idx}_${dqIdx}">${formatInlineMarkdown(dq)}</li>`).join('')}
+            </ol>
+          </div>
+        ` : ''}
+        ${s.source_pages && s.source_pages.length ? `<small class="handout-source-pages">${isEn ? 'Source: Page ' : '教材出處：第 '}${s.source_pages.join(', ')}${isEn ? '' : ' 頁'}</small>` : ''}
       </div>
     `).join('');
   }
 
   container.innerHTML = `
-    <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #e2e8f0;">
-      <h2 style="font-size: 22px; font-weight: 800; color: var(--green); margin: 0 0 6px 0;" contenteditable="true" spellcheck="false" id="handoutPreviewTitle" title="點擊直接修改標題">${formatInlineMarkdown(handout.title || (isEn ? 'Lesson Handout' : '隨堂講義'))}</h2>
-      <p style="margin: 0; color: #64748b; font-size: 13px;">${formatInlineMarkdown(handout.subtitle || '')} · ${isEn ? 'Target: ' : '適用對象：'}${escapeHtml(handout.target_audience || '')}</p>
+    <div class="handout-header-block">
+      <h2 contenteditable="true" spellcheck="false" id="handoutPreviewTitle" title="點擊直接修改標題">${formatInlineMarkdown(handout.title || (isEn ? 'Lesson Handout' : '隨堂講義'))}</h2>
+      <p>${formatInlineMarkdown(handout.subtitle || '')} · ${isEn ? 'Target: ' : '適用對象：'}${escapeHtml(handout.target_audience || '')}</p>
     </div>
     ${handout.overview || handout.overall_summary ? `
-      <div style="margin-bottom: 20px; padding: 14px 16px; background: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0; color: #166534;">
-        <b style="font-size: 14px;">${isEn ? 'Course Summary: ' : '📖 課程整體導讀：'}</b>
-        <p style="margin: 6px 0 0 0; font-size: 13.5px; line-height: 1.6;" contenteditable="true" spellcheck="false" id="handoutPreviewOverview" title="點擊直接修改導讀">${formatInlineMarkdown(handout.overview || handout.overall_summary || '')}</p>
+      <div class="handout-overview-box">
+        <b>${isEn ? '📖 Course Overview:' : '📖 課程導讀：'}</b>
+        <span contenteditable="true" spellcheck="false" id="handoutPreviewOverview" title="點擊直接修改導讀">${formatInlineMarkdown(handout.overview || handout.overall_summary || '')}</span>
       </div>
     ` : ''}
     ${sectionsHtml}
     ${handout.key_takeaways && handout.key_takeaways.length ? `
-      <div style="margin-top: 20px; padding: 14px 16px; background: #fffbeb; border-radius: 8px; border: 1px solid #fde68a; color: #92400e;">
-        <b style="font-size: 14px;">${isEn ? 'Core Takeaways: ' : '💡 核心總結與復習綱要：'}</b>
-        <ul style="margin: 6px 0 0 18px; padding: 0; font-size: 13.5px; line-height: 1.6;">
+      <div class="handout-takeaways-box">
+        <b>${isEn ? '💡 Key Takeaways' : '💡 課後總結與精華 (Key Takeaways)'}</b>
+        <ul>
           ${handout.key_takeaways.map((tip, tIdx) => `<li contenteditable="true" spellcheck="false" data-h-takeaway="${tIdx}">${formatInlineMarkdown(tip)}</li>`).join('')}
         </ul>
       </div>
@@ -3785,7 +3951,7 @@ function renderHandoutPreview() {
   renderMath(container);
 }
 
-// 渲染單元試卷預覽
+// 渲染單元試卷預覽 (靛藍灰色系)
 function renderQuizPreview() {
   const container = $('#previewQuizContainer');
   if (!container) return;
@@ -3795,9 +3961,9 @@ function renderQuizPreview() {
     container.innerHTML = `
       <div class="preview-empty-state">
         <span>📑</span>
-        <b>${isEn ? 'No Quiz Sheet Generated Yet' : '尚未生成單元試卷'}</b>
-        <small>${isEn ? 'Click "Generate Unit Quiz" in Workspace to create one.' : '請在工作台點擊「📑 生成單元試卷」或「🚀 一鍵生成全部項目」'}</small>
-        <button class="secondary-button" type="button" onclick="switchView('workspace')">${isEn ? '← Go to Workspace' : '← 前往工作台生成'}</button>
+        <b style="color: #2c4a63;">${isEn ? 'No Quiz Sheet Generated Yet' : '尚未生成單元試卷'}</b>
+        <small>${isEn ? 'Click "Generate Unit Quiz" in Workspace to create one.' : '請在工作台點擊「📑 生成單元試卷」或「🚀 一鍵生成全套教案」'}</small>
+        <button class="secondary-button" style="color: #2c4a63; border-color: #cbd5e1; background: #f0f4f8;" type="button" onclick="switchView('workspace')">${isEn ? '← Go to Workspace' : '← 前往工作台生成'}</button>
       </div>
     `;
     if ($('#previewQuizStudentBtn')) $('#previewQuizStudentBtn').classList.add('disabled');
@@ -3823,34 +3989,34 @@ function renderQuizPreview() {
   };
 
   container.innerHTML = `
-    <div style="margin-bottom: 20px; padding-bottom: 14px; border-bottom: 2px solid #e2e8f0;">
-      <h2 style="font-size: 22px; font-weight: 800; color: var(--green); margin: 0 0 6px 0;" contenteditable="true" spellcheck="false" id="quizPreviewTitle" title="點擊直接修改標題">${escapeHtml(quiz.title || (isEn ? 'Unit Quiz' : '單元試卷'))}</h2>
-      <p style="margin: 0; color: #64748b; font-size: 13px;">${escapeHtml(quiz.description || '')} · ${quiz.questions ? quiz.questions.length : 0} ${isEn ? 'Questions' : '題'}</p>
+    <div style="margin-bottom: 20px; padding-bottom: 14px; border-bottom: 2px solid #cbd5e1;">
+      <h2 style="font-size: 22px; font-weight: 800; color: #2c4a63; margin: 0 0 6px 0;" contenteditable="true" spellcheck="false" id="quizPreviewTitle" title="點擊直接修改標題">${formatInlineMarkdown(quiz.title || (isEn ? 'Unit Quiz' : '單元試卷'))}</h2>
+      <p style="margin: 0; color: #64748b; font-size: 13px;">${formatInlineMarkdown(quiz.description || '')} · ${quiz.questions ? quiz.questions.length : 0} ${isEn ? 'Questions' : '題'}</p>
     </div>
     ${(quiz.questions || []).map((q, idx) => `
-      <div class="quiz-question-card" style="margin-bottom: 18px; padding: 16px; background: #ffffff; border-radius: 8px; border: 1px solid var(--line); border-left: 4px solid var(--green); box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+      <div class="quiz-question-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px;">
-          <h4 style="font-size: 15px; font-weight: 700; color: var(--green); margin: 0; flex: 1;">
-            第 ${idx + 1} 題. <span contenteditable="true" spellcheck="false" data-q-text-idx="${idx}" title="點擊直接修改題目內容">${escapeHtml(q.question)}</span>
+          <h4>
+            第 ${idx + 1} 題. <span contenteditable="true" spellcheck="false" data-q-text-idx="${idx}" title="點擊直接修改題目內容">${formatInlineMarkdown(q.question)}</span>
           </h4>
           <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
             <button type="button" class="btn-regen-question" data-qidx="${idx}" title="消耗 3 點備課點數抽換此題">🔄 換這題 (3 點)</button>
-            <span style="font-size: 11px; padding: 2px 8px; border-radius: 99px; background: #ecefe8; color: var(--green); border: 1px solid #dce1d9; font-weight: 600; white-space: nowrap;">
+            <span class="quiz-diff-chip">
               ${diffLabels[q.difficulty] || q.difficulty}
             </span>
           </div>
         </div>
         <div style="margin: 10px 0 12px 10px; display: grid; grid-template-columns: 1fr; gap: 8px;">
           ${(q.options || []).map((opt, optIdx) => `
-            <div style="font-size: 13.5px; color: var(--ink); padding: 8px 12px; background: var(--card); border: 1px solid var(--line); border-radius: 6px;" contenteditable="true" spellcheck="false" data-q-opt-idx="${idx}_${optIdx}" title="點擊直接修改選項">
-              ${escapeHtml(opt)}
+            <div class="quiz-option-item" contenteditable="true" spellcheck="false" data-q-opt-idx="${idx}_${optIdx}" title="點擊直接修改選項">
+              ${formatInlineMarkdown(opt)}
             </div>
           `).join('')}
         </div>
-        <div class="preview-quiz-ans-block ${showTeacher ? '' : 'hidden'}" style="margin-top: 10px; padding: 12px 14px; background: #f4f7f4; border-radius: 6px; border: 1px solid #d1ded6; font-size: 13px; color: var(--green);">
-          <p style="margin: 0 0 4px 0; font-weight: 700;">${isEn ? 'Answer: ' : '【標準答案】'} <span contenteditable="true" spellcheck="false" data-q-ans-idx="${idx}">${escapeHtml(q.answer)}</span></p>
-          <p style="margin: 0; color: #2d5a4e;"><b>${isEn ? 'Explanation: ' : '【解析】'}</b><span contenteditable="true" spellcheck="false" data-q-exp-idx="${idx}" title="點擊直接修改解析">${escapeHtml(q.explanation)}</span></p>
-          ${q.source_pages && q.source_pages.length ? `<small style="display: block; margin-top: 6px; color: var(--muted);">${isEn ? 'Source Page: ' : '教材依據：第 '}${q.source_pages.join(', ')}${isEn ? '' : ' 頁'}</small>` : ''}
+        <div class="preview-quiz-ans-block ${showTeacher ? '' : 'hidden'}">
+          <p style="margin: 0 0 4px 0; font-weight: 700; color: #2c4a63;">${isEn ? 'Answer: ' : '【標準答案】'} <span contenteditable="true" spellcheck="false" data-q-ans-idx="${idx}">${formatInlineMarkdown(q.answer)}</span></p>
+          <p style="margin: 0; color: #334155;"><b>${isEn ? 'Explanation: ' : '【解析】'}</b><span contenteditable="true" spellcheck="false" data-q-exp-idx="${idx}" title="點擊直接修改解析">${formatInlineMarkdown(q.explanation)}</span></p>
+          ${q.source_pages && q.source_pages.length ? `<small style="display: block; margin-top: 6px; color: #94a3b8;">${isEn ? 'Source Page: ' : '教材依據：第 '}${q.source_pages.join(', ')}${isEn ? '' : ' 頁'}</small>` : ''}
         </div>
       </div>
     `).join('')}

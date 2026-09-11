@@ -52,6 +52,36 @@ def _normalize_icon(raw_icon: str) -> str:
     return "💡"
 
 
+def _get_deck_tone_guidance(tone: str = "清楚易懂", audience: str = "一般大眾/初學者") -> str:
+    parts = [f"【學習對象簡報規範：{audience}】"]
+    if any(k in audience for k in ["國中", "國小", "初學", "入門", "基礎"]):
+        parts.append("- 投影片重點簡明扼要，避免文字過多，演講稿（speaker_notes）以生活現象與直觀比喻切入。")
+    elif any(k in audience for k in ["高中", "升學"]):
+        parts.append("- 投影片著重觀念對比、重點歸納，演講稿著重因果關聯與關鍵概念剖析。")
+    else:
+        parts.append("- 投影片結構嚴謹，演講稿具備學術深度與專業說理。")
+
+    parts.append(f"\n【教學語氣與演講風格貫徹：{tone}】")
+    if "故事" in tone:
+        parts.append(
+            "- 【故事脈絡引導】：投影片標題與演講稿（speaker_notes）請採用故事敘事口吻（例如：『從生活中的一個謎題開始...』、『科學家如何偶然發現這一定律？』），每頁開場善用情境提問帶入。\n"
+            "- 【逐頁講稿情境化】：speaker_notes 必須如同生動說故事的名師，將抽象概念比喻為生活情境，娓娓道來。"
+        )
+    elif "活潑" in tone or "互動" in tone:
+        parts.append(
+            "- 【活潑互動與引導問答】：speaker_notes 多使用親切互動問句，穿插學員提問與情境思考。"
+        )
+    elif "專業" in tone or "嚴謹" in tone:
+        parts.append(
+            "- 【專業嚴謹與精準說理】：演講稿邏輯嚴密，用語標準精確。"
+        )
+    else:
+        parts.append(
+            "- 【清楚易懂】：講稿深入淺出，節奏明快，清楚傳達每頁核心重點。"
+        )
+    return "\n".join(parts)
+
+
 def plan_outline_node(state: DeckState) -> DeckState:
     ai_service = state["ai_service"]
     document = state["document"]
@@ -72,8 +102,9 @@ def plan_outline_node(state: DeckState) -> DeckState:
 
     context = "\n\n".join(f"[第 {c.page} 頁] {c.text}" for c in sampled)
     lang_instr = _get_lang_instruction(language)
+    tone_guidance = _get_deck_tone_guidance(tone=tone, audience=audience)
 
-    system_prompt = f"你是資深教學設計師。請規劃整份簡報的大綱架構與章節主題。{lang_instr}"
+    system_prompt = f"你是資深教學設計師。請規劃整份簡報的大綱架構與章節主題。\n\n{tone_guidance}\n\n{lang_instr}"
     
     user_prompt_parts = []
     if handout_text:
@@ -256,8 +287,10 @@ def generate_contents_node(state: DeckState) -> DeckState:
         "additionalProperties": False,
     }
 
+    tone_guidance = _get_deck_tone_guidance(tone=tone, audience=audience)
     system_prompt = (
-        f"你是資深教學設計師。請以專業嚴謹的結構，一次性批次產出整份包含 {slide_count} 頁的教學簡報。"
+        f"你是資深教學設計師。請以專業嚴謹的結構，一次性批次產出整份包含 {slide_count} 頁的教學簡報。\n\n"
+        f"{tone_guidance}\n\n"
         f"{visual_prompt_rule} {bullets_rule} {notes_rule} {lang_instr}"
     )
 

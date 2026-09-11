@@ -133,7 +133,8 @@ def test_parse_and_vlm_credit_costs():
     import datetime
 
     assert ACTION_CREDIT_COSTS["parse"] == 5
-    assert ACTION_CREDIT_COSTS["vlm_parse"] == 15
+    assert ACTION_CREDIT_COSTS["refine"] == 3
+    assert ACTION_CREDIT_COSTS["vlm_parse"] == 30
 
     db_path = os.getenv("AUTH_DB_PATH", "./data/users.db")
     today_str = datetime.date.today().isoformat()
@@ -142,26 +143,34 @@ def test_parse_and_vlm_credit_costs():
         cursor = conn.cursor()
         cursor.execute("DELETE FROM daily_quotas WHERE user_id = 'test_user_parse_rb'")
         cursor.execute(
-            "INSERT INTO daily_quotas (user_id, action, usage_date, used_count, daily_limit) VALUES (?, 'credits', ?, 30, 100)",
+            "INSERT INTO daily_quotas (user_id, action, usage_date, used_count, daily_limit) VALUES (?, 'credits', ?, 50, 100)",
             ("test_user_parse_rb", today_str)
         )
         conn.commit()
 
-        # Rollback vlm_parse (15 credits) -> 30 - 15 = 15
+        # Rollback vlm_parse (30 credits) -> 50 - 30 = 20
         rollback_user_quota("test_user_parse_rb", "vlm_parse")
         cursor.execute(
             "SELECT used_count FROM daily_quotas WHERE user_id = ? AND action = 'credits' AND usage_date = ?",
             ("test_user_parse_rb", today_str)
         )
-        assert cursor.fetchone()[0] == 15
+        assert cursor.fetchone()[0] == 20
 
-        # Rollback parse (5 credits) -> 15 - 5 = 10
+        # Rollback refine (3 credits) -> 20 - 3 = 17
+        rollback_user_quota("test_user_parse_rb", "refine")
+        cursor.execute(
+            "SELECT used_count FROM daily_quotas WHERE user_id = ? AND action = 'credits' AND usage_date = ?",
+            ("test_user_parse_rb", today_str)
+        )
+        assert cursor.fetchone()[0] == 17
+
+        # Rollback parse (5 credits) -> 17 - 5 = 12
         rollback_user_quota("test_user_parse_rb", "parse")
         cursor.execute(
             "SELECT used_count FROM daily_quotas WHERE user_id = ? AND action = 'credits' AND usage_date = ?",
             ("test_user_parse_rb", today_str)
         )
-        assert cursor.fetchone()[0] == 10
+        assert cursor.fetchone()[0] == 12
 
         cursor.execute("DELETE FROM daily_quotas WHERE user_id = 'test_user_parse_rb'")
         conn.commit()
