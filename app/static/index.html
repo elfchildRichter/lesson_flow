@@ -23,12 +23,14 @@
 <body>
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
   <aside class="sidebar">
-    <a class="brand" href="#" aria-label="課伴首頁" data-view="workspace">
+    <a class="brand" href="#" aria-label="課伴首頁" data-view="home">
       <span class="brand-mark"><span></span><span></span><span></span></span>
       <span data-i18n="nav.brand">課伴<small>LESSONFLOW (Alpha)</small></span>
     </a>
     <nav>
-      <button class="nav-item active" data-view="workspace"><span class="icon">📄</span><span
+      <button class="nav-item active" data-view="home"><span class="icon">✨</span><span
+          data-i18n="nav.home">產品介紹</span></button>
+      <button class="nav-item" data-view="workspace"><span class="icon">📄</span><span
           data-i18n="nav.workspace">工作台</span></button>
       <button class="nav-item" data-view="deck"><span class="icon">▤</span><span data-i18n="nav.deck">產出預覽</span><span
           class="nav-count" id="deckCount">0</span></button>
@@ -97,8 +99,8 @@
   <main>
     <header class="topbar" id="mainTopbar">
       <button class="menu-toggle" aria-label="切換選單">☰</button>
-      <div class="breadcrumb"><span data-view="workspace" style="cursor:pointer;"
-          data-i18n="nav.workspace">工作台</span><i>/</i><strong id="crumb" data-i18n="nav.crumb_create">建立新課程</strong>
+      <div class="breadcrumb"><span data-view="home" style="cursor:pointer;"
+          data-i18n="nav.brand_root">課伴</span><i>/</i><strong id="crumb" data-i18n="nav.crumb_home">產品介紹</strong>
       </div>
       <div class="top-actions">
         <span class="status-dot"><i></i><span id="modeText" data-i18n="topbar.status_ready">系統就緒</span></span>
@@ -122,7 +124,124 @@
     <!-- Floating Topbar Restore Button (Shown when topbar is collapsed) -->
     <button type="button" class="btn-topbar-restore hidden" id="topbarRestoreBtn" title="展開頂部工具列">▼</button>
 
-    <section class="view active" id="workspaceView">
+    <!-- 首頁 / 產品介紹 畫面 (Hero 視覺、核心 CTA、雙軌輸入流程、4 大功能展示與承諾條) -->
+    <section class="view active" id="homeView">
+      <div class="hero">
+        <div>
+          <p class="eyebrow"><span></span> <span data-i18n="hero.eyebrow">AI 教學設計工作台</span></p>
+          <h1 data-i18n="hero.title">把教材，變成一堂<br><em>真正好懂的課。</em></h1>
+          <p class="hero-copy" data-i18n="hero.subtitle">可直接上傳教材或與 AI 備課助手討論構思，完整產出好教好懂的講義、簡報與試卷；支援知識補充檢索、隨時手動修訂，讓備課與上課更順暢。</p>
+          <div class="home-hero-actions">
+            <button type="button" class="primary-button" data-view="workspace" style="padding: 10px 22px; font-size: 14px;">
+              <span data-i18n="home.btn_start">🚀 進入工作台開始備課</span>
+            </button>
+            <button type="button" class="secondary-button" data-view="agent" style="padding: 10px 20px; font-size: 14px;">
+              <span data-i18n="home.btn_agent">💡 諮詢 AI 備課助手</span>
+            </button>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="orbit orbit-a"></div>
+          <div class="orbit orbit-b"></div>
+          <div class="book">
+            <span></span>
+            <i></i>
+          </div>
+          <div class="spark s1">✦</div>
+          <div class="spark s2">✦</div>
+          <div class="spark s3">✦</div>
+        </div>
+      </div>
+
+      <div class="steps">
+        <div class="step done">
+          <span>01</span>
+          <div>
+            <b data-i18n="steps.step1_title">輸入或構思</b>
+            <small data-i18n="steps.step1_sub">PDF 解析 · AI 討論</small>
+          </div>
+        </div>
+        <i></i>
+        <div class="step done">
+          <span>02</span>
+          <div>
+            <b data-i18n="steps.step2_title">設定目標</b>
+            <small data-i18n="steps.step2_sub">對象、語氣與節奏</small>
+          </div>
+        </div>
+        <i></i>
+        <div class="step active">
+          <span>03</span>
+          <div>
+            <b data-i18n="steps.step3_title">完整產出</b>
+            <small data-i18n="steps.step3_sub">講義 · 簡報 · 試卷</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- 核心能力展示區 (5 大功能特色) -->
+      <div class="home-features-section">
+        <div class="home-features-grid">
+          <div class="home-feature-card">
+            <div class="feat-icon">📄</div>
+            <div style="flex: 1;">
+              <h3 data-i18n="home.feat1_title">多模態與標準教材解析</h3>
+              <p data-i18n="home.feat1_desc">常規教材採「標準文字解析」即可達到高水準教學設計，高速省額度；含理化公式或幾何圖表之教材，可啟用「多模態深度解析」精準理解圖像。</p>
+            </div>
+          </div>
+
+          <div class="home-feature-card">
+            <div class="feat-icon">📖</div>
+            <div style="flex: 1;">
+              <h3 data-i18n="home.feat4_title">教材問答與精準溯源</h3>
+              <p data-i18n="home.feat4_desc">專屬教材助教，預設嚴格根據上傳教材之原文段落回答並附上精準頁碼，確保教學依據真實可考、絕不憑空捏造；亦可按需啟用聯網搜尋，補充外部延伸知識與時事案例。</p>
+            </div>
+          </div>
+
+          <div class="home-feature-card">
+            <div class="feat-icon">📝</div>
+            <div style="flex: 1;">
+              <h3 data-i18n="home.feat3_title">隨堂講義與試卷評量</h3>
+              <p data-i18n="home.feat3_desc">一鍵生成 A4 導讀手冊與具備誘答解析的單元測驗卷，支援學生測驗卷與教師詳解模式，提供 Word / PDF 高清匯出。</p>
+            </div>
+          </div>
+
+          <div class="home-feature-card">
+            <div class="feat-icon">🎯</div>
+            <div style="flex: 1;">
+              <h3 data-i18n="home.feat2_title">教學簡報與逐頁講稿</h3>
+              <p data-i18n="home.feat2_desc">循序漸進投影片架構，每頁配備核心圖解提示與教師專屬逐頁演講稿，支援線上就地手動微調並同步匯出 PPTX / Word。</p>
+            </div>
+          </div>
+
+          <div class="home-feature-card" style="grid-column: 1 / -1;">
+            <div class="feat-icon">💡</div>
+            <div style="flex: 1;">
+              <h3 data-i18n="home.feat5_title">AI 專家備課助手 (4 大部門與智慧導航)</h3>
+              <p data-i18n="home.feat5_desc">手邊無現成教材也能備課！內建「教務教學部、營運行政部、市場營銷部、技術維護部」4 大專家部門，可針對特定任務深度諮詢；亦可直接使用「全域智慧導航模式」，系統自動精準分派至對應專業助手，構思教案後可一鍵銜接全套產出。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 底部價值標語 (Value Strip) -->
+      <div class="value-strip">
+        <div>
+          <span>01</span>
+          <p><b data-i18n="value.01_title">實證為本</b><small data-i18n="value.01_desc">以教材核心為基準，支援精準頁碼溯源與聯網補充</small></p>
+        </div>
+        <div>
+          <span>02</span>
+          <p><b data-i18n="value.02_title">教學設計</b><small data-i18n="value.02_desc">循序漸進架構，每頁皆有明確教學目標與講稿</small></p>
+        </div>
+        <div>
+          <span>03</span>
+          <p><b data-i18n="value.03_title">即刻匯出</b><small data-i18n="value.03_desc">一鍵匯出 PPTX 簡報、Word 講義與測驗試卷</small></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="workspaceView">
       <div class="section-head">
         <div>
           <p class="eyebrow"><span></span> <span data-i18n="hero.eyebrow">AI 教學設計工作台</span></p>
@@ -582,7 +701,7 @@
               <span class="dept-icon">🎓</span>
               <div>
                 <h3 data-i18n="agent.dept_academic_title">教務教學部</h3>
-                <small data-i18n="agent.dept_academic_role">Lesson Flow 小老師</small>
+                <small data-i18n="agent.dept_academic_role">教務小老師</small>
               </div>
               <span class="dept-badge badge-active" id="deptBadgeAcademic">🟢 已啟用</span>
             </div>
@@ -596,13 +715,13 @@
               <span class="dept-icon">🚀</span>
               <div>
                 <h3 data-i18n="agent.dept_mkt_title">市場與營銷部</h3>
-                <small data-i18n="agent.dept_mkt_role">營銷推廣負責人</small>
+                <small data-i18n="agent.dept_mkt_role">營銷推廣專員</small>
               </div>
               <span class="dept-badge badge-active" id="deptBadgeMarketing">🟢 已啟用</span>
             </div>
             <p class="dept-desc" data-i18n="agent.dept_mkt_desc">負責課程宣傳推廣、教學賣點包裝、招生文案與 FB/Threads/LinkedIn 社群貼文生成。</p>
             <button type="button" class="primary-button dept-chat-btn" data-dept="marketing"
-              style="width:100%; margin-top:12px; font-size:12px; padding:6px 12px;">💬 與營銷推廣負責人對話</button>
+              style="width:100%; margin-top:12px; font-size:12px; padding:6px 12px;">💬 與營銷推廣專員對話</button>
           </div>
 
           <div class="agent-dept-card" id="deptCardOperations" data-dept="operations">
@@ -639,7 +758,7 @@
       <div class="agent-dept-bar hidden" id="agentDeptBar">
         <div class="agent-dept-bar-left">
           <span class="agent-dept-bar-tag" data-i18n="agent.current_dept_tag">🏢 當前諮詢</span>
-          <span class="agent-dept-bar-title" id="agentDeptBarTitle">🎓 教務教學部（Lesson Flow 小老師）</span>
+          <span class="agent-dept-bar-title" id="agentDeptBarTitle">🎓 教務教學部（教務小老師）</span>
         </div>
         <div class="agent-dept-bar-actions">
           <button type="button" class="dept-switch-chip active" data-dept="academic">🎓 教務教學</button>
@@ -793,17 +912,17 @@
         <div class="auth-brand-steps">
           <div class="auth-step-item">
             <span class="auth-step-num">01</span>
-            <div><b data-i18n="steps.01_title">上傳解析</b><small data-i18n="steps.01_desc">PDF / 圖表辨識</small></div>
+            <div><b data-i18n="steps.step1_title">輸入或構思</b><small data-i18n="steps.step1_sub">PDF 解析 · AI 討論</small></div>
           </div>
           <div class="auth-step-arrow">→</div>
           <div class="auth-step-item">
             <span class="auth-step-num">02</span>
-            <div><b data-i18n="steps.02_title">教學設計</b><small data-i18n="steps.02_desc">簡報·講義·試卷</small></div>
+            <div><b data-i18n="steps.step2_title">設定目標</b><small data-i18n="steps.step2_sub">對象、語氣與節奏</small></div>
           </div>
           <div class="auth-step-arrow">→</div>
           <div class="auth-step-item">
             <span class="auth-step-num">03</span>
-            <div><b data-i18n="steps.03_title">AI 助手</b><small data-i18n="steps.03_desc">多領域備課·問答</small></div>
+            <div><b data-i18n="steps.step3_title">完整產出</b><small data-i18n="steps.step3_sub">講義 · 簡報 · 試卷</small></div>
           </div>
         </div>
       </div>

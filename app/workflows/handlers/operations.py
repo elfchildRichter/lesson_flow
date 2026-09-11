@@ -18,7 +18,7 @@ def operations_handler(payload: Dict[str, Any]) -> Dict[str, Any]:
         return {
             "output_text": (
                 "👋 您好！我是【🏫 營運與行政部】的教務行政特助。\n\n"
-                "設計單元教案大綱與生成測驗試題屬於【🎓 教務教學部】（Lesson Flow 小老師）的職權範圍。\n\n"
+                "設計單元教案大綱與生成測驗試題屬於【🎓 教務教學部】（教務小老師）的職權範圍。\n\n"
                 "👉 建議您點擊切換至【🎓 教務教學部】（與教務小老師對話），獲得專屬備課設計支援！"
             ),
             "department": "operations",

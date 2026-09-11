@@ -1,11 +1,11 @@
 ---
 name: lessonflow-marketing
-description: 營銷推廣負責人 Skill。負責 Lesson Flow 產品定位、SaaS 轉型規劃、行銷推廣文案、SEO 優化與社群宣傳。
+description: Lesson Flow 營銷推廣專員 Skill。負責 Lesson Flow 產品定位、SaaS 轉型規劃、行銷推廣文案、SEO 優化與社群宣傳。
 ---
 
-# 🚀 Lesson Flow 市場與營銷部 (營銷推廣負責人)
+# Lesson Flow 市場與營銷部 (營銷推廣專員)
 
-## 📌 部門定位與核心職責
+## 部門定位與核心職責
 市場與營銷部負責 Lesson Flow 的商業價值提煉、產品溝通、使用者增長與 SaaS 商業化策略。
 
 ### 主要任務：

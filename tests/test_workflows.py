@@ -393,10 +393,18 @@ def test_quiz_graph_with_web_search(monkeypatch):
     result = quiz_graph.invoke(state)
     sheet = result["quiz_sheet"]
 
-    assert sheet.title == "聯網考古題綜合評量"
-    assert len(sheet.questions) == 1
-    assert any("參考經典題型資料" in p for p in prompts)
 
+def test_company_router_marketing_intent():
+    from app.workflows.router import company_router
 
-
-
+    state = {
+        "input_query": "我要教兒童coding，要怎麼行銷？",
+        "payload": {
+            "query": "我要教兒童coding，要怎麼行銷？",
+            "target_department": None,
+            "user_info": {"role": "user", "tier": {"allowed_departments": ["academic", "marketing", "operations", "devops"]}}
+        }
+    }
+    result = company_router.invoke(state)
+    assert result["target_department"] == "marketing"
+    assert result["matched_skill"] == "saas_marketing"

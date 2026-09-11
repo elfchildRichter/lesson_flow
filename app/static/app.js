@@ -15,16 +15,19 @@ const $$ = (selector) => [...document.querySelectorAll(selector)];
 const translations = {
   'zh-TW': {
     'nav.brand': '課伴<small>LESSONFLOW (Alpha)</small>',
+    'nav.brand_root': '課伴',
+    'nav.home': '產品介紹',
     'nav.workspace': '工作台',
     'nav.deck': '產出預覽',
     'nav.chat': '教材問答',
     'nav.profile': '個人帳號設定',
     'nav.admin': '管理員控制台',
     'nav.agent': 'AI 備課助手',
-    'nav.crumb_create': '建立新課程',
-    'nav.crumb_workspace': '工作台',
-    'nav.crumb_deck': '產出預覽',
-    'nav.crumb_chat': '教材問答',
+    'nav.crumb_home': '產品介紹',
+    'nav.crumb_create': '教學設計工作台',
+    'nav.crumb_workspace': '教學設計工作台',
+    'nav.crumb_deck': '教學產出預覽',
+    'nav.crumb_chat': '教材問答知識庫',
     'nav.crumb_admin': '管理員控制台',
     'nav.crumb_agent': 'AI 備課助手',
     'nav.crumb_profile': '個人帳號設定',
@@ -48,13 +51,13 @@ const translations = {
     'agent.metric_router_sub': '意圖自適應分流與容錯',
     'agent.dept_status_active': '🟢 服務中',
     'agent.dept_academic_title': '教務教學部',
-    'agent.dept_academic_role': 'Lesson Flow 小老師',
+    'agent.dept_academic_role': '教務小老師',
     'agent.dept_academic_desc': '負責教材解析、問答流調優、單元教案大綱、試題與簡報逐頁演講稿生成。',
     'agent.dept_ops_title': '營運與行政部',
     'agent.dept_ops_role': '教務行政特助',
     'agent.dept_ops_desc': '負責學校/機構團體合約、席位授權撥發、帳號開通與團隊權限維護。',
     'agent.dept_mkt_title': '市場與營銷部',
-    'agent.dept_mkt_role': '營銷推廣負責人',
+    'agent.dept_mkt_role': '營銷推廣專員',
     'agent.dept_mkt_desc': '負責課程宣傳推廣、教學賣點包裝、招生文案與 FB/Threads/LinkedIn 社群貼文生成。',
     'agent.dept_devops_title': '技術維護部',
     'agent.dept_devops_role': '技術維護工程師',
@@ -67,6 +70,7 @@ const translations = {
     'agent.sug_3': '🚀 FB/Threads 社群推廣文案',
     'agent.sug_4': '📋 查詢會員等級與每日配額',
     'agent.placeholder': '下達備課或教學任務 (例: \'幫我設計一份 45 分鐘物理教案大綱\' 或 \'出 5 題選擇題\')...',
+    'agent.shortcut': '<span>↵</span> Enter 傳送 · Shift + Enter 換行',
     'provider.title': '⚡ AI 模型提供者',
     'multimodal.title': '📷 教材解析設定',
     'multimodal.toggle_label': '圖表與理化公式辨識',
@@ -95,6 +99,8 @@ const translations = {
     'workspace.title': 'AI 教學設計工作台',
     'workspace.subtitle': '可直接上傳教材或與 AI 備課助手討論構思，完整產出好教好懂的講義、簡報與試卷；支援知識補充檢索、隨時手動修訂，讓備課與上課更順暢。',
     'hero.title': '把教材，變成一堂<br><em>真正好懂的課。</em>',
+    'hero.title_em': '真正好懂的課。',
+    'hero.subtitle': '可直接上傳教材或與 AI 備課助手討論構思，完整產出好教好懂的講義、簡報與試卷；支援知識補充檢索、隨時手動修訂，讓備課與上課更順暢。',
     'hero.copy': '可直接上傳教材或與 AI 備課助手討論構思，完整產出好教好懂的講義、簡報與試卷，<br>支援知識補充檢索、隨時手動修訂，讓備課與上課更順暢。',
     'hero.toggle_collapse': '收合介紹',
     'hero.toggle_expand': '展開介紹',
@@ -102,12 +108,24 @@ const translations = {
     'auth_brand.eyebrow': '✦ 課伴 LessonFlow',
     'auth_brand.title': '把教材，變成一堂<br><em>真正好懂的課。</em>',
     'auth_brand.copy': '可直接上傳教材或與 AI 備課助手討論構思，完整產出好教好懂的講義、簡報與試卷；支援知識補充檢索、隨時手動修訂，讓備課與上課更順暢。',
-    'steps.01_title': '上傳解析',
-    'steps.01_desc': 'PDF / 圖表辨識',
-    'steps.02_title': '教學設計',
-    'steps.02_desc': '簡報·講義·試卷',
-    'steps.03_title': 'AI 助手',
-    'steps.03_desc': '多領域備課·問答',
+    'steps.step1_title': '輸入或構思',
+    'steps.step1_sub': 'PDF 解析 · AI 討論',
+    'steps.step2_title': '設定目標',
+    'steps.step2_sub': '對象、語氣與節奏',
+    'steps.step3_title': '完整產出',
+    'steps.step3_sub': '講義 · 簡報 · 試卷',
+    'home.btn_start': '🚀 進入工作台開始備課',
+    'home.btn_agent': '💡 諮詢 AI 備課助手',
+    'home.feat1_title': '多模態與標準教材解析',
+    'home.feat1_desc': '常規教材採「標準文字解析」即可達到高水準教學設計，高速省額度；含理化公式或幾何圖表之教材，可啟用「多模態深度解析」精準理解圖像。',
+    'home.feat4_title': '教材問答與精準溯源',
+    'home.feat4_desc': '專屬教材助教，預設嚴格根據上傳教材之原文段落回答並附上精準頁碼，確保教學依據真實可考、絕不憑空捏造；亦可按需啟用聯網搜尋，補充外部延伸知識與時事案例。',
+    'home.feat3_title': '隨堂講義與試卷評量',
+    'home.feat3_desc': '一鍵生成 A4 導讀手冊與具備誘答解析的單元測驗卷，支援學生測驗卷與教師詳解模式，提供 Word / PDF 高清匯出。',
+    'home.feat2_title': '教學簡報與逐頁講稿',
+    'home.feat2_desc': '循序漸進投影片架構，每頁配備核心圖解提示與教師專屬逐頁演講稿，支援線上就地手動微調並同步匯出 PPTX / Word。',
+    'home.feat5_title': 'AI 專家備課助手 (4 大部門與智慧導航)',
+    'home.feat5_desc': '手邊無現成教材也能備課！內建「教務教學部、營運行政部、市場營銷部、技術維護部」4 大專家部門，可針對特定任務深度諮詢；亦可直接使用「全域智慧導航模式」，系統自動精準分派至對應專業助手，構思教案後可一鍵銜接全套產出。',
     'upload.title': '選擇你的教材',
     'upload.secure': '✓ 安全加密',
     'upload.drag': '拖曳 PDF 到這裡',
@@ -128,12 +146,12 @@ const translations = {
     'settings.web_search': '開啟網路補充搜尋（延伸案例數據）',
     'settings.generate_btn': '生成教學內容',
     'settings.estimate': '預計需要 1–2 分鐘，可留在此頁等待',
-    'value.01_title': '忠於原文',
-    'value.01_desc': '回答附上教材頁碼',
+    'value.01_title': '實證為本',
+    'value.01_desc': '以教材核心為基準，支援精準頁碼溯源與聯網補充',
     'value.02_title': '教學設計',
-    'value.02_desc': '不是單純內容摘要',
+    'value.02_desc': '循序漸進架構，每頁皆有明確教學目標與講稿',
     'value.03_title': '即刻匯出',
-    'value.03_desc': 'PPTX、講義與試卷',
+    'value.03_desc': '一鍵匯出 PPTX 簡報、Word 講義與測驗試卷',
 
     'workspace.common_title': '✦ 共通教學設定 (通用於下方三大產出模組)',
     'workspace.generate_all': '🚀 一鍵生成全套教案 (講義+簡報+試卷)',
@@ -146,6 +164,7 @@ const translations = {
     'handout.btn_to_workbench': '🎯 參考講義調整教學設計',
     'handout.btn_print': '🖨️ A4 預覽列印 (另存 PDF)',
     'handout.btn_download_docx': '📄 下載 Word (.docx)',
+    'handout.btn': '📝 生成 A4 隨堂講義',
     'deck.badge': '🎯 模組 2',
     'deck.title': '教學簡報',
     'deck.desc': '投影片大綱、視覺圖解與逐頁講稿',
@@ -196,7 +215,7 @@ const translations = {
     'opt.quiz_diff.medium': '中等理解題',
     'opt.quiz_diff.hard': '進階論述與計算題',
 
-    'opt.provider.gemini': '✨ Gemini 雲端 (Cloud API)',
+    'opt.provider.gemini': 'Gemini 雲端 (Cloud API) ✨',
     'opt.provider.ollama_cloud': 'Ollama 雲端 (Cloud API)',
     'opt.provider.ollama_local': 'Ollama 本機 (Local LLM)',
     'opt.provider.openai': 'OpenAI 雲端 (GPT-4o)',
@@ -328,14 +347,17 @@ const translations = {
   },
   'en': {
     'nav.brand': 'LessonFlow<small>(Alpha)</small>',
+    'nav.brand_root': 'LessonFlow',
+    'nav.home': 'Product Overview',
     'nav.workspace': 'Workspace',
     'nav.deck': 'Outputs & Preview',
     'nav.chat': 'Material Q&A',
     'nav.profile': 'Account Settings',
     'nav.admin': 'Admin Console',
     'nav.agent': 'AI Lesson Assistant',
-    'nav.crumb_create': 'Create Course',
-    'nav.crumb_workspace': 'Workspace',
+    'nav.crumb_home': 'Product Overview',
+    'nav.crumb_create': 'Instructional Workspace',
+    'nav.crumb_workspace': 'Instructional Workspace',
     'nav.crumb_deck': 'Outputs & Preview',
     'nav.crumb_chat': 'Material Q&A',
     'nav.crumb_admin': 'Admin Console',
@@ -362,13 +384,13 @@ const translations = {
     'agent.metric_router_sub': 'Adaptive Intent Routing & Fallback',
     'agent.dept_status_active': '🟢 Active',
     'agent.dept_academic_title': 'Academic & Teaching',
-    'agent.dept_academic_role': 'Lesson Flow Tutor',
+    'agent.dept_academic_role': 'LessonFlow Tutor',
     'agent.dept_academic_desc': 'Handles material parsing, Q&A, lesson plan outlines, quiz questions, and slide deck scripts.',
     'agent.dept_ops_title': 'Operations & Admin',
-    'agent.dept_ops_role': 'Ops & Institution Admin',
+    'agent.dept_ops_role': 'Operations Assistant',
     'agent.dept_ops_desc': 'Handles school/institution licensing, member seat allocation, account approvals, and org permissions.',
     'agent.dept_mkt_title': 'Marketing & Sales',
-    'agent.dept_mkt_role': 'Marketing Lead',
+    'agent.dept_mkt_role': 'Marketing Specialist',
     'agent.dept_mkt_desc': 'Promotes your courses, packages teaching highlights, creates enrollment copy, and generates social media posts.',
     'agent.dept_devops_title': 'DevOps & Maintenance',
     'agent.dept_devops_role': 'DevOps Engineer',
@@ -381,6 +403,7 @@ const translations = {
     'agent.sug_3': '🚀 FB/Threads Promo Post',
     'agent.sug_4': '📋 Check Tier & Daily Quota',
     'agent.placeholder': 'Enter teaching task (e.g. \'Design a 45-min Physics lesson plan\' or \'Generate 5 quiz questions\')...',
+    'agent.shortcut': '<span>↵</span> Enter to send · Shift + Enter for new line',
     'provider.title': '⚡ AI Provider',
     'multimodal.title': '📷 PDF Reading Mode',
     'multimodal.toggle_label': 'Formula & Diagram Recognition',
@@ -410,19 +433,33 @@ const translations = {
     'workspace.title': 'AI Instructional Design Workspace',
     'workspace.subtitle': 'Upload materials or brainstorm with AI teaching assistants to generate engaging handouts, slide decks, and quiz sheets; with knowledge search and live editing to streamline your teaching.',
     'hero.title': 'Transform Materials into<br><em>Truly Engaging Lessons.</em>',
+    'hero.title_em': 'Truly Engaging Lessons.',
+    'hero.subtitle': 'Upload materials or brainstorm with AI teaching assistants to generate engaging handouts, slide decks, and quiz sheets; with knowledge search and live editing to streamline your teaching.',
     'hero.copy': 'Upload materials or brainstorm with AI teaching assistants to craft structured handouts, slide decks, and quizzes,<br>with knowledge search and instant manual editing.',
     'hero.toggle_collapse': 'Collapse Intro',
     'hero.toggle_expand': 'Expand Intro',
     'hero.collapsed_title': 'Turn materials into clear, structured lessons.',
     'auth_brand.eyebrow': '✦ LessonFlow',
-    'auth_brand.title': 'Transform Materials into<br><em>Engaging Lessons.</em>',
+    'auth_brand.title': 'Transform Materials into<br><em>Truly Engaging Lessons.</em>',
     'auth_brand.copy': 'Upload materials or brainstorm with AI teaching assistants to generate engaging handouts, slide decks, and quiz sheets; with knowledge search and live editing to streamline your teaching.',
-    'steps.01_title': 'Upload & Parse',
-    'steps.01_desc': 'PDF / Formula OCR',
-    'steps.02_title': 'Lesson Design',
-    'steps.02_desc': 'Decks · Handouts · Quizzes',
-    'steps.03_title': 'AI Copilot',
-    'steps.03_desc': 'Expert Agents & Q&A',
+    'steps.step1_title': 'Input & Ideate',
+    'steps.step1_sub': 'PDF · AI Chat',
+    'steps.step2_title': 'Set Target',
+    'steps.step2_sub': 'Audience & Tone',
+    'steps.step3_title': 'Full Output',
+    'steps.step3_sub': 'Handout · Deck · Quiz',
+    'home.btn_start': '🚀 Launch Instructional Workspace',
+    'home.btn_agent': '💡 Consult AI Lesson Assistant',
+    'home.feat1_title': 'Standard & Multimodal Parsing',
+    'home.feat1_desc': 'Fast Standard OCR delivers high quality for text materials while saving credits; enable Multimodal VLM for deep formula and diagram comprehension.',
+    'home.feat4_title': 'Material Q&A & Source Citations',
+    'home.feat4_desc': 'Dedicated material copilot that strictly answers based on uploaded documents with exact page citations to prevent hallucinations; optional web search can be toggled for external case studies.',
+    'home.feat3_title': 'A4 Handouts & Unit Quizzes',
+    'home.feat3_desc': 'Generate study guides and quiz sheets with distractor rationales, student/teacher modes, and Word/PDF export support.',
+    'home.feat2_title': 'Slide Decks & Speaker Notes',
+    'home.feat2_desc': 'Progressive slide structure with conceptual visual cues and comprehensive speaker notes, editable directly on-screen.',
+    'home.feat5_title': 'AI Expert Lesson Assistant (4 Departments & Auto-Routing)',
+    'home.feat5_desc': 'No PDF at hand? Brainstorm with 4 specialized expert departments (Academic, Ops, Marketing, DevOps) or use the unified Omni Auto-Router to automatically route tasks and generate full lesson plans directly.',
     'upload.title': 'Select Your Material',
     'upload.secure': '✓ Secure & Encrypted',
     'upload.drag': 'Drag & Drop PDF Here',
@@ -442,12 +479,12 @@ const translations = {
     'settings.web_search': 'Enable Web Search (Supplement cases & data)',
     'settings.generate_btn': 'Generate Lesson Content',
     'settings.estimate': 'Takes about 1–2 minutes, feel free to wait here',
-    'value.01_title': 'Factually Faithful',
-    'value.01_desc': 'Answers cited with PDF page numbers',
+    'value.01_title': 'Evidence-Grounded',
+    'value.01_desc': 'Anchored in source materials with page citations & web supplements',
     'value.02_title': 'Instructional Design',
     'value.02_desc': 'Structured learning, not just summaries',
     'value.03_title': 'Instant Export',
-    'value.03_desc': 'Download PPTX, handouts & quiz',
+    'value.03_desc': 'Download PPTX, Word handouts & quizzes',
 
     'workspace.common_title': '✦ Common Teaching Settings (Applied across all 3 modules)',
     'workspace.generate_all': '🚀 Generate Complete Package (Handout + Deck + Quiz)',
@@ -460,6 +497,7 @@ const translations = {
     'handout.btn_to_workbench': '🎯 Reference Handout in Workspace',
     'handout.btn_print': '🖨️ A4 Preview & Print (PDF)',
     'handout.btn_download_docx': '📄 Download Word (.docx)',
+    'handout.btn': '📝 Generate A4 Handout',
     'deck.badge': '🎯 Module 2',
     'deck.title': 'Teaching Deck',
     'deck.desc': 'Slide outlines, visual diagrams & speaker scripts',
@@ -680,7 +718,7 @@ function setLanguage(lang) {
     updateAuthUI(null);
   }
 
-  const activeView = $('.view.active')?.id.replace('View', '') || 'workspace';
+  const activeView = $('.view.active')?.id.replace('View', '') || 'home';
   switchView(activeView);
 }
 
@@ -1173,6 +1211,35 @@ function updateAuthUI(user) {
     if ($('#userAvatar')) $('#userAvatar').textContent = state.lang === 'en' ? 'G' : '客';
     if ($('#userProfileInfo')) $('#userProfileInfo').innerHTML = `${t('quota.guest')}<small>${tier.badge}</small>`;
   }
+
+  // 更新首頁 Portal 卡片 (訪客登入區 vs 已登入歡迎區)
+  const guestPortal = $('#homeGuestPortal');
+  const userPortal = $('#homeUserPortal');
+  if (guestPortal && userPortal) {
+    if (user) {
+      guestPortal.classList.add('hidden');
+      userPortal.classList.remove('hidden');
+      if ($('#homeWelcomeUsername')) $('#homeWelcomeUsername').textContent = user.username;
+      if ($('#homeWelcomeRoleBadge')) {
+        $('#homeWelcomeRoleBadge').textContent = tier.badge;
+        $('#homeWelcomeRoleBadge').className = `role-chip ${user.role}`;
+      }
+      if ($('#homeWelcomeAvatar')) {
+        $('#homeWelcomeAvatar').textContent = user.role === 'admin' ? '👑' : user.username.charAt(0).toUpperCase();
+      }
+      if ($('#homeWelcomeQuota')) {
+        const isUnlimited = tier.isUnlimited;
+        const credits = user.credits || { remaining: 100, daily_limit: 100 };
+        $('#homeWelcomeQuota').textContent = isUnlimited
+          ? (state.lang === 'en' ? 'Unlimited credits' : '無限點數')
+          : (state.lang === 'en' ? `Today's remaining: ${credits.remaining !== undefined ? credits.remaining : 100} / ${credits.daily_limit || 100} pts` : `今日剩餘點數：${credits.remaining !== undefined ? credits.remaining : 100} / ${credits.daily_limit || 100} 點`);
+      }
+    } else {
+      guestPortal.classList.remove('hidden');
+      userPortal.classList.add('hidden');
+    }
+  }
+
   updateAdminUI();
   updateAgentDepartmentBadges(user);
   updateFeaturePermissionsUI(user);
@@ -1188,9 +1255,9 @@ function renderDeptActiveIndicators() {
   const activeKey = state.activeDept; // null = unsegmented omni mode
 
   const depts = [
-    { key: 'academic', card: '#deptCardAcademic', defaultLabel: isEn ? '💬 Chat with Academic Tutor' : '💬 與教務小老師對話', activeLabel: isEn ? '✓ Active Chatting' : '✓ 對話中 (教務小老師)' },
-    { key: 'marketing', card: '#deptCardMarketing', defaultLabel: isEn ? '💬 Chat with Marketing Lead' : '💬 與營銷推廣負責人對話', activeLabel: isEn ? '✓ Active Chatting' : '✓ 對話中 (營銷推廣負責人)' },
-    { key: 'operations', card: '#deptCardOperations', defaultLabel: isEn ? '💬 Chat with Ops Admin' : '💬 與教務行政特助對話', activeLabel: isEn ? '✓ Active Chatting' : '✓ 對話中 (教務行政特助)' },
+    { key: 'academic', card: '#deptCardAcademic', defaultLabel: isEn ? '💬 Chat with LessonFlow Tutor' : '💬 與教務小老師對話', activeLabel: isEn ? '✓ Active Chatting' : '✓ 對話中 (教務小老師)' },
+    { key: 'marketing', card: '#deptCardMarketing', defaultLabel: isEn ? '💬 Chat with Marketing Specialist' : '💬 與營銷推廣專員對話', activeLabel: isEn ? '✓ Active Chatting' : '✓ 對話中 (營銷推廣專員)' },
+    { key: 'operations', card: '#deptCardOperations', defaultLabel: isEn ? '💬 Chat with Operations Assistant' : '💬 與教務行政特助對話', activeLabel: isEn ? '✓ Active Chatting' : '✓ 對話中 (教務行政特助)' },
     { key: 'devops', card: '#deptCardDevops', defaultLabel: isEn ? '💬 Chat with DevOps Engineer' : '💬 與技術維護工程師對話', activeLabel: isEn ? '✓ Active Chatting' : '✓ 對話中 (技術維護工程師)' }
   ];
 
@@ -1441,11 +1508,90 @@ $('#registerForm').addEventListener('submit', async (e) => {
     $('#regPassword').value = '';
     setTimeout(() => {
       switchAuthTab('login');
-      $('#loginUsername').value = username;
+      if ($('#loginUsername')) $('#loginUsername').value = username;
     }, 2000);
   } catch (err) {
     errorEl.textContent = err.message;
     errorEl.classList.remove('hidden');
+  }
+});
+
+// 首頁 Tab 切換與登入/註冊處理
+function switchHomeAuthTab(tab) {
+  const isLogin = tab === 'login';
+  $('#homeTabLoginBtn')?.classList.toggle('active', isLogin);
+  $('#homeTabRegisterBtn')?.classList.toggle('active', !isLogin);
+  $('#homeLoginForm')?.classList.toggle('hidden', !isLogin);
+  $('#homeRegisterForm')?.classList.toggle('hidden', isLogin);
+}
+
+$('#homeTabLoginBtn')?.addEventListener('click', () => switchHomeAuthTab('login'));
+$('#homeTabRegisterBtn')?.addEventListener('click', () => switchHomeAuthTab('register'));
+
+$('#homeLoginForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const username = $('#homeLoginUsername')?.value.trim();
+  const password = $('#homeLoginPassword')?.value;
+  const errorEl = $('#homeLoginError');
+  if (errorEl) errorEl.classList.add('hidden');
+
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.detail || (state.lang === 'en' ? 'Login failed' : '登入失敗'));
+    }
+
+    localStorage.setItem('auth_token', data.access_token);
+    await fetchCurrentUser();
+    toast(state.lang === 'en' ? `Welcome back, ${data.username}!` : `登入成功！歡迎回來，${data.username}`);
+  } catch (err) {
+    if (errorEl) {
+      errorEl.textContent = err.message;
+      errorEl.classList.remove('hidden');
+    }
+  }
+});
+
+$('#homeRegisterForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const username = $('#homeRegUsername')?.value.trim();
+  const password = $('#homeRegPassword')?.value;
+  const errorEl = $('#homeRegError');
+  const successEl = $('#homeRegSuccess');
+  if (errorEl) errorEl.classList.add('hidden');
+  if (successEl) successEl.classList.add('hidden');
+
+  try {
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.detail || (state.lang === 'en' ? 'Registration failed' : '註冊失敗'));
+    }
+
+    if (successEl) {
+      successEl.textContent = data.message || (state.lang === 'en' ? 'Registered! Awaiting admin approval.' : '註冊成功！請等待管理員核准開通。');
+      successEl.classList.remove('hidden');
+    }
+    if ($('#homeRegUsername')) $('#homeRegUsername').value = '';
+    if ($('#homeRegPassword')) $('#homeRegPassword').value = '';
+    setTimeout(() => {
+      switchHomeAuthTab('login');
+      if ($('#homeLoginUsername')) $('#homeLoginUsername').value = username;
+    }, 2000);
+  } catch (err) {
+    if (errorEl) {
+      errorEl.textContent = err.message;
+      errorEl.classList.remove('hidden');
+    }
   }
 });
 
@@ -1629,14 +1775,15 @@ function switchView(name) {
   if ($(`#${name}View`)) $(`#${name}View`).classList.add('active');
 
   const crumbs = {
-    'workspace': t('nav.crumb_create'),
+    'home': t('nav.crumb_home'),
+    'workspace': t('nav.crumb_workspace'),
     'deck': t('nav.crumb_deck'),
     'chat': t('nav.crumb_chat'),
     'profile': t('nav.crumb_profile'),
     'agent': t('nav.crumb_agent'),
     'admin': t('nav.crumb_admin')
   };
-  if ($('#crumb')) $('#crumb').textContent = crumbs[name] || t('nav.crumb_create');
+  if ($('#crumb')) $('#crumb').textContent = crumbs[name] || t('nav.crumb_home');
   if (innerWidth < 950) toggleSidebar(false);
 
 
@@ -2844,7 +2991,7 @@ setLanguage(state.lang);
 const DEPT_WELCOME_CONFIGS = {
   academic: {
     avatar: '🎓',
-    title: { 'zh-TW': '💡 歡迎與教務小老師對話', 'en': '💡 Welcome to Academic & Lesson Planning Tutor' },
+    title: { 'zh-TW': '💡 歡迎與教務小老師對話', 'en': '💡 Welcome to LessonFlow Tutor' },
     desc: { 'zh-TW': '請下達備課或教學任務（例如：「設計牛頓運動定律 45 分鐘教案」、「出 5 題高中生物題」或「生成逐頁演講稿」）。', 'en': 'Enter lesson plan or teaching tasks (e.g. "Design a 45-min Physics plan", "Generate 5 Biology quiz questions").' },
     suggestions: [
       { text: '🎓 45 分鐘教案設計', query: '請幫我設計一份 45 分鐘國中物理「牛頓第二運動定律」的備課教案與觀念大綱' },
@@ -2854,7 +3001,7 @@ const DEPT_WELCOME_CONFIGS = {
   },
   marketing: {
     avatar: '🚀',
-    title: { 'zh-TW': '🚀 歡迎與營銷推廣負責人對話', 'en': '🚀 Welcome to Marketing & Promotion Lead' },
+    title: { 'zh-TW': '🚀 歡迎與營銷推廣專員對話', 'en': '🚀 Welcome to Marketing Specialist' },
     desc: { 'zh-TW': '請下達推廣或文案任務（例如：「撰寫微課教學 FB 貼文」、「梳理課程核心賣點」或「撰寫教學心得文章」）。', 'en': 'Enter marketing tasks (e.g. "Write an FB promo post", "Summarize course pitch features").' },
     suggestions: [
       { text: '📱 FB / Threads 社群推廣貼文', query: '請幫我產出一篇介紹微課教學與防幻覺 AI 助手的 FB 社群推廣文案' },
@@ -2864,7 +3011,7 @@ const DEPT_WELCOME_CONFIGS = {
   },
   operations: {
     avatar: '🏫',
-    title: { 'zh-TW': '🏫 歡迎與教務行政特助對話', 'en': '🏫 Welcome to Ops & Institution Admin' },
+    title: { 'zh-TW': '🏫 歡迎與教務行政特助對話', 'en': '🏫 Welcome to Operations Assistant' },
     desc: { 'zh-TW': '請下達行政或權限查詢任務（例如：「查詢學校團體合約」、「檢視團隊席位配額」或「查詢個人每日限額」）。', 'en': 'Enter admin tasks (e.g. "Check school contract terms", "View team seat allocation").' },
     suggestions: [
       { text: '🏫 查詢機構與學校團體合約', query: '查詢學校與機構團體授權合約與成員開通方式' },
@@ -2874,7 +3021,7 @@ const DEPT_WELCOME_CONFIGS = {
   },
   devops: {
     avatar: '🛠️',
-    title: { 'zh-TW': '🛠️ 歡迎與技術維護工程師對話', 'en': '🛠️ Welcome to DevOps & Maintenance Engineer' },
+    title: { 'zh-TW': '🛠️ 歡迎與技術維護工程師對話', 'en': '🛠️ Welcome to DevOps Engineer' },
     desc: { 'zh-TW': '請下達維護或診斷任務（例如：「排查 Railway 部署狀態」、「診斷 Linux OOM 記憶體效能」或「檢視 JWT 驗證」）。', 'en': 'Enter devops tasks (e.g. "Check Railway deploy health", "Diagnose Linux Kernel OOM memory").' },
     suggestions: [
       { text: '🛠️ 排查 Railway 雲端部署狀態', query: '排查本機與 Railway 雲端部署運行狀態與環境設定' },
@@ -2887,9 +3034,9 @@ const DEPT_WELCOME_CONFIGS = {
 function updateAgentDeptBar(deptKey) {
   const isEn = state.lang === 'en';
   const deptLabels = {
-    academic: isEn ? '🎓 Academic & Teaching (Lesson Flow Tutor)' : '🎓 教務教學部（Lesson Flow 小老師）',
-    marketing: isEn ? '🚀 Marketing & Sales (Marketing Lead)' : '🚀 市場與營銷部（營銷推廣負責人）',
-    operations: isEn ? '🏫 Operations & Admin (Ops Admin)' : '🏫 營運與行政部（教務行政特助）',
+    academic: isEn ? '🎓 Academic & Teaching (LessonFlow Tutor)' : '🎓 教務教學部（教務小老師）',
+    marketing: isEn ? '🚀 Marketing & Sales (Marketing Specialist)' : '🚀 市場與營銷部（營銷推廣專員）',
+    operations: isEn ? '🏫 Operations & Admin (Operations Assistant)' : '🏫 營運與行政部（教務行政特助）',
     devops: isEn ? '🛠️ DevOps & Infra (DevOps Engineer)' : '🛠️ 技術維護部（技術維護工程師）'
   };
   const titleEl = $('#agentDeptBarTitle');
@@ -2987,9 +3134,9 @@ function switchAgentDeptWelcome(deptKey) {
   container.scrollTop = container.scrollHeight;
 
   const deptNames = {
-    academic: lang === 'en' ? '🎓 Academic Tutor' : '🎓 教務小老師',
-    marketing: lang === 'en' ? '🚀 Marketing Lead' : '🚀 營銷推廣負責人',
-    operations: lang === 'en' ? '🏫 Ops Admin' : '🏫 教務行政特助',
+    academic: lang === 'en' ? '🎓 LessonFlow Tutor' : '🎓 教務小老師',
+    marketing: lang === 'en' ? '🚀 Marketing Specialist' : '🚀 營銷推廣專員',
+    operations: lang === 'en' ? '🏫 Operations Assistant' : '🏫 教務行政特助',
     devops: lang === 'en' ? '🛠️ DevOps Engineer' : '🛠️ 技術維護工程師'
   };
   const label = deptNames[deptKey] || deptNames.academic;
@@ -3127,7 +3274,7 @@ async function dispatchAgentTask(query) {
       body: JSON.stringify({
         query,
         platform,
-        target_department: state.activeDept || 'academic',
+        target_department: state.activeDept || null,
         history: state.agentHistory.slice(-10)
       })
     });

@@ -46,7 +46,11 @@ def classify_intent_node(state: CompanyState) -> CompanyState:
         }
 
     # 3. High priority check: Action intent for course promotion, articles, and marketing
-    marketing_triggers = ["賣點", "亮點", "招生", "宣傳", "推廣", "文案", "貼文", "社群文案", "行銷文案", "廣告文案", "fb 貼文", "threads 貼文", "社群貼文", "課程賣點", "社群推廣", "包裝", "文章", "心得", "經驗", "分享", "撰寫"]
+    marketing_triggers = [
+        "行銷", "推廣", "宣傳", "招生", "文案", "貼文", "賣點", "亮點", "社群",
+        "廣告", "獲客", "受眾", "曝光", "定價", "fb", "threads", "ig", "instagram",
+        "包裝", "文章", "心得", "經驗", "分享", "撰寫", "marketing", "promo", "promotion"
+    ]
     if any(k in query_lower for k in marketing_triggers):
         marketing_skill = skill_registry.get_skill("saas_marketing")
         return {
@@ -55,7 +59,7 @@ def classify_intent_node(state: CompanyState) -> CompanyState:
         }
 
     # 4. 若使用者已在 UI 點選特定部門對話框 (specified_dept)，直接鎖定為該部門處理
-    if specified_dept in ["marketing", "academic", "operations", "devops"]:
+    if specified_dept and specified_dept in ["marketing", "academic", "operations", "devops"]:
         dept_skills = skill_registry.list_skills(specified_dept)
         matched_skill = dept_skills[0].name if dept_skills else f"{specified_dept}_general"
         logger.info(f"[Orchestrator] Direct routing to active user department [{specified_dept}] with skill [{matched_skill}]")
@@ -106,18 +110,18 @@ def department_dispatcher_node(state: CompanyState) -> CompanyState:
             notice = (
                 "🔒 【權限限制】\n\n"
                 "技術維運診斷為 👑 【管理員專用功能】。\n"
-                "一般教師與使用者請使用「💡 備課與教務助手」產出教案大綱，或使用「🚀 社群行銷助手」撰寫推廣貼文。"
+                "一般教師與使用者請使用「🎓 教務小老師」產出教案大綱，或使用「🚀 營銷推廣專員」撰寫推廣貼文。"
             )
         elif dept == "marketing":
             notice = (
                 "⭐ 【升級提示：教師專業版獨享功能】\n\n"
-                "【社群行銷文案助手】屬於「⭐ 教師專業版」以上解鎖功能。\n"
+                "【🚀 市場與營銷部】（營銷推廣專員）屬於「⭐ 教師專業版」以上解鎖功能。\n"
                 "目前您處於「🎓 教師試用版」。升級至專業版後即可解鎖全套 FB / Threads / IG 教學心得與課程推廣文案自動生成功能！"
             )
         elif dept == "operations":
             notice = (
                 "🏫 【升級提示：機構/學校版獨享功能】\n\n"
-                "【教務營運與行政管理助手】屬於「🏫 機構/學校版」以上解鎖功能。\n"
+                "【🏫 營運與行政部】（教務行政特助）屬於「🏫 機構/學校版」以上解鎖功能。\n"
                 "目前您處於「🎓 教師試用版」。升級至機構/學校版後即可解鎖全套團隊席位授權管理與團體合約維護功能！"
             )
         else:

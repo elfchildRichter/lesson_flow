@@ -1,11 +1,11 @@
 ---
 name: lessonflow-operations
-description: Lesson Flow 事務負責人 Skill。負責處理使用者身份驗證、權限控制、每日 Quota 額度管理、系統設定與廣播通知。
+description: Lesson Flow 教務行政特助 Skill。負責處理使用者身份驗證、權限控制、每日 Quota 額度管理、系統設定與廣播通知。
 ---
 
-# 📋 Lesson Flow 營運與行政部 (Lesson Flow 事務負責人)
+# Lesson Flow 營運與行政部 (教務行政特助)
 
-## 📌 部門定位與核心職責
+## 部門定位與核心職責
 營運與行政部負責 Lesson Flow 平台的日常維運規則、使用者存取控制與服務用量平衡。
 
 ### 主要任務：

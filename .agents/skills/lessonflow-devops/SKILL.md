@@ -3,9 +3,9 @@ name: lessonflow-devops
 description: Lesson Flow 技術維護工程師 Skill。負責處理 Railway 雲端部署、Linux Kernel OOM 診斷、Hugging Face 快取持久化、AI Provider 切換與 Docker 環境建置。
 ---
 
-# 🛠️ Lesson Flow 技術維護部 (Lesson Flow 技術維護工程師)
+# Lesson Flow 技術維護部 (技術維護工程師)
 
-## 📌 部門定位與核心職責
+## 部門定位與核心職責
 技術維護部是 Lesson Flow 系統穩定度、效能優化與基礎設施的守護者。
 
 ### 主要任務：

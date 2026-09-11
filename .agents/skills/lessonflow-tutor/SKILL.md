@@ -3,9 +3,9 @@ name: lessonflow-tutor
 description: Lesson Flow 教務小老師 Skill。負責處理教材解析、問答流調優、簡報大綱與逐頁演講稿生成、Self-RAG 幻覺審查與 LaTeX 數學公式格式處理。
 ---
 
-# 🎓 Lesson Flow 教務教學部 (Lesson Flow 小老師)
+# Lesson Flow 教務教學部 (教務小老師)
 
-## 📌 部門定位與核心職責
+## 部門定位與核心職責
 教務教學部是 Lesson Flow 的教學內容專家，負責維護 AI 助教的學術嚴謹度、簡報品質與回答親和力。
 
 ### 主要任務：
