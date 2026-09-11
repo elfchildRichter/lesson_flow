@@ -1938,4 +1938,894 @@ if (window.renderMathInElement) {{
 """
 
 
+SUPERSCRIPTS_MAP = {
+    "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴",
+    "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹",
+    "+": "⁺", "-": "⁻", "=": "⁼", "(": "⁽", ")": "⁾",
+    "n": "ⁿ", "i": "ⁱ", "t": "ᵗ"
+}
+
+SUBSCRIPTS_MAP = {
+    "0": "₀", "1": "₁", "2": "₂", "3": "₃", "4": "₄",
+    "5": "₅", "6": "₆", "7": "₇", "8": "₈", "9": "₉",
+    "+": "₊", "-": "₋", "=": "₌", "(": "₍", ")": "₎",
+    "a": "ₐ", "e": "ₑ", "h": "ₕ", "i": "ᵢ", "j": "ⱼ",
+    "k": "ₖ", "l": "ₗ", "m": "ₘ", "n": "ₙ", "o": "ₒ",
+    "p": "ₚ", "r": "ᵣ", "s": "ₛ", "t": "ₜ", "u": "ᵤ", "v": "ᵥ", "x": "ₓ", "y": "ᵧ"
+}
+
+GREEK_AND_SYMBOLS_MAP = {
+    r"\alpha": "α", r"\beta": "β", r"\gamma": "γ", r"\delta": "δ", r"\Delta": "Δ",
+    r"\epsilon": "ε", r"\zeta": "ζ", r"\eta": "η", r"\theta": "θ", r"\Theta": "Θ",
+    r"\lambda": "λ", r"\Lambda": "Λ", r"\mu": "μ", r"\nu": "ν", r"\xi": "ξ",
+    r"\pi": "π", r"\Pi": "Π", r"\rho": "ρ", r"\sigma": "σ", r"\Sigma": "Σ",
+    r"\tau": "τ", r"\phi": "φ", r"\Phi": "Φ", r"\chi": "χ", r"\psi": "ψ",
+    r"\omega": "ω", r"\Omega": "Ω",
+    r"\times": "×", r"\cdot": "·", r"\approx": "≈", r"\pm": "±",
+    r"\mp": "∓", r"\le": "≤", r"\leq": "≤", r"\ge": "≥", r"\geq": "≥",
+    r"\neq": "≠", r"\equiv": "≡", r"\infty": "∞", r"\propto": "∝", r"\partial": "∂",
+    r"\nabla": "∇", r"\rightarrow": "→", r"\to": "→", r"\leftarrow": "←",
+    r"\Rightarrow": "⇒", r"\Leftarrow": "⇐",
+    r"\degree": "°", r"\circ": "°", r"\sum": "∑", r"\int": "∫",
+    r"\,": " ", r"\;": " ", r"\quad": "  ", r"\qquad": "   ",
+}
+
+
+def clean_latex_to_unicode(latex_text: str) -> str:
+    """Convert LaTeX formula text into clean Unicode mathematical representation."""
+    if not latex_text:
+        return ""
+    import re
+
+    text = latex_text.strip()
+    if text.startswith("$$") and text.endswith("$$"):
+        text = text[2:-2].strip()
+    elif text.startswith("$") and text.endswith("$"):
+        text = text[1:-1].strip()
+    elif text.startswith(r"\(") and text.endswith(r"\)"):
+        text = text[2:-2].strip()
+    elif text.startswith(r"\[") and text.endswith(r"\]"):
+        text = text[2:-2].strip()
+
+    # 1. Text wrappers: \text{...}, \mathrm{...}, \mathbf{...}, \mathit{...}
+    text = re.sub(r"\\(?:text|mathrm|mathbf|mathit|textbf|textit)\{([^}]*)\}", r"\1", text)
+    text = re.sub(r"\\(?:left|right)\b", "", text)
+
+    # 2. Vector: \vec{F} -> F⃗, \vec{a} -> a⃗
+    text = re.sub(r"\\vec\{([A-Za-z])\}", r"\1⃗", text)
+    text = re.sub(r"\\vec\s*([A-Za-z])", r"\1⃗", text)
+
+    # 3. Fractions: \frac{a}{b} -> a/b
+    def _frac_sub(m):
+        num = m.group(1).strip()
+        den = m.group(2).strip()
+        return f"{num}/{den}"
+    text = re.sub(r"\\frac\{([^}]+)\}\{([^}]+)\}", _frac_sub, text)
+
+    # 4. Square roots: \sqrt{x} -> √(x), \sqrt[n]{x} -> n√(x)
+    text = re.sub(r"\\sqrt\[([^]]+)\]\{([^}]+)\}", r"\1√(\2)", text)
+    text = re.sub(r"\\sqrt\{([^}]+)\}", r"√(\1)", text)
+
+    # 5. Greek letters & symbols
+    for cmd, sym in GREEK_AND_SYMBOLS_MAP.items():
+        text = text.replace(cmd, sym)
+
+    # 6. Superscripts: x^{2} or x^2
+    def _sup_sub(m):
+        raw = m.group(1) or m.group(2)
+        return "".join(SUPERSCRIPTS_MAP.get(c, c) for c in raw)
+    text = re.sub(r"\^\{([^}]+)\}|\^([0-9a-zA-Z+\-()])", _sup_sub, text)
+
+    # 7. Subscripts: m_{1} or m_1
+    def _sub_sub(m):
+        raw = m.group(1) or m.group(2)
+        return "".join(SUBSCRIPTS_MAP.get(c, c) for c in raw)
+    text = re.sub(r"_\{([^}]+)\}|_([0-9a-zA-Z+\-()])", _sub_sub, text)
+
+    # 8. Clean residual braces or backslashes
+    text = text.replace("{", "").replace("}", "")
+    text = re.sub(r"\\[a-zA-Z]+", "", text)
+
+    return text.strip()
+
+
+def add_markdown_and_math_to_paragraph(p, text: str, font_size=None, font_color=None, base_bold=False):
+    """Parse inline markdown (bold, italic, code) and LaTeX math ($...$, $$...$$) and add formatted runs."""
+    if not text:
+        return
+    import re
+    from docx.shared import Pt, RGBColor
+
+    # Auto wrap bare LaTeX commands if needed
+    text_processed = _wrap_bare_latex(str(text))
+
+    pattern = re.compile(r"(\$\$[\s\S]*?\$\$|\$[^$\n]+?\$|\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\)|(?<!\*)\*\*[^\*\n]+?\*\*(?!\*)|__[^_\n]+?__|(?<!\*)\*[^\*\n]+?\*(?!\*)|`[^`\n]+?`)")
+    tokens = pattern.split(text_processed)
+
+    for token in tokens:
+        if not token:
+            continue
+
+        # Math formula: $$...$$, $...$, \[...\], \(...\)
+        if (token.startswith("$$") and token.endswith("$$")) or (token.startswith("$") and token.endswith("$")) or (token.startswith(r"\[") and token.endswith(r"\]")) or (token.startswith(r"\(") and token.endswith(r"\)")):
+            math_clean = clean_latex_to_unicode(token)
+            run = p.add_run(math_clean)
+            run.font.name = "Cambria Math"
+            run.font.italic = True
+            if base_bold:
+                run.font.bold = True
+            if font_size:
+                run.font.size = font_size
+            if font_color:
+                run.font.color.rgb = font_color
+
+        # Bold markdown: **...** or __...__
+        elif (token.startswith("**") and token.endswith("**") and len(token) >= 4) or (token.startswith("__") and token.endswith("__") and len(token) >= 4):
+            content = token[2:-2]
+            run = p.add_run(content)
+            run.font.bold = True
+            if font_size:
+                run.font.size = font_size
+            if font_color:
+                run.font.color.rgb = font_color
+
+        # Italic markdown: *...*
+        elif token.startswith("*") and token.endswith("*") and len(token) > 2:
+            content = token[1:-1]
+            run = p.add_run(content)
+            run.font.italic = True
+            if base_bold:
+                run.font.bold = True
+            if font_size:
+                run.font.size = font_size
+            if font_color:
+                run.font.color.rgb = font_color
+
+        # Code markdown: `...`
+        elif token.startswith("`") and token.endswith("`") and len(token) > 2:
+            content = token[1:-1]
+            run = p.add_run(content)
+            run.font.name = "Consolas"
+            run.font.size = font_size or Pt(9.5)
+            run.font.color.rgb = RGBColor(180, 83, 9)
+
+        # Plain text
+        else:
+            run = p.add_run(token)
+            if base_bold:
+                run.font.bold = True
+            if font_size:
+                run.font.size = font_size
+            if font_color:
+                run.font.color.rgb = font_color
+
+
+def make_handout_docx(handout: Handout) -> bytes:
+    """Generate professional Word (.docx) file for Handout with math and formatting support."""
+    import docx
+    from docx.shared import Inches, Pt, RGBColor
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.enum.table import WD_TABLE_ALIGNMENT
+    from docx.oxml import parse_xml
+    from docx.oxml.ns import nsdecls
+
+    doc = docx.Document()
+    for section in doc.sections:
+        section.page_width = Inches(8.27)
+        section.page_height = Inches(11.69)
+        section.top_margin = Inches(0.8)
+        section.bottom_margin = Inches(0.8)
+        section.left_margin = Inches(0.8)
+        section.right_margin = Inches(0.8)
+
+    style_normal = doc.styles["Normal"]
+    font = style_normal.font
+    font.name = "Microsoft JhengHei"
+    font.size = Pt(10.5)
+    font.color.rgb = RGBColor(30, 41, 59)
+
+    # Title
+    title_p = doc.add_paragraph()
+    add_markdown_and_math_to_paragraph(title_p, handout.title or "隨堂講義", font_size=Pt(20), font_color=RGBColor(15, 23, 42), base_bold=True)
+    title_p.paragraph_format.space_after = Pt(2)
+
+    # Subtitle
+    if handout.subtitle:
+        sub_p = doc.add_paragraph()
+        add_markdown_and_math_to_paragraph(sub_p, handout.subtitle, font_size=Pt(11), font_color=RGBColor(100, 116, 139))
+        sub_p.paragraph_format.space_after = Pt(8)
+
+    # Overview Table Box
+    if handout.overview:
+        tbl = doc.add_table(rows=1, cols=1)
+        tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+        tbl.columns[0].width = Inches(6.67)
+        cell = tbl.cell(0, 0)
+        shading = parse_xml(r'<w:shd {} w:fill="EFF6FF"/>'.format(nsdecls("w")))
+        cell._tc.get_or_add_tcPr().append(shading)
+        borders = parse_xml(r"""
+            <w:tcBorders {} >
+                <w:top w:val="none" />
+                <w:left w:val="single" w:sz="24" w:space="0" w:color="2563EB" />
+                <w:bottom w:val="none" />
+                <w:right w:val="none" />
+            </w:tcBorders>
+        """.format(nsdecls("w")))
+        cell._tc.get_or_add_tcPr().append(borders)
+
+        cp = cell.paragraphs[0]
+        c_title_run = cp.add_run("【課程導讀】\n")
+        c_title_run.font.bold = True
+        c_title_run.font.color.rgb = RGBColor(37, 99, 235)
+        add_markdown_and_math_to_paragraph(cp, handout.overview, font_size=Pt(10), font_color=RGBColor(30, 41, 59))
+        doc.add_paragraph().paragraph_format.space_after = Pt(4)
+
+    # Sections
+    for idx, sec in enumerate(handout.sections, 1):
+        sec_h = doc.add_paragraph()
+        sec_h_title = f"§ {idx}. {sec.title}"
+        add_markdown_and_math_to_paragraph(sec_h, sec_h_title, font_size=Pt(13), font_color=RGBColor(30, 58, 138), base_bold=True)
+        sec_h.paragraph_format.space_before = Pt(10)
+        sec_h.paragraph_format.space_after = Pt(4)
+
+        if sec.summary:
+            sum_p = doc.add_paragraph()
+            add_markdown_and_math_to_paragraph(sum_p, sec.summary, font_size=Pt(10.5), font_color=RGBColor(51, 65, 85))
+            sum_p.paragraph_format.space_after = Pt(6)
+
+        if sec.key_points:
+            kp_title = doc.add_paragraph()
+            kp_run = kp_title.add_run("📌 核心要點：")
+            kp_run.font.bold = True
+            kp_run.font.color.rgb = RGBColor(22, 101, 52)
+            kp_title.paragraph_format.space_after = Pt(2)
+            for kp in sec.key_points:
+                p = doc.add_paragraph(style="List Bullet")
+                add_markdown_and_math_to_paragraph(p, kp, font_size=Pt(10), font_color=RGBColor(30, 41, 59))
+                p.paragraph_format.space_after = Pt(2)
+
+        if sec.discussion_questions:
+            dq_title = doc.add_paragraph()
+            dq_run = dq_title.add_run("💬 隨堂思考與練習：")
+            dq_run.font.bold = True
+            dq_run.font.color.rgb = RGBColor(146, 64, 14)
+            dq_title.paragraph_format.space_before = Pt(4)
+            dq_title.paragraph_format.space_after = Pt(2)
+            for q_idx, dq in enumerate(sec.discussion_questions, 1):
+                p = doc.add_paragraph()
+                p_num = p.add_run(f"{q_idx}. ")
+                p_num.font.bold = True
+                add_markdown_and_math_to_paragraph(p, dq, font_size=Pt(10), font_color=RGBColor(30, 41, 59))
+                p.paragraph_format.space_after = Pt(2)
+
+        if sec.source_pages:
+            ref_p = doc.add_paragraph()
+            ref_run = ref_p.add_run(f"教材出處：第 {', '.join(map(str, sec.source_pages))} 頁")
+            ref_run.font.size = Pt(9)
+            ref_run.font.italic = True
+            ref_run.font.color.rgb = RGBColor(148, 163, 184)
+            ref_p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+            ref_p.paragraph_format.space_after = Pt(8)
+
+    # Key Takeaways
+    if handout.key_takeaways:
+        doc.add_paragraph().paragraph_format.space_after = Pt(4)
+        takeaway_tbl = doc.add_table(rows=1, cols=1)
+        takeaway_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+        takeaway_tbl.columns[0].width = Inches(6.67)
+        t_cell = takeaway_tbl.cell(0, 0)
+        t_shading = parse_xml(r'<w:shd {} w:fill="F8FAFC"/>'.format(nsdecls("w")))
+        t_cell._tc.get_or_add_tcPr().append(t_shading)
+        t_borders = parse_xml(r"""
+            <w:tcBorders {} >
+                <w:top w:val="single" w:sz="8" w:space="0" w:color="CBD5E1" />
+                <w:left w:val="single" w:sz="8" w:space="0" w:color="CBD5E1" />
+                <w:bottom w:val="single" w:sz="8" w:space="0" w:color="CBD5E1" />
+                <w:right w:val="single" w:sz="8" w:space="0" w:color="CBD5E1" />
+            </w:tcBorders>
+        """.format(nsdecls("w")))
+        t_cell._tc.get_or_add_tcPr().append(t_borders)
+
+        tcp = t_cell.paragraphs[0]
+        t_head = tcp.add_run("🎯 本單元總結與核心精華\n")
+        t_head.font.bold = True
+        t_head.font.color.rgb = RGBColor(15, 23, 42)
+        for t in handout.key_takeaways:
+            tp = t_cell.add_paragraph()
+            tp.add_run("• ")
+            add_markdown_and_math_to_paragraph(tp, t, font_size=Pt(10), font_color=RGBColor(30, 41, 59))
+            tp.paragraph_format.space_after = Pt(2)
+
+    buf = io.BytesIO()
+    doc.save(buf)
+    buf.seek(0)
+    return buf.getvalue()
+
+
+def make_quiz_docx(sheet: QuizSheet, teacher_mode: bool = False) -> bytes:
+    """Generate professional Word (.docx) file for QuizSheet with math formula and markdown support."""
+    import docx
+    from docx.shared import Inches, Pt, RGBColor
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.enum.table import WD_TABLE_ALIGNMENT
+
+    doc = docx.Document()
+    for section in doc.sections:
+        section.page_width = Inches(8.27)
+        section.page_height = Inches(11.69)
+        section.top_margin = Inches(0.8)
+        section.bottom_margin = Inches(0.8)
+        section.left_margin = Inches(0.8)
+        section.right_margin = Inches(0.8)
+
+    style_normal = doc.styles["Normal"]
+    font = style_normal.font
+    font.name = "Microsoft JhengHei"
+    font.size = Pt(10.5)
+    font.color.rgb = RGBColor(30, 41, 59)
+
+    # Title
+    title_p = doc.add_paragraph()
+    add_markdown_and_math_to_paragraph(title_p, sheet.title or "單元評量測驗卷", font_size=Pt(18), font_color=RGBColor(15, 23, 42), base_bold=True)
+    title_p.paragraph_format.space_after = Pt(2)
+    title_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+    # Subtitle / Mode Indicator
+    mode_text = "【教師詳解卷】" if teacher_mode else "【學生練習測驗卷】"
+    sub_p = doc.add_paragraph()
+    sub_run = sub_p.add_run(f"{mode_text}   建議測驗時間：{sheet.duration_minutes} 分鐘 | 總題數：{len(sheet.questions)} 題")
+    sub_run.font.size = Pt(10.5)
+    sub_run.font.bold = True
+    sub_run.font.color.rgb = RGBColor(37, 99, 235) if teacher_mode else RGBColor(100, 116, 139)
+    sub_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    sub_p.paragraph_format.space_after = Pt(10)
+
+    # Student info table
+    info_tbl = doc.add_table(rows=1, cols=4)
+    info_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+    info_tbl.columns[0].width = Inches(1.6)
+    info_tbl.columns[1].width = Inches(1.2)
+    info_tbl.columns[2].width = Inches(2.2)
+    info_tbl.columns[3].width = Inches(1.67)
+
+    info_cells = info_tbl.rows[0].cells
+    info_cells[0].paragraphs[0].text = "班級：____________"
+    info_cells[1].paragraphs[0].text = "座號：______"
+    info_cells[2].paragraphs[0].text = "姓名：________________"
+    info_cells[3].paragraphs[0].text = "得分：__________"
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(8)
+
+    type_labels = {
+        "single_choice": "單選題",
+        "multiple_choice": "多選題",
+        "problem_solving": "計算與推導論述題",
+    }
+    diff_labels = {"easy": "基礎", "medium": "中等", "hard": "進階"}
+
+    for idx, q in enumerate(sheet.questions, 1):
+        t_name = type_labels.get(q.type, "測驗題")
+        d_name = diff_labels.get(q.difficulty, "中等")
+
+        qp = doc.add_paragraph()
+        q_num = qp.add_run(f"第 {idx} 題. ")
+        q_num.font.bold = True
+        q_num.font.color.rgb = RGBColor(30, 58, 138)
+
+        q_badge = qp.add_run(f"【{t_name} · 難度：{d_name}】 ")
+        q_badge.font.size = Pt(9.5)
+        q_badge.font.color.rgb = RGBColor(100, 116, 139)
+
+        add_markdown_and_math_to_paragraph(qp, q.question, font_size=Pt(10.5), font_color=RGBColor(15, 23, 42), base_bold=True)
+        qp.paragraph_format.space_before = Pt(8)
+        qp.paragraph_format.space_after = Pt(4)
+
+        if q.options:
+            for opt in q.options:
+                op = doc.add_paragraph()
+                add_markdown_and_math_to_paragraph(op, opt, font_size=Pt(10), font_color=RGBColor(51, 65, 85))
+                op.paragraph_format.left_indent = Inches(0.3)
+                op.paragraph_format.space_after = Pt(2)
+
+        if teacher_mode:
+            ans_p = doc.add_paragraph()
+            ans_lbl = ans_p.add_run("【標準答案】：")
+            ans_lbl.font.bold = True
+            ans_lbl.font.color.rgb = RGBColor(22, 101, 52)
+            add_markdown_and_math_to_paragraph(ans_p, q.answer, font_size=Pt(10.5), font_color=RGBColor(22, 101, 52), base_bold=True)
+            ans_p.paragraph_format.left_indent = Inches(0.2)
+            ans_p.paragraph_format.space_after = Pt(2)
+
+            exp_p = doc.add_paragraph()
+            exp_lbl = exp_p.add_run("【試題詳解】：")
+            exp_lbl.font.bold = True
+            exp_lbl.font.color.rgb = RGBColor(30, 41, 59)
+            add_markdown_and_math_to_paragraph(exp_p, q.explanation, font_size=Pt(10), font_color=RGBColor(30, 41, 59))
+            exp_p.paragraph_format.left_indent = Inches(0.2)
+            exp_p.paragraph_format.space_after = Pt(2)
+
+            if q.source_pages:
+                src_p = doc.add_paragraph()
+                src_run = src_p.add_run(f"【出處頁碼】：第 {', '.join(map(str, q.source_pages))} 頁")
+                src_run.font.size = Pt(9)
+                src_run.font.italic = True
+                src_run.font.color.rgb = RGBColor(148, 163, 184)
+                src_p.paragraph_format.left_indent = Inches(0.2)
+                src_p.paragraph_format.space_after = Pt(6)
+        else:
+            ans_space = doc.add_paragraph()
+            ans_space.add_run("作答區：(        )")
+            ans_space.paragraph_format.left_indent = Inches(0.2)
+            ans_space.paragraph_format.space_after = Pt(8)
+
+    buf = io.BytesIO()
+    doc.save(buf)
+    buf.seek(0)
+    return buf.getvalue()
+
+
+def make_deck_docx(deck: Deck) -> bytes:
+    """Generate professional Word (.docx) file for Slide Deck & Speaker Notes."""
+    import docx
+    from docx.shared import Inches, Pt, RGBColor
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.enum.table import WD_TABLE_ALIGNMENT
+    from docx.oxml import parse_xml
+    from docx.oxml.ns import nsdecls
+
+    doc = docx.Document()
+    for section in doc.sections:
+        section.page_width = Inches(8.27)
+        section.page_height = Inches(11.69)
+        section.top_margin = Inches(0.8)
+        section.bottom_margin = Inches(0.8)
+        section.left_margin = Inches(0.8)
+        section.right_margin = Inches(0.8)
+
+    style_normal = doc.styles["Normal"]
+    font = style_normal.font
+    font.name = "Microsoft JhengHei"
+    font.size = Pt(10.5)
+    font.color.rgb = RGBColor(30, 41, 59)
+
+    # Title
+    title_p = doc.add_paragraph()
+    add_markdown_and_math_to_paragraph(title_p, deck.title or "教學簡報與逐頁演講稿", font_size=Pt(20), font_color=RGBColor(15, 23, 42), base_bold=True)
+    title_p.paragraph_format.space_after = Pt(2)
+
+    # Subtitle
+    sub_text = f"{deck.subtitle} · 預估講授時間：{deck.duration} 分鐘 · 共 {len(deck.slides)} 頁" if deck.duration else (deck.subtitle or "")
+    if sub_text:
+        sub_p = doc.add_paragraph()
+        add_markdown_and_math_to_paragraph(sub_p, sub_text, font_size=Pt(10.5), font_color=RGBColor(100, 116, 139))
+        sub_p.paragraph_format.space_after = Pt(12)
+
+    for idx, s in enumerate(deck.slides, 1):
+        icon_str = getattr(s, "icon", "💡") or "💡"
+
+        # Slide Header
+        slide_h = doc.add_paragraph()
+        slide_h_title = f"第 {idx} 頁：{icon_str} {s.title}"
+        add_markdown_and_math_to_paragraph(slide_h, slide_h_title, font_size=Pt(13.5), font_color=RGBColor(194, 65, 12), base_bold=True)
+        slide_h.paragraph_format.space_before = Pt(12)
+        slide_h.paragraph_format.space_after = Pt(4)
+
+        # Slide Bullets
+        if s.bullets:
+            b_head = doc.add_paragraph()
+            b_head_run = b_head.add_run("📌 投影片核心要點：")
+            b_head_run.font.bold = True
+            b_head_run.font.size = Pt(10)
+            b_head_run.font.color.rgb = RGBColor(154, 52, 18)
+            b_head.paragraph_format.space_after = Pt(2)
+
+            for b in s.bullets:
+                bp = doc.add_paragraph(style="List Bullet")
+                add_markdown_and_math_to_paragraph(bp, b, font_size=Pt(10), font_color=RGBColor(30, 41, 59))
+                bp.paragraph_format.space_after = Pt(2)
+
+        # Speaker Notes Box
+        if s.speaker_notes:
+            notes_tbl = doc.add_table(rows=1, cols=1)
+            notes_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+            notes_tbl.columns[0].width = Inches(6.67)
+            n_cell = notes_tbl.cell(0, 0)
+            n_shading = parse_xml(r'<w:shd {} w:fill="F8FAFC"/>'.format(nsdecls("w")))
+            n_cell._tc.get_or_add_tcPr().append(n_shading)
+            n_borders = parse_xml(r"""
+                <w:tcBorders {} >
+                    <w:top w:val="none" />
+                    <w:left w:val="single" w:sz="20" w:space="0" w:color="DE5B37" />
+                    <w:bottom w:val="none" />
+                    <w:right w:val="none" />
+                </w:tcBorders>
+            """.format(nsdecls("w")))
+            n_cell._tc.get_or_add_tcPr().append(n_borders)
+
+            n_cp = n_cell.paragraphs[0]
+            n_head = n_cp.add_run("🎙️ 講師逐頁演講稿與延伸備課筆記：\n")
+            n_head.font.bold = True
+            n_head.font.size = Pt(10)
+            n_head.font.color.rgb = RGBColor(222, 91, 55)
+
+            np_content = n_cell.add_paragraph()
+            add_markdown_and_math_to_paragraph(np_content, s.speaker_notes, font_size=Pt(9.5), font_color=RGBColor(51, 65, 85))
+            np_content.paragraph_format.space_after = Pt(2)
+
+        # Visual prompt suggestion if any
+        if getattr(s, "visual_prompt", None):
+            vp_p = doc.add_paragraph()
+            vp_lbl = vp_p.add_run("🖼️ 畫面呈現建議：")
+            vp_lbl.font.size = Pt(9)
+            vp_lbl.font.bold = True
+            vp_lbl.font.color.rgb = RGBColor(148, 163, 184)
+            add_markdown_and_math_to_paragraph(vp_p, s.visual_prompt, font_size=Pt(9), font_color=RGBColor(100, 116, 139))
+            vp_p.paragraph_format.space_before = Pt(2)
+            vp_p.paragraph_format.space_after = Pt(2)
+
+        # Source pages
+        if s.source_pages:
+            ref_p = doc.add_paragraph()
+            ref_run = ref_p.add_run(f"教材出處：第 {', '.join(map(str, sec.source_pages) if 'sec' in locals() else map(str, s.source_pages))} 頁")
+            ref_run.font.size = Pt(9)
+            ref_run.font.italic = True
+            ref_run.font.color.rgb = RGBColor(148, 163, 184)
+            ref_p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+            ref_p.paragraph_format.space_after = Pt(6)
+
+    buf = io.BytesIO()
+    doc.save(buf)
+    buf.seek(0)
+    return buf.getvalue()
+
+
+def make_quiz_html(sheet: QuizSheet, teacher_mode: bool = False) -> str:
+    """Generate professional printable A4 HTML for QuizSheet."""
+    type_labels = {
+        "single_choice": "單選題",
+        "multiple_choice": "多選題",
+        "problem_solving": "計算與推導論述題",
+    }
+    diff_labels = {"easy": "基礎", "medium": "中等", "hard": "進階"}
+
+    questions_html = ""
+    for idx, q in enumerate(sheet.questions, 1):
+        t_name = type_labels.get(q.type, "測驗題")
+        d_name = diff_labels.get(q.difficulty, "中等")
+        q_text_fmt = _format_handout_text(q.question)
+
+        options_html = ""
+        if q.options:
+            options_items = "".join(f"<div class='quiz-option'>{_format_handout_text(opt)}</div>" for opt in q.options)
+            options_html = f"<div class='quiz-options-grid'>{options_items}</div>"
+
+        solution_box_html = ""
+        if teacher_mode:
+            pages_html = f"<div class='quiz-source'>出處頁碼：第 {', '.join(map(str, q.source_pages))} 頁</div>" if q.source_pages else ""
+            solution_box_html = f"""
+            <div class="solution-box">
+                <div class="solution-answer"><strong>【標準答案】</strong>：<code>{_format_handout_text(q.answer)}</code></div>
+                <div class="solution-explanation"><strong>【試題詳解】</strong>：{_format_handout_text(q.explanation)}</div>
+                {pages_html}
+            </div>
+            """
+        else:
+            solution_box_html = """
+            <div class="student-answer-box">
+                <span>作答區 / 演算草稿：</span>
+                <div class="student-answer-line"></div>
+            </div>
+            """
+
+        questions_html += f"""
+        <div class="quiz-item">
+            <div class="quiz-item-header">
+                <span class="quiz-number">第 {idx} 題.</span>
+                <span class="quiz-badge">{t_name} · 難度：{d_name}</span>
+                <div class="quiz-question-body">{q_text_fmt}</div>
+            </div>
+            {options_html}
+            {solution_box_html}
+        </div>
+        """
+
+    mode_title = "【教師詳解卷】" if teacher_mode else "【學生練習測驗卷】"
+    title_esc = _format_handout_text(sheet.title or "單元評量測驗卷")
+
+    return f"""<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{sheet.title or '單元評量測驗卷'} {mode_title}</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+<style>
+@page {{
+    size: A4 portrait;
+    margin: 12mm 15mm;
+}}
+*, *:before, *:after {{
+    box-sizing: border-box;
+}}
+body {{
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
+    color: #1e293b;
+    background: #f8fafc;
+    margin: 0;
+    padding: 20px;
+    line-height: 1.6;
+}}
+.quiz-container {{
+    max-width: 820px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 32px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.08);
+    border: 1px solid #e2e8f0;
+}}
+.quiz-header {{
+    text-align: center;
+    border-bottom: 2px solid #334155;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+}}
+.quiz-title {{
+    font-size: 20px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+}}
+.quiz-subtitle {{
+    font-size: 13px;
+    color: #475569;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+}}
+.student-info-bar {{
+    display: flex;
+    justify-content: space-between;
+    background: #f1f5f9;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    margin-top: 10px;
+}}
+.quiz-item {{
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px dashed #cbd5e1;
+}}
+.quiz-item:last-child {{
+    border-bottom: none;
+}}
+.quiz-item-header {{
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 8px;
+}}
+.quiz-number {{
+    color: #1e3a8a;
+    margin-right: 4px;
+}}
+.quiz-badge {{
+    font-size: 11px;
+    padding: 2px 6px;
+    background: #e2e8f0;
+    color: #475569;
+    border-radius: 4px;
+    font-weight: 500;
+    margin-right: 6px;
+}}
+.quiz-question-body {{
+    display: inline;
+    font-weight: 600;
+}}
+.quiz-options-grid {{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 16px;
+    margin: 8px 0 10px 14px;
+    font-size: 13px;
+}}
+@media (max-width: 600px) {{
+    .quiz-options-grid {{
+        grid-template-columns: 1fr;
+    }}
+}}
+.quiz-option {{
+    padding: 4px 0;
+    color: #334155;
+}}
+.solution-box {{
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-left: 4px solid #16a34a;
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    margin-top: 8px;
+    font-size: 12.5px;
+    line-height: 1.55;
+}}
+.solution-answer {{
+    color: #15803d;
+    margin-bottom: 4px;
+}}
+.solution-explanation {{
+    color: #166534;
+}}
+.quiz-source {{
+    font-size: 11px;
+    color: #86efac;
+    text-align: right;
+    margin-top: 4px;
+}}
+.student-answer-box {{
+    margin-top: 8px;
+    font-size: 12px;
+    color: #64748b;
+}}
+.student-answer-line {{
+    border-bottom: 1px dotted #cbd5e1;
+    height: 24px;
+    margin-top: 2px;
+}}
+.no-print {{
+    margin-bottom: 18px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}}
+.btn-print {{
+    background: #1e293b;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 600;
+}}
+.btn-print:hover {{
+    background: #0f172a;
+}}
+@media print {{
+    *, *:before, *:after {{
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        box-sizing: border-box !important;
+    }}
+    html, body {{
+        background: #ffffff !important;
+        color: #0f172a !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 100% !important;
+        overflow: visible !important;
+    }}
+    .quiz-container {{
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        border: none !important;
+    }}
+    .no-print {{
+        display: none !important;
+    }}
+    .quiz-item {{
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }}
+    .katex-display {{
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+        overflow-x: visible !important;
+    }}
+}}
+</style>
+<script>
+var katexOptions = {{
+    delimiters: [
+        {{left: '$$', right: '$$', display: true}},
+        {{left: '$', right: '$', display: false}},
+        {{left: '\\\\[', right: '\\\\]', display: true}},
+        {{left: '\\\\(', right: '\\\\)', display: false}}
+    ],
+    throwOnError: false
+}};
+
+function unescapeMathInElement(element) {{
+    if (!element) return;
+    var html = element.innerHTML;
+    html = html.replace(/(\\$\\$[\\s\\S]*?\\$\\$|\\$[^$\\n]+?\\$|\\\\\\[[\\s\\S]*?\\\\\\]|\\\\\\([\\s\\S]*?\\\\\\))/g, function(match) {{
+        return match
+            .replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'");
+    }});
+    element.innerHTML = html;
+}}
+
+var mathRendered = false;
+function doRenderMath() {{
+    if (mathRendered) return;
+    if (window.renderMathInElement) {{
+        try {{
+            var container = document.querySelector('.quiz-container');
+            if (container) {{
+                unescapeMathInElement(container);
+                renderMathInElement(container, katexOptions);
+            }}
+            mathRendered = true;
+        }} catch(e) {{
+            console.warn('KaTeX error:', e);
+        }}
+    }}
+}}
+
+document.addEventListener('DOMContentLoaded', doRenderMath);
+window.addEventListener('load', function() {{
+    doRenderMath();
+}});
+
+function triggerPrint() {{
+    doRenderMath();
+    var btn = document.querySelector('.btn-print');
+    if (btn) btn.disabled = true;
+
+    var executePrint = function() {{
+        setTimeout(function() {{
+            window.print();
+            if (btn) btn.disabled = false;
+        }}, 150);
+    }};
+
+    if (document.fonts && document.fonts.ready) {{
+        document.fonts.ready.then(executePrint).catch(executePrint);
+    }} else {{
+        executePrint();
+    }}
+}}
+</script>
+</head>
+<body>
+<div class="quiz-container">
+    <div class="no-print">
+        <button class="btn-print" onclick="triggerPrint()">🖨️ 列印 / 另存為 A4 PDF</button>
+    </div>
+    <div class="quiz-header">
+        <h1 class="quiz-title">{title_esc}</h1>
+        <div class="quiz-subtitle">{mode_title} &nbsp;|&nbsp; 建議測驗時間：{sheet.duration_minutes} 分鐘 &nbsp;|&nbsp; 總題數：{len(sheet.questions)} 題</div>
+        <div class="student-info-bar">
+            <span>班級：___________</span>
+            <span>座號：_______</span>
+            <span>姓名：_______________</span>
+            <span>得分：___________</span>
+        </div>
+    </div>
+    {questions_html}
+</div>
+<script>
+if (window.renderMathInElement) {{
+    doRenderMath();
+}}
+</script>
+</body>
+</html>
+"""
+
+
+
 

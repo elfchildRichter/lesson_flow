@@ -496,6 +496,122 @@ def test_make_handout_html_katex():
     assert "A4 portrait" in html_out
 
 
+def test_make_handout_docx():
+    from app.models import Handout, HandoutSection
+    from app.services import make_handout_docx
+
+    handout = Handout(
+        id="h_docx_1",
+        document_id="d_1",
+        title="牛頓運動定律與萬有引力",
+        subtitle="高中物理第一單元講義",
+        overview="本單元探討物體運動狀態與力的作用關係。",
+        sections=[
+            HandoutSection(
+                title="牛頓第一運動定律",
+                summary="慣性定律：合力為零時維持等速或靜止。",
+                key_points=["慣性與質量的關係", "日常生活慣性現象"],
+                discussion_questions=["為什麼急煞車時人會往前傾？"],
+                source_pages=[1, 2],
+            )
+        ],
+        key_takeaways=["力是改變運動狀態的原因"],
+    )
+
+    docx_bytes = make_handout_docx(handout)
+    assert isinstance(docx_bytes, bytes)
+    assert len(docx_bytes) > 1000  # Valid docx zip file
+
+
+def test_make_quiz_docx_and_html():
+    from app.models import QuizSheet, QuizQuestion
+    from app.services import make_quiz_docx, make_quiz_html
+
+    sheet = QuizSheet(
+        id="q_docx_1",
+        document_id="d_1",
+        title="牛頓運動定律單元測驗卷",
+        description="檢驗牛頓三大運動定律理解程度",
+        duration_minutes=20,
+        questions=[
+            QuizQuestion(
+                id="q1",
+                type="single_choice",
+                question="一物體質量 2kg，受 10N 合力作用，其加速度為？",
+                options=["(A) 2 m/s²", "(B) 5 m/s²", "(C) 10 m/s²", "(D) 20 m/s²"],
+                answer="(B)",
+                explanation="由 F = ma 可得 a = F/m = 10/2 = 5 m/s²",
+                source_pages=[3],
+                difficulty="easy",
+            )
+        ],
+    )
+
+    # 1. Test student docx
+    student_docx = make_quiz_docx(sheet, teacher_mode=False)
+    assert isinstance(student_docx, bytes)
+    assert len(student_docx) > 1000
+
+    # 2. Test teacher docx
+    teacher_docx = make_quiz_docx(sheet, teacher_mode=True)
+    assert isinstance(teacher_docx, bytes)
+    assert len(teacher_docx) > 1000
+
+    # 3. Test student HTML
+    student_html = make_quiz_html(sheet, teacher_mode=False)
+    assert "學生練習測驗卷" in student_html
+    assert "作答區" in student_html
+    assert "【標準答案】" not in student_html
+    assert "katex.min.css" in student_html
+
+    # 4. Test teacher HTML
+    teacher_html = make_quiz_html(sheet, teacher_mode=True)
+    assert "教師詳解卷" in teacher_html
+    assert "【標準答案】" in teacher_html
+    assert "【試題詳解】" in teacher_html
+
+
+def test_clean_latex_to_unicode_and_deck_docx():
+    from app.services import clean_latex_to_unicode, make_deck_docx
+    from app.models import Deck, Slide
+
+    # 1. Test math unicode conversion
+    res_vec = clean_latex_to_unicode(r"$\vec{F} = m\vec{a}$")
+    assert "F⃗" in res_vec and "a⃗" in res_vec
+
+    res_grav = clean_latex_to_unicode(r"$F = G\frac{m_1 m_2}{r^2}$")
+    assert "m₁" in res_grav and "r²" in res_grav
+
+    res_energy = clean_latex_to_unicode(r"$E = mc^2 + \frac{1}{2}mv^2$")
+    assert "c²" in res_energy and "v²" in res_energy
+
+    # 2. Test deck docx generation
+    test_deck = Deck(
+        id="deck_docx_test",
+        document_id="doc_1",
+        title="牛頓運動定律與古典力學",
+        subtitle="高中生｜45 分鐘",
+        duration=45,
+        mode="gemini",
+        slides=[
+            Slide(
+                title="牛頓第二運動定律",
+                bullets=["**公式**：$\\vec{F} = m\\vec{a}$", "質量為慣性的量度"],
+                speaker_notes="各位同學好，今天我們要推導 $\\vec{F} = m\\vec{a}$ 的物理意義與應用。",
+                visual_prompt="展示加速度與施力方向一致的示意圖",
+                icon="🚀",
+                source_pages=[5, 6],
+            )
+        ],
+    )
+
+    docx_bytes = make_deck_docx(test_deck)
+    assert isinstance(docx_bytes, bytes)
+    assert len(docx_bytes) > 1000
+
+
+
+
 
 
 

@@ -93,15 +93,15 @@ const translations = {
 
     'hero.eyebrow': 'AI 教學設計工作台',
     'workspace.title': 'AI 教學設計工作台',
-    'workspace.subtitle': '上傳 PDF 教材，快速完成結構化教學簡報、隨堂講義與單元試卷。',
+    'workspace.subtitle': '可直接上傳教材或與 AI 備課助手討論構思，完整產出好教好懂的講義、簡報與試卷；支援知識補充檢索、隨時手動修訂，讓備課與上課更順暢。',
     'hero.title': '把教材，變成一堂<br><em>真正好懂的課。</em>',
-    'hero.copy': '上傳 PDF，幾分鐘內完成課程簡報、逐頁講稿，<br>還能隨時向教材提問。',
+    'hero.copy': '可直接上傳教材或與 AI 備課助手討論構思，完整產出好教好懂的講義、簡報與試卷，<br>支援知識補充檢索、隨時手動修訂，讓備課與上課更順暢。',
     'hero.toggle_collapse': '收合介紹',
     'hero.toggle_expand': '展開介紹',
     'hero.collapsed_title': '把教材，變成一堂真正好懂的課。',
     'auth_brand.eyebrow': '✦ 課伴 LessonFlow',
     'auth_brand.title': '把教材，變成一堂<br><em>真正好懂的課。</em>',
-    'auth_brand.copy': '上傳 PDF 教材，快速生成結構化教學簡報、隨堂講義與單元試卷，並享有 AI 備課專家與即時問答支援。',
+    'auth_brand.copy': '可直接上傳教材或與 AI 備課助手討論構思，完整產出好教好懂的講義、簡報與試卷；支援知識補充檢索、隨時手動修訂，讓備課與上課更順暢。',
     'steps.01_title': '上傳解析',
     'steps.01_desc': 'PDF / 圖表辨識',
     'steps.02_title': '教學設計',
@@ -138,28 +138,33 @@ const translations = {
     'workspace.common_title': '✦ 共通教學設定 (通用於下方三大產出模組)',
     'workspace.generate_all': '🚀 一鍵生成全套教案 (講義+簡報+試卷)',
     'handout.badge': '📝 模組 1',
-    'handout.title': '隨堂講義 (Handout)',
+    'handout.title': '隨堂講義',
     'handout.desc': 'A4 導讀手冊、核心觀念與研讀建議',
     'handout.audience': '適用對象',
     'handout.detail': '詳細程度',
     'handout.web_search': '開啟網路知識補充（整合時事案例）',
-    'handout.btn': '📝 生成 A4 隨堂講義',
-    'handout.btn_to_deck': '🎯 依講義生成簡報',
-    'handout.btn_to_quiz': '📑 依講義出題',
-    'handout.btn_print': '🖨️ A4 排版列印',
-    'handout.btn_download_md': '↓ 下載講義 (.md)',
+    'handout.btn_to_workbench': '🎯 參考講義調整教學設計',
+    'handout.btn_print': '🖨️ A4 預覽列印 (另存 PDF)',
+    'handout.btn_download_docx': '📄 下載 Word (.docx)',
     'deck.badge': '🎯 模組 2',
     'deck.title': '教學簡報',
     'deck.desc': '投影片大綱、視覺圖解與逐頁講稿',
     'deck.web_search': '開啟網路補充搜尋（延伸案例數據）',
     'deck.btn': '✦ 生成教學簡報',
+    'deck.btn_pptx': '📊 下載簡報 (.pptx)',
+    'deck.btn_print_handout': '🖨️ 講稿列印 (另存 PDF)',
+    'deck.btn_docx': '📄 下載講稿 (.docx)',
+    'deck.btn_download_docx': '📄 下載講稿 (.docx)',
     'quiz.badge': '📑 模組 3',
-    'quiz.title': '單元試卷 (Quiz)',
+    'quiz.title': '單元試卷',
     'quiz.desc': '隨堂測驗評量、誘答選項與觀念詳解',
     'quiz.count': '出題題數',
     'quiz.difficulty': '試題難度',
     'quiz.web_search': '開啟外部題庫檢索（搜尋真實考題）',
     'quiz.btn': '📑 生成單元試卷',
+    'quiz.teacher_mode_toggle': '✔ 顯示解答與詳細解析 (教師版)',
+    'quiz.btn_print': '🖨️ 列印考卷 (另存 PDF)',
+    'quiz.btn_download_docx': '📄 下載考卷 (.docx)',
 
     'opt.audience.college': '大學生',
     'opt.audience.high': '高中生',
@@ -215,8 +220,8 @@ const translations = {
     'deck.eyebrow': '教學內容已就緒',
     'deck.title': '教學簡報',
     'deck.subtitle': '上傳教材後開始生成。',
-    'deck.btn_script': '↓ 下載講稿',
-    'deck.btn_pptx': '↓ 匯出 PPTX',
+    'deck.btn_script': '🖨️ 講稿列印 (另存 PDF)',
+    'deck.btn_pptx': '📊 下載簡報 (.pptx)',
     'deck.empty_slide': '還沒有簡報',
     'deck.stage_empty_b': '尚未產生內容',
     'deck.stage_empty_s': '回到工作台上傳教材並設定課程',
@@ -403,15 +408,15 @@ const translations = {
 
     'hero.eyebrow': 'AI Instructional Design Workspace',
     'workspace.title': 'AI Instructional Design Workspace',
-    'workspace.subtitle': 'Upload PDF materials to quickly generate structured presentation decks, handouts, and quizzes.',
+    'workspace.subtitle': 'Upload materials or brainstorm with AI teaching assistants to generate engaging handouts, slide decks, and quiz sheets; with knowledge search and live editing to streamline your teaching.',
     'hero.title': 'Transform Materials into<br><em>Truly Engaging Lessons.</em>',
-    'hero.copy': 'Upload a PDF to generate presentation decks and speaker scripts in minutes,<br>and ask questions anytime.',
+    'hero.copy': 'Upload materials or brainstorm with AI teaching assistants to craft structured handouts, slide decks, and quizzes,<br>with knowledge search and instant manual editing.',
     'hero.toggle_collapse': 'Collapse Intro',
     'hero.toggle_expand': 'Expand Intro',
     'hero.collapsed_title': 'Turn materials into clear, structured lessons.',
     'auth_brand.eyebrow': '✦ LessonFlow',
     'auth_brand.title': 'Transform Materials into<br><em>Engaging Lessons.</em>',
-    'auth_brand.copy': 'Upload PDF material to instantly generate structured slide decks, handouts, and quiz sheets, supported by AI lesson assistants and smart Q&A.',
+    'auth_brand.copy': 'Upload materials or brainstorm with AI teaching assistants to generate engaging handouts, slide decks, and quiz sheets; with knowledge search and live editing to streamline your teaching.',
     'steps.01_title': 'Upload & Parse',
     'steps.01_desc': 'PDF / Formula OCR',
     'steps.02_title': 'Lesson Design',
@@ -452,16 +457,18 @@ const translations = {
     'handout.audience': 'Target Audience',
     'handout.detail': 'Detail Level',
     'handout.web_search': 'Enable Web Search (Add current cases)',
-    'handout.btn': '📝 Generate A4 Handout',
-    'handout.btn_to_deck': '🎯 Generate Deck from Handout',
-    'handout.btn_to_quiz': '📑 Generate Quiz from Handout',
-    'handout.btn_print': '🖨️ A4 Print Layout',
-    'handout.btn_download_md': '↓ Download Handout (.md)',
+    'handout.btn_to_workbench': '🎯 Reference Handout in Workspace',
+    'handout.btn_print': '🖨️ A4 Preview & Print (PDF)',
+    'handout.btn_download_docx': '📄 Download Word (.docx)',
     'deck.badge': '🎯 Module 2',
     'deck.title': 'Teaching Deck',
     'deck.desc': 'Slide outlines, visual diagrams & speaker scripts',
     'deck.web_search': 'Enable Web Search (Supplement cases & data)',
     'deck.btn': '✦ Generate Slide Deck',
+    'deck.btn_pptx': '📊 Download Deck (.pptx)',
+    'deck.btn_print_handout': '🖨️ Speaker Notes Print (PDF)',
+    'deck.btn_docx': '📄 Download Notes (.docx)',
+    'deck.btn_download_docx': '📄 Download Notes (.docx)',
     'quiz.badge': '📑 Module 3',
     'quiz.title': 'Unit Quiz',
     'quiz.desc': 'Unit assessment, distractor options & explanations',
@@ -469,6 +476,9 @@ const translations = {
     'quiz.difficulty': 'Difficulty',
     'quiz.web_search': 'Enable Question Search (Real exams & questions)',
     'quiz.btn': '📑 Generate Unit Quiz',
+    'quiz.teacher_mode_toggle': '✔ Show Answers & Explanations (Teacher Mode)',
+    'quiz.btn_print': '🖨️ Print Quiz (PDF)',
+    'quiz.btn_download_docx': '📄 Download Quiz (.docx)',
 
     'opt.audience.college': 'College Students',
     'opt.audience.high': 'High School Students',
@@ -524,8 +534,8 @@ const translations = {
     'deck.eyebrow': 'Lesson Content Ready',
     'deck.title': 'Teaching Deck',
     'deck.subtitle': 'Upload materials to start generating.',
-    'deck.btn_script': '↓ Download Script',
-    'deck.btn_pptx': '↓ Export PPTX',
+    'deck.btn_script': '🖨️ Speaker Notes Print (PDF)',
+    'deck.btn_pptx': '📊 Download Deck (.pptx)',
     'deck.empty_slide': 'No slides yet',
     'deck.stage_empty_b': 'No Content Generated',
     'deck.stage_empty_s': 'Return to workspace to upload PDF & configure course',
@@ -1701,9 +1711,8 @@ function renderDeck() {
     if ($('#deckEmptyState')) $('#deckEmptyState').classList.remove('hidden');
     if ($('#deckLayout')) $('#deckLayout').classList.add('hidden');
     if ($('#pptDownload')) $('#pptDownload').classList.add('disabled');
-    if ($('#scriptDownload')) $('#scriptDownload').classList.add('disabled');
     if ($('#deckPrintHandoutBtn')) $('#deckPrintHandoutBtn').classList.add('disabled');
-    if ($('#deckToQuizBtn')) $('#deckToQuizBtn').classList.add('disabled');
+    if ($('#deckDownloadDocxBtn')) $('#deckDownloadDocxBtn').classList.add('disabled');
     return;
   }
   if ($('#deckEmptyState')) $('#deckEmptyState').classList.add('hidden');
@@ -1718,21 +1727,24 @@ function renderDeck() {
   };
   const modeText = modeLabels[d.mode] || (state.lang === 'en' ? 'AI Generated' : 'AI 生成');
   const slideText = state.lang === 'en' ? `${d.slides.length} Slides` : `${d.slides.length} 張投影片`;
-  $('#deckTitle').textContent = d.title;
-  $('#deckSubtitle').textContent = `${d.subtitle} · ${slideText} · ${modeText}`;
-  $('#pptDownload').href = `/api/decks/${d.id}/pptx`;
-  $('#scriptDownload').href = `/api/decks/${d.id}/script`;
-  $('#pptDownload').classList.remove('disabled');
-  $('#scriptDownload').classList.remove('disabled');
+  if ($('#deckTitle')) $('#deckTitle').textContent = d.title;
+  if ($('#deckSubtitle')) $('#deckSubtitle').textContent = `${d.subtitle} · ${slideText} · ${modeText}`;
+  if ($('#pptDownload')) {
+    $('#pptDownload').href = `/api/decks/${d.id}/pptx`;
+    $('#pptDownload').classList.remove('disabled');
+  }
   if ($('#deckPrintHandoutBtn')) {
     $('#deckPrintHandoutBtn').href = `/api/decks/${d.id}/handout/print`;
     $('#deckPrintHandoutBtn').classList.remove('disabled');
   }
-  if ($('#deckToQuizBtn')) {
-    $('#deckToQuizBtn').classList.remove('disabled');
+  if ($('#deckDownloadDocxBtn')) {
+    $('#deckDownloadDocxBtn').href = `/api/decks/${d.id}/docx`;
+    $('#deckDownloadDocxBtn').classList.remove('disabled');
   }
-  $('#slideList').innerHTML = d.slides.map((s, i) => `<div class="slide-thumb ${i === 0 ? 'active' : ''}" data-index="${i}"><small>${String(i + 1).padStart(2, '0')}</small><div class="mini-slide"><b>${escapeHtml(s.title)}</b>${s.bullets.slice(0, 3).map(() => '<i></i>').join('')}</div></div>`).join('');
-  $$('.slide-thumb').forEach(t => t.addEventListener('click', () => showSlide(+t.dataset.index)));
+  if ($('#slideList')) {
+    $('#slideList').innerHTML = d.slides.map((s, i) => `<div class="slide-thumb ${i === 0 ? 'active' : ''}" data-index="${i}"><small>${String(i + 1).padStart(2, '0')}</small><div class="mini-slide"><b>${escapeHtml(s.title)}</b>${s.bullets.slice(0, 3).map(() => '<i></i>').join('')}</div></div>`).join('');
+    $$('.slide-thumb').forEach(t => t.addEventListener('click', () => showSlide(+t.dataset.index)));
+  }
   showSlide(0);
 }
 
@@ -2271,15 +2283,14 @@ $('#chatForm').addEventListener('submit', async e => {
   }
 });
 
-$('#questionInput').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('#chatForm').requestSubmit() } });
+$('#questionInput')?.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('#chatForm')?.requestSubmit(); } });
 $$('#chatView .suggestions button, .chat-sug-btn').forEach(btn => btn.addEventListener('click', () => {
   if (!state.document) return toast(state.lang === 'en' ? 'Please upload material first' : '請先上傳教材', true);
   const q = btn.dataset.query || btn.textContent.replace(/^[🎓📝🚀📋💡]\s*/, '').trim();
-  $('#questionInput').value = q;
-  $('#chatForm').requestSubmit();
+  if ($('#questionInput')) $('#questionInput').value = q;
+  $('#chatForm')?.requestSubmit();
 }));
-$('#pptDownload').addEventListener('click', () => toast('正在下載 PowerPoint 簡報'));
-$('#scriptDownload').addEventListener('click', () => toast('正在下載逐頁演講稿'));
+$('#pptDownload')?.addEventListener('click', () => toast(state.lang === 'en' ? 'Downloading PowerPoint presentation...' : '正在下載 PowerPoint 簡報'));
 
 // ── AI 提供者 (Provider) 切換與 UI 更新 ──
 function updateProviderUI(info) {
@@ -3672,15 +3683,10 @@ $('#generateQuizBtn')?.addEventListener('click', () => generateQuizAction());
 $('#generateAllBtn')?.addEventListener('click', () => generateAllAction());
 
 // 綁定講義預覽連鎖觸發按鈕
-$('#handoutToDeckBtn')?.addEventListener('click', () => {
+$('#handoutToWorkbenchBtn')?.addEventListener('click', () => {
   switchView('workspace');
-  toast(state.lang === 'en' ? 'Starting slide deck generation from Handout...' : '正在依據講義母本生成教學簡報...');
-  generateDeckAction();
-});
-$('#handoutToQuizBtn')?.addEventListener('click', () => {
-  switchView('workspace');
-  toast(state.lang === 'en' ? 'Starting quiz generation from Handout...' : '正在依據講義母本生成單元試卷...');
-  generateQuizAction();
+  const target = $('#deckModuleCard') || $('#settingsCard');
+  if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 
 // === 產出預覽中心 Sub-tabs 切換與渲染 ===
@@ -3856,23 +3862,29 @@ function renderHandoutPreview() {
         <button class="secondary-button" type="button" onclick="switchView('workspace')">${isEn ? '← Go to Workspace' : '← 前往工作台生成'}</button>
       </div>
     `;
-    if ($('#handoutToDeckBtn')) $('#handoutToDeckBtn').classList.add('disabled');
-    if ($('#handoutToQuizBtn')) $('#handoutToQuizBtn').classList.add('disabled');
+    if ($('#handoutToWorkbenchBtn')) $('#handoutToWorkbenchBtn').classList.add('disabled');
     if ($('#previewHandoutPrintBtn')) $('#previewHandoutPrintBtn').classList.add('disabled');
-    if ($('#previewHandoutMdBtn')) $('#previewHandoutMdBtn').classList.add('disabled');
+    if ($('#previewHandoutDocxBtn')) $('#previewHandoutDocxBtn').classList.add('disabled');
     return;
   }
 
   const handout = state.handout;
-  if ($('#handoutToDeckBtn')) $('#handoutToDeckBtn').classList.remove('disabled');
-  if ($('#handoutToQuizBtn')) $('#handoutToQuizBtn').classList.remove('disabled');
+  const toWorkbenchBtn = $('#handoutToWorkbenchBtn');
+  if (toWorkbenchBtn) {
+    toWorkbenchBtn.classList.remove('disabled');
+    toWorkbenchBtn.onclick = () => {
+      switchView('workspace');
+      const target = $('#deckModuleCard') || $('#settingsCard');
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+  }
   if ($('#previewHandoutPrintBtn')) {
-    $('#previewHandoutPrintBtn').href = `/api/handouts/${handout.id}/html`;
+    $('#previewHandoutPrintBtn').href = `/api/handouts/${handout.id}/print`;
     $('#previewHandoutPrintBtn').classList.remove('disabled');
   }
-  if ($('#previewHandoutMdBtn')) {
-    $('#previewHandoutMdBtn').href = `/api/handouts/${handout.id}/markdown`;
-    $('#previewHandoutMdBtn').classList.remove('disabled');
+  if ($('#previewHandoutDocxBtn')) {
+    $('#previewHandoutDocxBtn').href = `/api/handouts/${handout.id}/docx`;
+    $('#previewHandoutDocxBtn').classList.remove('disabled');
   }
 
   let sectionsHtml = '';
@@ -3966,22 +3978,22 @@ function renderQuizPreview() {
         <button class="secondary-button" style="color: #2c4a63; border-color: #cbd5e1; background: #f0f4f8;" type="button" onclick="switchView('workspace')">${isEn ? '← Go to Workspace' : '← 前往工作台生成'}</button>
       </div>
     `;
-    if ($('#previewQuizStudentBtn')) $('#previewQuizStudentBtn').classList.add('disabled');
-    if ($('#previewQuizTeacherBtn')) $('#previewQuizTeacherBtn').classList.add('disabled');
+    if ($('#previewQuizPrintBtn')) $('#previewQuizPrintBtn').classList.add('disabled');
+    if ($('#previewQuizDocxBtn')) $('#previewQuizDocxBtn').classList.add('disabled');
     return;
   }
 
   const quiz = state.quiz;
-  if ($('#previewQuizStudentBtn')) {
-    $('#previewQuizStudentBtn').href = `/api/quiz/${quiz.id}/markdown?teacher=false`;
-    $('#previewQuizStudentBtn').classList.remove('disabled');
+  const showTeacher = $('#previewQuizTeacherToggle') ? $('#previewQuizTeacherToggle').checked : false;
+  if ($('#previewQuizPrintBtn')) {
+    $('#previewQuizPrintBtn').href = `/api/quiz/${quiz.id}/print?teacher=${showTeacher}`;
+    $('#previewQuizPrintBtn').classList.remove('disabled');
   }
-  if ($('#previewQuizTeacherBtn')) {
-    $('#previewQuizTeacherBtn').href = `/api/quiz/${quiz.id}/markdown?teacher=true`;
-    $('#previewQuizTeacherBtn').classList.remove('disabled');
+  if ($('#previewQuizDocxBtn')) {
+    $('#previewQuizDocxBtn').href = `/api/quiz/${quiz.id}/docx?teacher=${showTeacher}`;
+    $('#previewQuizDocxBtn').classList.remove('disabled');
   }
 
-  const showTeacher = $('#previewQuizTeacherToggle') ? $('#previewQuizTeacherToggle').checked : false;
   const diffLabels = {
     'easy': isEn ? 'Basic' : '基礎觀念',
     'medium': isEn ? 'Moderate' : '中等理解',
@@ -4052,11 +4064,14 @@ function renderQuizPreview() {
 $('#previewQuizTeacherToggle')?.addEventListener('change', () => {
   const isChecked = $('#previewQuizTeacherToggle').checked;
   $$('.preview-quiz-ans-block').forEach(el => el.classList.toggle('hidden', !isChecked));
-});
-
-// 綁定簡報頁面捷徑按鈕
-$('#deckToQuizBtn')?.addEventListener('click', () => {
-  switchPreviewTab('quiz');
+  if (state.quiz) {
+    if ($('#previewQuizPrintBtn')) {
+      $('#previewQuizPrintBtn').href = `/api/quiz/${state.quiz.id}/print?teacher=${isChecked}`;
+    }
+    if ($('#previewQuizDocxBtn')) {
+      $('#previewQuizDocxBtn').href = `/api/quiz/${state.quiz.id}/docx?teacher=${isChecked}`;
+    }
+  }
 });
 
 // === 隨堂講義 Modal 渲染與關閉 ===

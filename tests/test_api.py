@@ -354,6 +354,88 @@ def test_handout_patch():
         app.dependency_overrides.clear()
 
 
+def test_docx_and_print_endpoints():
+    client = TestClient(app)
+    from fastapi_auth_lite import get_current_user
+    from app.main import store
+    from app.models import Handout, HandoutSection, QuizSheet, QuizQuestion, Deck, Slide
+
+    # 1. Handout setup
+    handout = Handout(
+        id="h_api_docx",
+        document_id="doc_api",
+        title="API測試講義",
+        subtitle="副標題",
+        overview="總覽",
+        sections=[HandoutSection(title="章節1", summary="摘要1", key_points=["點1"], discussion_questions=["問1"])],
+        key_takeaways=["總結1"],
+    )
+    store.handouts[handout.id] = handout
+
+    # 2. Quiz setup
+    quiz = QuizSheet(
+        id="q_api_docx",
+        document_id="doc_api",
+        title="API測試試卷",
+        description="描述",
+        questions=[
+            QuizQuestion(
+                id="q1",
+                type="single_choice",
+                question="測試問題？",
+                options=["A", "B"],
+                answer="A",
+                explanation="詳解",
+            )
+        ],
+    )
+    store.quizzes[quiz.id] = quiz
+
+    app.dependency_overrides[get_current_user] = lambda: {"id": "docx_tester", "username": "tester", "role": "admin", "tier": "teacher_pro"}
+    try:
+        # Test Handout DOCX
+        res_h_docx = client.get(f"/api/handouts/{handout.id}/docx")
+        assert res_h_docx.status_code == 200
+        assert "officedocument.wordprocessingml.document" in res_h_docx.headers["Content-Type"]
+        assert len(res_h_docx.content) > 1000
+
+        # Test Quiz DOCX (student & teacher)
+        res_q_docx_student = client.get(f"/api/quiz/{quiz.id}/docx?teacher=false")
+        assert res_q_docx_student.status_code == 200
+        assert "quiz-student" in res_q_docx_student.headers["Content-Disposition"]
+
+        res_q_docx_teacher = client.get(f"/api/quiz/{quiz.id}/docx?teacher=true")
+        assert res_q_docx_teacher.status_code == 200
+        assert "quiz-teacher" in res_q_docx_teacher.headers["Content-Disposition"]
+
+        # Test Quiz Print/HTML
+        res_q_html = client.get(f"/api/quiz/{quiz.id}/print?teacher=true")
+        assert res_q_html.status_code == 200
+        assert "text/html" in res_q_html.headers["Content-Type"]
+        assert "教師詳解卷" in res_q_html.text
+
+        # Test Deck DOCX
+        deck = Deck(
+            id="deck_api_docx_1",
+            document_id="doc_1",
+            title="簡報測試",
+            subtitle="高中生｜20分鐘",
+            duration=20,
+            mode="gemini",
+            slides=[Slide(title="第一頁", bullets=["重點一"], speaker_notes="講稿內容", source_pages=[1])],
+        )
+        store.decks[deck.id] = deck
+        res_deck_docx = client.get(f"/api/decks/{deck.id}/docx")
+        assert res_deck_docx.status_code == 200
+        assert "officedocument.wordprocessingml.document" in res_deck_docx.headers["Content-Type"]
+        assert f"deck-notes-{deck.id}.docx" in res_deck_docx.headers["Content-Disposition"]
+        assert len(res_deck_docx.content) > 1000
+    finally:
+        app.dependency_overrides.clear()
+
+
+
+
 
 
 

@@ -35,10 +35,14 @@ from .models import (
 from .services import (
     AIService,
     DocumentStore,
+    make_deck_docx,
     make_deck_handout_html,
+    make_handout_docx,
     make_handout_html,
     make_handout_markdown,
     make_pptx,
+    make_quiz_docx,
+    make_quiz_html,
     make_quiz_markdown,
     make_script,
     parse_pdf,
@@ -502,6 +506,19 @@ def download_script(deck_id: str) -> Response:
     )
 
 
+@app.get("/api/decks/{deck_id}/docx")
+def download_deck_docx(deck_id: str) -> Response:
+    deck = store.decks.get(deck_id)
+    if not deck:
+        raise HTTPException(404, "找不到簡報")
+    docx_bytes = make_deck_docx(deck)
+    return Response(
+        docx_bytes,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f'attachment; filename="deck-notes-{deck.id}.docx"'},
+    )
+
+
 class RefineSlideRequest(BaseModel):
     instruction: str = Field(default="潤飾講稿與要點，使口語表達更自然、生動且具啟發性", max_length=500)
 
@@ -767,6 +784,31 @@ def download_quiz_markdown(quiz_id: str, teacher: bool = False) -> Response:
     )
 
 
+@app.get("/api/quiz/{quiz_id}/docx")
+def download_quiz_docx(quiz_id: str, teacher: bool = False) -> Response:
+    sheet = store.quizzes.get(quiz_id)
+    if not sheet:
+        raise HTTPException(404, "找不到題目卷")
+    docx_bytes = make_quiz_docx(sheet, teacher_mode=teacher)
+    prefix = "teacher" if teacher else "student"
+    return Response(
+        docx_bytes,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f'attachment; filename="quiz-{prefix}-{sheet.id}.docx"'},
+    )
+
+
+@app.get("/api/quiz/{quiz_id}/html")
+@app.get("/api/quiz/{quiz_id}/print")
+def view_quiz_html(quiz_id: str, teacher: bool = False) -> Response:
+    sheet = store.quizzes.get(quiz_id)
+    if not sheet:
+        raise HTTPException(404, "找不到題目卷")
+    html_content = make_quiz_html(sheet, teacher_mode=teacher)
+    return Response(html_content, media_type="text/html; charset=utf-8")
+
+
+
 @app.post("/api/handouts/generate")
 def generate_handout_endpoint(
     request: HandoutGenerateRequest,
@@ -858,12 +900,27 @@ def download_handout_markdown(handout_id: str) -> Response:
 
 
 @app.get("/api/handouts/{handout_id}/html")
+@app.get("/api/handouts/{handout_id}/print")
 def view_handout_html(handout_id: str) -> Response:
     handout = store.handouts.get(handout_id)
     if not handout:
         raise HTTPException(404, "找不到講義資料")
     html_content = make_handout_html(handout)
     return Response(html_content, media_type="text/html; charset=utf-8")
+
+
+@app.get("/api/handouts/{handout_id}/docx")
+def download_handout_docx(handout_id: str) -> Response:
+    handout = store.handouts.get(handout_id)
+    if not handout:
+        raise HTTPException(404, "找不到講義資料")
+    docx_bytes = make_handout_docx(handout)
+    return Response(
+        docx_bytes,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f'attachment; filename="handout-{handout.id}.docx"'},
+    )
+
 
 
 @app.get("/api/decks/{deck_id}/handout/print")

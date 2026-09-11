@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>課伴 LessonFlow · AI 教學設計與簡報生成</title>
+  <meta name="description" content="可直接上傳教材或與 AI 備課助手討論構思，完整產出好教好懂的講義、簡報與試卷；支援知識補充檢索、隨時手動修訂，讓備課與上課更順暢。">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -126,7 +127,7 @@
         <div>
           <p class="eyebrow"><span></span> <span data-i18n="hero.eyebrow">AI 教學設計工作台</span></p>
           <h1 data-i18n="workspace.title">AI 教學設計工作台</h1>
-          <p data-i18n="workspace.subtitle">上傳 PDF 教材，快速完成結構化教學簡報、隨堂講義與單元試卷。</p>
+          <p data-i18n="workspace.subtitle">可直接上傳教材或與 AI 備課助手討論構思，完整產出好教好懂的講義、簡報與試卷；支援知識補充檢索、隨時手動修訂，讓備課與上課更順暢。</p>
         </div>
       </div>
 
@@ -214,7 +215,7 @@
               <div class="module-card-header">
                 <div class="module-title-wrap">
                   <span class="module-badge handout-badge" data-i18n="handout.badge">📝 模組 1</span>
-                  <h3 data-i18n="handout.title">隨堂講義 (Handout)</h3>
+                  <h3 data-i18n="handout.title">隨堂講義</h3>
                 </div>
                 <small class="module-desc" data-i18n="handout.desc">A4 導讀手冊、核心觀念與研讀建議</small>
               </div>
@@ -256,12 +257,12 @@
               <div class="module-form-body">
                 <label><span data-i18n="settings.duration">課程時間</span><select id="duration">
                     <option value="20">20 分鐘</option>
-                    <option value="30" selected>30 分鐘</option>
-                    <option value="45">45 分鐘</option>
+                    <option value="30">30 分鐘</option>
+                    <option value="45" selected>45 分鐘</option>
                     <option value="60">60 分鐘</option>
                     <option value="90">90 分鐘</option>
                   </select></label>
-                <label><span data-i18n="settings.slide_count">簡報頁數</span><select id="slideCount">
+                <label><span data-i18n="settings.slide_count">簡報張數</span><select id="slideCount">
                     <option value="6">6 頁</option>
                     <option value="8" selected>8 頁</option>
                     <option value="10">10 頁</option>
@@ -287,7 +288,7 @@
               <div class="module-card-header">
                 <div class="module-title-wrap">
                   <span class="module-badge quiz-badge" data-i18n="quiz.badge">📑 模組 3</span>
-                  <h3 data-i18n="quiz.title">單元試卷 (Quiz)</h3>
+                  <h3 data-i18n="quiz.title">單元試卷</h3>
                 </div>
                 <small class="module-desc" data-i18n="quiz.desc">隨堂測驗評量、誘答選項與觀念詳解</small>
               </div>
@@ -360,28 +361,26 @@
 
         <!-- 講義專屬操作列 (預設顯示) -->
         <div class="download-actions" id="handoutDownloadActions">
-          <button class="secondary-button disabled" id="handoutToDeckBtn" type="button" data-i18n="handout.btn_to_deck">🎯 依講義生成簡報</button>
-          <button class="secondary-button disabled" id="handoutToQuizBtn" type="button" data-i18n="handout.btn_to_quiz">📑 依講義出題</button>
-          <a class="secondary-button disabled" id="previewHandoutPrintBtn" target="_blank" data-i18n="handout.btn_print">🖨️ A4 排版列印</a>
-          <a class="primary-button disabled" id="previewHandoutMdBtn" data-i18n="handout.btn_download_md">↓ 下載講義 (.md)</a>
+          <button class="secondary-button disabled" id="handoutToWorkbenchBtn" type="button" data-i18n="handout.btn_to_workbench">🎯 參考講義調整教學設計</button>
+          <a class="secondary-button disabled" id="previewHandoutPrintBtn" target="_blank" data-i18n="handout.btn_print">🖨️ A4 預覽列印 (另存 PDF)</a>
+          <a class="primary-button disabled" id="previewHandoutDocxBtn" data-i18n="handout.btn_download_docx">📄 下載 Word (.docx)</a>
         </div>
 
         <!-- 簡報專屬操作列 -->
         <div class="download-actions hidden" id="deckDownloadActions">
-          <a class="secondary-button disabled" id="deckPrintHandoutBtn" target="_blank" data-i18n="deck.btn_print_handout">🖨️ A4 講義列印</a>
-          <button class="secondary-button disabled" id="deckToQuizBtn" type="button" data-i18n="deck.btn_deck_to_quiz">🎯 依簡報出題</button>
-          <a class="secondary-button disabled" id="scriptDownload" data-i18n="deck.btn_script">↓ 下載講稿</a>
-          <a class="primary-button disabled" id="pptDownload" data-i18n="deck.btn_pptx">↓ 匯出 PPTX</a>
+          <a class="secondary-button disabled" id="deckPrintHandoutBtn" target="_blank" data-i18n="deck.btn_print_handout">🖨️ 講稿列印 (另存 PDF)</a>
+          <a class="secondary-button disabled" id="deckDownloadDocxBtn" data-i18n="deck.btn_docx">📄 下載講稿 (.docx)</a>
+          <a class="primary-button disabled" id="pptDownload" data-i18n="deck.btn_pptx">📊 下載簡報 (.pptx)</a>
         </div>
 
         <!-- 試卷專屬操作列 -->
         <div class="download-actions hidden" id="quizDownloadActions">
-          <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; margin-right:6px; cursor:pointer; color:var(--green); font-weight:600;">
+          <label style="display:inline-flex; align-items:center; gap:6px; font-size:12.5px; margin-right:8px; cursor:pointer; color:var(--ink); font-weight:600;">
             <input type="checkbox" id="previewQuizTeacherToggle" style="width:auto; margin:0;" />
-            <span>教師詳解模式</span>
+            <span data-i18n="quiz.teacher_mode_toggle">✔ 顯示解答與詳細解析 (教師版)</span>
           </label>
-          <a class="secondary-button disabled" id="previewQuizStudentBtn">↓ 學生練習卷 (.md)</a>
-          <a class="primary-button disabled" id="previewQuizTeacherBtn">↓ 教師詳解卷 (.md)</a>
+          <a class="secondary-button disabled" id="previewQuizPrintBtn" target="_blank" data-i18n="quiz.btn_print">🖨️ 列印考卷 (另存 PDF)</a>
+          <a class="primary-button disabled" id="previewQuizDocxBtn" data-i18n="quiz.btn_download_docx">📄 下載考卷 (.docx)</a>
         </div>
       </div>
 
@@ -779,7 +778,7 @@
         <div class="auth-brand-header">
           <p class="eyebrow" style="margin-bottom: 8px;"><span></span> <span data-i18n="auth_brand.eyebrow">✦ 課伴 LessonFlow</span></p>
           <h2 class="auth-brand-title" data-i18n="auth_brand.title">把教材，變成一堂<br><em>真正好懂的課。</em></h2>
-          <p class="auth-brand-copy" data-i18n="auth_brand.copy">上傳 PDF 教材，快速生成結構化教學簡報、隨堂講義與單元試卷，並享有 AI 備課專家與即時問答支援。</p>
+          <p class="auth-brand-copy" data-i18n="auth_brand.copy">可直接上傳教材或與 AI 備課助手討論構思，完整產出好教好懂的講義、簡報與試卷；支援知識補充檢索、隨時手動修訂，讓備課與上課更順暢。</p>
         </div>
 
         <div class="auth-brand-art" aria-hidden="true">
@@ -1007,7 +1006,7 @@
     <p id="loadingCopy" data-i18n="loading.read_copy">整理章節與核心概念…</p>
     <div class="loading-track"><span></span></div>
   </div>
-  <script src="/app.js?v=5.4.5"></script>
+  <script src="/app.js?v=5.4.7"></script>
 </body>
 
 </html>
